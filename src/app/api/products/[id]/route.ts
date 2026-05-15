@@ -1,72 +1,64 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { storage } from "@/lib/storage";
 import { insertProductSchema } from "@/lib/schema";
-import { getCurrentUser, unauthorizedResponse } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
+import {
+  withErrorHandling,
+  unauthorized,
+  notFound,
+  badRequest,
+  conflict,
+} from "@/lib/apiError";
 
-export async function GET(
+export const GET = withErrorHandling(async (
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) {
+) => {
   const user = await getCurrentUser();
-  if (!user) return unauthorizedResponse();
+  if (!user) return unauthorized();
 
   const { id } = await params;
   const product = await storage.getProduct(id);
-  if (!product) {
-    return NextResponse.json({ message: "Product not found" }, { status: 404 });
-  }
+  if (!product) return notFound("Product not found");
   return NextResponse.json(product);
-}
+});
 
-export async function PATCH(
+export const PATCH = withErrorHandling(async (
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) {
+) => {
   const user = await getCurrentUser();
-  if (!user) return unauthorizedResponse();
+  if (!user) return unauthorized();
 
   const { id } = await params;
-  try {
-    const body = await req.json();
-    const partial = insertProductSchema.partial().safeParse(body);
+  const body = await req.json();
+  const partial = insertProductSchema.partial().safeParse(body);
     if (!partial.success) {
-      return NextResponse.json(
-        { message: "Validation error", errors: partial.error.flatten() },
-        { status: 400 }
-      );
+      return badRequest("Validation error", z.treeifyError(partial.error));
     }
 
-    if (partial.data.sku) {
-      const existing = await storage.getProductBySku(partial.data.sku);
-      if (existing && existing.id !== id) {
-        return NextResponse.json(
-          { message: "A product with this SKU already exists" },
-          { status: 409 }
-        );
-      }
+  if (partial.data.sku) {
+    const existing = await storage.getProductBySku(partial.data.sku);
+    if (existing && existing.id !== id) {
+      return conflict("A product with this SKU already exists");
     }
-
-    const product = await storage.updateProduct(id, partial.data);
-    if (!product) {
-      return NextResponse.json({ message: "Product not found" }, { status: 404 });
-    }
-    return NextResponse.json(product);
-  } catch {
-    return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
-}
 
-export async function DELETE(
+  const product = await storage.updateProduct(id, partial.data);
+  if (!product) return notFound("Product not found");
+  return NextResponse.json(product);
+});
+
+export const DELETE = withErrorHandling(async (
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) {
+) => {
   const user = await getCurrentUser();
-  if (!user) return unauthorizedResponse();
+  if (!user) return unauthorized();
 
   const { id } = await params;
   const deleted = await storage.deleteProduct(id);
-  if (!deleted) {
-    return NextResponse.json({ message: "Product not found" }, { status: 404 });
-  }
+  if (!deleted) return notFound("Product not found");
   return NextResponse.json({ message: "Product deleted" });
-}
+});

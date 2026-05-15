@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { withErrorHandling, unauthorized } from "@/lib/apiError";
 
-export async function GET() {
+export const GET = withErrorHandling(async () => {
   const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ message: "Не авторизовано" }, { status: 401 });
-  }
+  if (!user) return unauthorized();
   return NextResponse.json(user);
-}
+});
