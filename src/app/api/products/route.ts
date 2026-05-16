@@ -10,10 +10,19 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
   if (!user) return unauthorized();
 
   const url = new URL(req.url);
-  const query = url.searchParams.get("q") || "";
+  const rawQuery = url.searchParams.get("q") || "";
   const category = url.searchParams.get("category") || "";
 
-  const products = await storage.searchProducts(query, category);
+  // Normalise and validate the search term (max 100 chars after trimming)
+  const cleanedQuery = rawQuery.replace(/\++/g, " ").trim();
+  const querySchema = z.string().max(100, "Search term too long").optional();
+  const parsed = querySchema.safeParse(cleanedQuery);
+  if (!parsed.success) {
+    // Bad request will be turned into a proper JSON error by withErrorHandling
+    throw parsed.error;
+  }
+
+  const products = await storage.searchProducts(parsed.data ?? "", category);
   return NextResponse.json(products);
 });
 
