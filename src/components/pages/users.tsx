@@ -24,10 +24,10 @@ import { UserPlus, Pencil, Trash2, ShieldCheck, ShieldAlert, Users, Loader2 } fr
 
 function clearanceBadgeVariant(level: string) {
   switch (level) {
-    case "Особливої важливості": return "destructive";
-    case "Цілком таємно": return "destructive";
-    case "Таємно": return "default";
-    case "Для службового користування": return "secondary";
+    case "Highly confidential": return "destructive";
+    case "Top secret": return "destructive";
+    case "Secret": return "default";
+    case "For official use": return "secondary";
     default: return "outline";
   }
 }
