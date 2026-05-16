@@ -86,8 +86,10 @@ export default function Products() {
     if (product.quantity === 0)
       return <Badge variant="destructive" className="text-xs" data-testid={`status-stock-${product.id}`}>Out of stock</Badge>;
     if (product.quantity <= product.lowStockThreshold)
-      return <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-700 text-xs" data-testid={`status-stock-${product.id}`}>Low stock</Badge>;
-    return <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700 text-xs" data-testid={`status-stock-${product.id}`}>In stock</Badge>;
+      return <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-300
+      dark:border-amber-700 text-xs" data-testid={`status-stock-${product.id}`}>Low stock</Badge>;
+    return <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-300
+    dark:border-emerald-700 text-xs" data-testid={`status-stock-${product.id}`}>In stock</Badge>;
   }
 
   const SortButton = ({ column, label }: { column: SortKey; label: string }) => (

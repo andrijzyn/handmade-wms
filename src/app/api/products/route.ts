@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { storage } from "@/lib/storage";
 import { insertProductSchema } from "@/lib/schema";
-import { getCurrentUser, unauthorizedResponse } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
+import { withErrorHandling, unauthorized, badRequest, conflict } from "@/lib/apiError";
 
-export async function GET(req: NextRequest) {
+export const GET = withErrorHandling(async (req: NextRequest) => {
   const user = await getCurrentUser();
-  if (!user) return unauthorizedResponse();
+  if (!user) return unauthorized();
 
   const url = new URL(req.url);
   const query = url.searchParams.get("q") || "";
@@ -13,33 +15,23 @@ export async function GET(req: NextRequest) {
 
   const products = await storage.searchProducts(query, category);
   return NextResponse.json(products);
-}
+});
 
-export async function POST(req: NextRequest) {
+export const POST = withErrorHandling(async (req: NextRequest) => {
   const user = await getCurrentUser();
-  if (!user) return unauthorizedResponse();
+  if (!user) return unauthorized();
 
-  try {
-    const body = await req.json();
-    const parsed = insertProductSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json(
-        { message: "Validation error", errors: parsed.error.flatten() },
-        { status: 400 }
-      );
-    }
-
-    const existing = await storage.getProductBySku(parsed.data.sku);
-    if (existing) {
-      return NextResponse.json(
-        { message: "A product with this SKU already exists" },
-        { status: 409 }
-      );
-    }
-
-    const product = await storage.createProduct(parsed.data);
-    return NextResponse.json(product, { status: 201 });
-  } catch {
-    return NextResponse.json({ message: "Server error" }, { status: 500 });
+  const body = await req.json();
+  const parsed = insertProductSchema.safeParse(body);
+  if (!parsed.success) {
+    return badRequest("Validation error", z.treeifyError(parsed.error));
   }
-}
+
+  const existing = await storage.getProductBySku(parsed.data.sku);
+  if (existing) {
+    return conflict("A product with this SKU already exists");
+  }
+
+  const product = await storage.createProduct(parsed.data);
+  return NextResponse.json(product, { status: 201 });
+});

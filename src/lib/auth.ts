@@ -1,6 +1,5 @@
 import { getIronSession, type SessionOptions } from "iron-session";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
 import type { SafeUser } from "./schema";
 
 export interface SessionData {
@@ -44,10 +43,3 @@ export async function requireAdmin(): Promise<SafeUser> {
   return user;
 }
 
-export function unauthorizedResponse() {
-  return NextResponse.json({ message: "Необхідна авторизація" }, { status: 401 });
-}
-
-export function forbiddenResponse() {
-  return NextResponse.json({ message: "Недостатньо прав доступу" }, { status: 403 });
-}

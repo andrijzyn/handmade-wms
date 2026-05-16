@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -284,7 +284,7 @@ export default function UsersPage() {
       </Card>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-[480px]"><DialogHeader><DialogTitle>New user</DialogTitle></DialogHeader>
+        <DialogContent className="max-w-[480px]"><DialogHeader><DialogTitle>New user</DialogTitle><DialogDescription>Create a new user account</DialogDescription></DialogHeader>
           <UserForm onSubmit={(data) => createMutation.mutate(data)} isPending={createMutation.isPending} />
         </DialogContent>
       </Dialog>
