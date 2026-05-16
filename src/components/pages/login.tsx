@@ -51,14 +51,14 @@ export default function LoginPage() {
             <h1 className="text-xl font-semibold tracking-tight" data-testid="text-app-title">
               StockPulse
             </h1>
-            <p className="text-sm text-muted-foreground mt-1">Система управління складом</p>
+            <p className="text-sm text-muted-foreground mt-1">Warehouse management system</p>
           </div>
         </div>
 
         {/* Login Card */}
         <Card className="border-border/50">
           <CardHeader className="pb-4 pt-5 px-5">
-            <p className="text-sm font-medium text-foreground">Вхід до системи</p>
+            <p className="text-sm font-medium text-foreground">System login</p>
           </CardHeader>
           <CardContent className="px-5 pb-5">
             <Form {...form}>
@@ -68,10 +68,10 @@ export default function LoginPage() {
                   name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-medium">Логін</FormLabel>
+                      <FormLabel className="text-xs font-medium">Username</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Введіть логін"
+                          placeholder="Enter username"
                           autoComplete="username"
                           data-testid="input-username"
                           {...field}
@@ -87,12 +87,12 @@ export default function LoginPage() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-medium">Пароль</FormLabel>
+                      <FormLabel className="text-xs font-medium">Password</FormLabel>
                       <div className="relative">
                         <FormControl>
                           <Input
                             type={showPassword ? "text" : "password"}
-                            placeholder="Введіть пароль"
+                            placeholder="Enter password"
                             autoComplete="current-password"
                             className="pr-10"
                             data-testid="input-password"
@@ -127,10 +127,10 @@ export default function LoginPage() {
                   {isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Вхід...
+                      Signing in…
                     </>
                   ) : (
-                    "Увійти"
+                    "Sign in"
                   )}
                 </Button>
               </form>
@@ -140,7 +140,7 @@ export default function LoginPage() {
 
         {/* Hint */}
         <p className="text-center text-xs text-muted-foreground">
-          Доступ надається адміністратором системи
+          Access is granted by the system administrator
         </p>
       </div>
     </div>
