@@ -58,9 +58,9 @@ export const notFound = (msg: string, details?: unknown) =>
  * exceptions, turning them into a uniform JSON response.
  */
 export function withErrorHandling(
-  handler: (...args: never[]) => Promise<NextResponse>
+  handler: (...args: any[]) => Promise<NextResponse>
 ) {
-  return async (...args: never[]) => {
+  return async (...args: any[]) => {
     try {
       return await handler(...args);
     } catch (err) {
