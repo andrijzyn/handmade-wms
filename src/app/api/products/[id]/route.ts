@@ -11,18 +11,17 @@ import {
   conflict,
 } from "@/lib/apiError";
 
-export const GET = withErrorHandling(async (
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) => {
-  const user = await getCurrentUser();
-  if (!user) return unauthorized();
+export async function GET(req: NextRequest) {
+  const url = new URL(req.url);
+  const q = url.searchParams.get("q") ?? "";
 
-  const { id } = await params;
-  const product = await storage.getProduct(id);
-  if (!product) return notFound("Product not found");
-  return NextResponse.json(product);
-});
+  const all = await storage.getLocations(); // або який метод є
+  const filtered = q
+      ? all.filter((l) => l.label.toLowerCase().includes(q.toLowerCase()))
+      : all;
+
+  return NextResponse.json(filtered.slice(0, 20));
+}
 
 export const PATCH = withErrorHandling(async (
   req: NextRequest,

@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Plus, Search, Pencil, Trash2, ArrowUpDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import ProductForm from "@/components/pages/product-form";
+import LocationsForm from "@/components/pages/locations-form";
 
 type SortKey = "name" | "sku" | "category" | "quantity" | "price";
 type SortDir = "asc" | "desc";
@@ -34,6 +34,7 @@ export default function Products() {
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
 
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ["/api/products", { q: search, category: categoryFilter }],
@@ -99,13 +100,8 @@ export default function Products() {
     </button>
   );
 
-  if (showForm || editingProduct) {
-    return (
-      <ProductForm
-        product={editingProduct ?? undefined}
-        onClose={() => { setShowForm(false); setEditingProduct(null); }}
-      />
-    );
+  if (viewingProduct) {
+    return <LocationsForm product={viewingProduct} onClose={() => setViewingProduct(null)} />;
   }
 
   return (

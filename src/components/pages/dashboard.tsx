@@ -14,7 +14,8 @@ interface Stats {
   categoriesCount: number;
 }
 
-export default function Dashboard({ onNavigate }: { onNavigate: (page: "dashboard" | "products" | "users") => void }) {
+// Required for card navigation handling
+export default function Dashboard({ onNavigate }: { onNavigate: (page: "dashboard" | "products" | "users" | "locations") => void }) {
   const { data: stats, isLoading: statsLoading } = useQuery<Stats>({
     queryKey: ["/api/stats"],
   });

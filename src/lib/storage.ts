@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import { z } from "zod";
 import { getSupabase } from "./supabase";
 import type { Product, InsertProduct, User, InsertUser, SafeUser } from "./schema";
 
@@ -274,6 +275,154 @@ class SupabaseStorage {
   async validatePassword(user: User, password: string): Promise<boolean> {
     return bcrypt.compare(password, user.password);
   }
+
+  // Повертає ProductLocationView[] — з JOIN на locations
+  async getProductLocations(productId: string): Promise<ProductLocationView[]> {
+    const { data, error } = await this.db
+        .from("product_locations")
+        .select(`
+      id,
+      product_id,
+      location_id,
+      quantity,
+      updated_at,
+      locations (
+        label,
+        row,
+        col,
+        level
+      )
+    `)
+        .eq("product_id", productId);
+
+    if (error) throw new Error(error.message);
+
+    return (data ?? []).map((row: any) => ({
+      id:             row.id,
+      productId:      row.product_id,
+      locationId:     row.location_id,
+      quantity:       row.quantity,
+      updatedAt:      row.updated_at,
+      locationLabel:  row.locations.label,
+      locationRow:    row.locations.row,
+      locationCol:    row.locations.col,
+      locationLevel:  row.locations.level,
+    }));
+  }
+
+// Перевірка на дублікат
+  async getProductLocation(productId: string, locationId: string): Promise<ProductLocation | null> {
+    const { data } = await this.db
+        .from("product_locations")
+        .select("*")
+        .eq("product_id", productId)
+        .eq("location_id", locationId)
+        .single();
+
+    return data ?? null;
+  }
+
+// Створення прив'язки
+  async createProductLocation(input: InsertProductLocation): Promise<ProductLocation> {
+    const { data, error } = await this.db
+        .from("product_locations")
+        .insert({
+          product_id:  input.productId,
+          location_id: input.locationId,
+          quantity:    input.quantity,
+        })
+        .select()
+        .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async updateProductLocation(id: string, quantity: number): Promise<ProductLocation | null> {
+    const { data, error } = await this.db
+        .from("product_locations")
+        .update({ quantity, updated_at: new Date().toISOString() })
+        .eq("id", id)
+        .select()
+        .single();
+
+    if (error) return null;
+    return data;
+  }
+
+  async deleteProductLocation(id: string): Promise<boolean> {
+    const { error, count } = await this.db
+        .from("product_locations")
+        .delete({ count: "exact" })
+        .eq("id", id);
+
+    if (error) return false;
+    return (count ?? 0) > 0;
+  }
+
+  async getLocations(filters?: { q?: string }): Promise<Location[]> {
+    let query = this.db
+        .from("locations")
+        .select("*")
+        .order("row", { ascending: true })
+        .order("col", { ascending: true })
+        .order("level", { ascending: true })
+        .limit(50);
+
+    if (filters?.q) {
+      query = query.ilike("label", `%${filters.q}%`);
+    }
+
+    const { data, error } = await query;
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  }
 }
 
 export const storage = new SupabaseStorage();
+
+// ── Location ─────────────────────────────────────────
+
+export interface Location {
+  id: string;
+  row: number;
+  col: number;
+  level: number;
+  label: string;
+}
+
+export const insertLocationSchema = z.object({
+  row:   z.number().int().min(1).max(100),
+  col:   z.number().int().min(1).max(100),
+  level: z.number().int().refine(
+      (v) => [0, 10, 20, 30, 40, 50, 60].includes(v),
+      { message: "Level must be 0, 10, 20, 30, 40, 50 or 60" }
+  ),
+});
+
+export type InsertLocation = z.infer<typeof insertLocationSchema>;
+
+// ── ProductLocation ───────────────────────────────────
+
+export interface ProductLocation {
+  id: string;
+  productId: string;
+  locationId: string;
+  quantity: number;
+  updatedAt: string;
+}
+
+export interface ProductLocationView extends ProductLocation {
+  locationLabel: string;
+  locationRow: number;
+  locationCol: number;
+  locationLevel: number;
+}
+
+export const insertProductLocationSchema = z.object({
+  productId:  z.string().uuid("Invalid product ID"),
+  locationId: z.string().uuid("Invalid location ID"),
+  quantity:   z.number().int().min(0, "Quantity must be 0 or more"),
+});
+
+export type InsertProductLocation = z.infer<typeof insertProductLocationSchema>;

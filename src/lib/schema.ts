@@ -24,6 +24,52 @@ export const insertProductSchema = z.object({
 
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 
+// ── Location ─────────────────────────────────────────
+
+export interface Location {
+  id: string;
+  row: number;
+  col: number;
+  level: number;
+  label: string;
+}
+
+export const insertLocationSchema = z.object({
+  row:   z.number().int().min(1).max(100),
+  col:   z.number().int().min(1).max(100),
+  level: z.number().int().refine(v => [0,10,20,30,40,50,60].includes(v), {
+    message: "Level must be 0, 10... 60",
+  }),
+});
+
+export type InsertLocation = z.infer<typeof insertLocationSchema>;
+
+// ── ProductLocation ───────────────────────────────────
+
+export interface ProductLocation {
+  id: string;
+  productId: string;
+  locationId: string;
+  quantity: number;
+  updatedAt: string;
+}
+
+// Joined view — для відображення в UI
+export interface ProductLocationView extends ProductLocation {
+  locationLabel: string;
+  locationRow: number;
+  locationCol: number;
+  locationLevel: number;
+}
+
+export const insertProductLocationSchema = z.object({
+  productId:  z.string().uuid("Invalid product ID"),
+  locationId: z.string().uuid("Invalid location ID"),
+  quantity:   z.number().int().min(0, "Quantity must be 0 or more"),
+});
+
+export type InsertProductLocation = z.infer<typeof insertProductLocationSchema>;
+
 // ── Military ranks ──────────────────────────────────
 export const MILITARY_RANKS = [
   "Private",
