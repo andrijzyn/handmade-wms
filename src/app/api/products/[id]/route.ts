@@ -11,17 +11,20 @@ import {
   conflict,
 } from "@/lib/apiError";
 
-export async function GET(req: NextRequest) {
+export const GET = withErrorHandling(async (req: NextRequest) => {
+  const user = await getCurrentUser();
+  if (!user) return unauthorized();
+
   const url = new URL(req.url);
   const q = url.searchParams.get("q") ?? "";
 
-  const all = await storage.getLocations(); // або який метод є
+  const all = await storage.getLocations();
   const filtered = q
       ? all.filter((l) => l.label.toLowerCase().includes(q.toLowerCase()))
       : all;
 
   return NextResponse.json(filtered.slice(0, 20));
-}
+});
 
 export const PATCH = withErrorHandling(async (
   req: NextRequest,

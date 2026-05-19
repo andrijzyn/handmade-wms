@@ -1,13 +1,17 @@
 
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
+import { getCurrentUser } from "@/lib/auth";
+import { withErrorHandling, unauthorized } from "@/lib/apiError";
 
 /**
  * Діагностичний ендпоінт — перевіряє підключення до Supabase.
  * GET /api/debug
  * ВИДАЛИТИ ПЕРЕД ПРОДАКШЕНОМ!
  */
-export async function GET() {
+export const GET = withErrorHandling(async (req) => {
+  const user = await getCurrentUser();
+  if (!user) return unauthorized();
   const result: Record<string, unknown> = {
     timestamp: new Date().toISOString(),
     env: {
@@ -47,4 +51,4 @@ export async function GET() {
   }
 
   return NextResponse.json(result, { status: 200 });
-}
+});
