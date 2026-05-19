@@ -10,7 +10,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Search, Pencil, ArrowUpDown } from "lucide-react";
-import LocationsForm from "./locations-form";
+import LocationForm from "@/components/pages/location-form";
 
 type SortKey = "label" | "row" | "col" | "level";
 type SortDir = "asc" | "desc";
@@ -57,7 +57,7 @@ export default function Locations() {
 
   if (editingProduct) {
     return (
-        <LocationsForm
+        <LocationForm
             product={editingProduct}
             onClose={() => setEditingProduct(null)}
         />

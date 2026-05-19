@@ -36,7 +36,7 @@ interface ProductLocationsFormProps {
   onClose: () => void;
 }
 
-export default function LocationsForm({ product, onClose }: ProductLocationsFormProps) {
+export default function LocationForm({ product, onClose }: ProductLocationsFormProps) {
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<ProductLocationView | null>(null);
