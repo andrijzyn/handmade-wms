@@ -4,5 +4,5 @@ import { getSession } from "@/lib/auth";
 export async function POST() {
   const session = await getSession();
   session.destroy();
-  return NextResponse.json({ message: "Вихід успішний" });
+  return NextResponse.json({ message: "Logout successful" });
 }
