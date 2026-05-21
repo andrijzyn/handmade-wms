@@ -7,6 +7,8 @@ A logistics and inventory management system for military warehouses. Built with 
 Authentication is implemented with a custom session layer (iron-session + bcrypt) to minimise dependency on external providers and simplify future migrations to on-premise deployments.
 
 > DB status: [/api/debug](https://timely-croissant-26e162.netlify.app/api/debug)
+>
+> [Documentation](https://documenter.getpostman.com/view/40522977/2sBXwjvtDk)
 
 ---
 
