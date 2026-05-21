@@ -1,0 +1,302 @@
+{
+  "info": {
+    "_postman_id": "e9691def-8c09-486c-9ae3-25d16b925472",
+    "name": "test",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "40522977"
+  },
+  "item": [
+    {
+      "name": "Login Copy",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"username\": \"\",\n    \"password\": \"\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        },
+        "description": "Authenticates a user and returns the authenticated user profile.\n\n**Endpoint**  \n`POST {{baseUrl}}/api/auth/login`\n\n**Request body**  \nSends a JSON object with:\n\n- `username`: The user's login name.\n    \n- `password`: The user's password.\n    \n\nDo not store real credentials in shared examples or documentation.\n\n**Successful response**  \nReturns `200 OK` with a JSON object describing the authenticated user, including identifiers and profile/access fields such as:\n\n- `id`\n    \n- `username`\n    \n- `fullName`\n    \n- `rank`\n    \n- `unit`\n    \n- `callsign`\n    \n- `clearanceLevel`\n    \n- `role`\n    \n- `isActive`\n    \n- `createdAt`\n    \n\nThis response indicates the credentials were accepted and the user's account details were retrieved successfully."
+      },
+      "response": []
+    },
+    {
+      "name": "Products generator (OK)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let responseCode = pm.response.code;",
+              "",
+              "// Якщо продукт успішно створено (200 або 201)",
+              "if (responseCode === 200 || responseCode === 201) {",
+              "    let jsonData = pm.response.json();",
+              "    pm.collectionVariables.set(\"temp_product_id\", jsonData.id);",
+              "    console.log(\"Продукт створено: \" + jsonData.id);",
+              "} ",
+              "// Якщо виник конфлікт (наприклад, 409 Conflict) або помилка валідації",
+              "else if (responseCode === 409 || responseCode === 400) {",
+              "    console.warn(\"Помилка створення, SKU вже існує. Спроба регенерації...\");",
+              "    ",
+              "    // 1. Генеруємо нові випадкові дані прямо тут",
+              "    // Якщо ви використовуєте змінні в Body типу {{\"$randomProductName\"}}, ",
+              "    // Postman їх зазвичай підставляє один раз. ",
+              "    // Тому краще змінити їх на змінні колекції і оновити їх перед повтором.",
+              "    pm.collectionVariables.set(\"random_sku\", \"SKU-\" + Math.floor(Math.random() * 1000000));",
+              "    ",
+              "    // 2. Робимо повторний запит до цього ж ендпойнту",
+              "    postman.setNextRequest(\"Назва вашого запиту POST /api/products\");",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "if (!pm.collectionVariables.get(\"random_sku\")) {",
+              "    pm.collectionVariables.set(\"random_sku\", \"SKU-\" + Math.floor(Math.random() * 1000000));",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"category\": \"{{$randomCatchPhraseDescriptor}}\",\n    \"description\": \"\",\n\t\"lowStockThreshold\": 10,\n\t\"name\": \"{{$randomProductName}}\",\n\t\"price\": {{$randomPrice}},\n\t\"quantity\": {{$randomInt}},\n\t\"sku\": \"{{random_sku}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/products",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "products"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Receive id_locations (OK)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "let responseData = pm.response.json();",
+              "let locations = responseData.data ? responseData.data : responseData;",
+              "",
+              "// Перевіряємо, чи масив не порожній (адже за рандомним лейблом може нічого не знайтись)",
+              "if (Array.isArray(locations) && locations.length > 0) {",
+              "    ",
+              "    // Вибираємо рандомну локацію з відфільтрованих",
+              "    let randomIndex = Math.floor(Math.random() * locations.length);",
+              "    let randomLocation = locations[randomIndex];",
+              "",
+              "    if (randomLocation && randomLocation.id) {",
+              "        pm.collectionVariables.set(\"random_location_id\", randomLocation.id);",
+              "        console.log(\"Знайдено локацій: \" + locations.length + \". Вибрано ID: \" + randomLocation.id);",
+              "    }",
+              "} else {",
+              "    // Якщо масив порожній, виводимо попередження в консоль",
+              "    console.warn(\"Увага: За лейблом '\" + pm.collectionVariables.get(\"random_label\") + \"' локацій не знайдено!\");",
+              "    // Очищаємо стару змінну, щоб наступний POST-запит не використав неактуальне ID",
+              "    pm.collectionVariables.unset(\"random_location_id\");",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Генеруємо випадкове ціле число від 1 до 100",
+              "let randomLabelNumber = Math.floor(Math.random() * 100) + 1;",
+              "",
+              "// Якщо ваші лейбли мають формат рядка, наприклад \"01\", \"05\", \"100\" (з нулями попереду), ",
+              "// розкоментуйте наступний рядок, щоб додати нуль на початку для чисел < 10:",
+              "// let labelString = randomLabelNumber.toString().padStart(2, '0');",
+              "// pm.collectionVariables.set(\"random_label\", labelString);",
+              "",
+              "// Якщо це просто числа (1, 2... 100), зберігаємо як є:",
+              "pm.collectionVariables.set(\"random_label\", randomLabelNumber.toString());",
+              "",
+              "console.log(\"Згенеровано лейбл для пошуку: \" + pm.collectionVariables.get(\"random_label\"));"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/locations?q={{random_label}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "locations"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "{{random_label}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Connect Prod to Location",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"productId\": \"{{temp_product_id}}\",\n    \"locationId\": \"{{random_location_id}}\",\n    \"quantity\": {{$randomInt}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/products/{{temp_product_id}}/locations",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "products",
+            "{{temp_product_id}}",
+            "locations"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Products destroyer",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/products/{{temp_product_id}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "products",
+            "{{temp_product_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Logout Copy",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/logout",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "logout"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": ""
+    },
+    {
+      "key": "temp_product_id",
+      "value": ""
+    },
+    {
+      "key": "random_label",
+      "value": ""
+    },
+    {
+      "key": "random_location_id",
+      "value": ""
+    },
+    {
+      "key": "random_sku",
+      "value": ""
+    }
+  ]
+}
