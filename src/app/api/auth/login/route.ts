@@ -9,20 +9,20 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
   const body = await req.json();
   const parsed = loginSchema.safeParse(body);
   if (!parsed.success) {
-    return badRequest("Невірні дані для входу", z.treeifyError(parsed.error));
+    return badRequest("Invalid login data", z.treeifyError(parsed.error));
   }
 
   const user = await storage.getUserByUsername(parsed.data.username);
   if (!user) {
-    return raiseApiError("Невірний логін або пароль", 401);
+    return raiseApiError("Invalid username or password", 401);
   }
   if (!user.isActive) {
-    return raiseApiError("Акаунт деактивовано", 401);
+    return raiseApiError("Account is deactivated", 401);
   }
 
   const valid = await storage.validatePassword(user, parsed.data.password);
   if (!valid) {
-    return raiseApiError("Невірний логін або пароль", 401);
+    return raiseApiError("Invalid username or password", 401);
   }
 
   const { password: _, ...safeUser } = user;
