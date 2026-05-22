@@ -1,14 +1,19 @@
 # StockPulse — Military Inventory Management System
 
-[Live Demo](https://timely-croissant-26e162.netlify.app/) · [![Netlify Status](https://api.netlify.com/api/v1/badges/bdf2edfe-59ca-4dc1-a32a-fd8d85621657/deploy-status)](https://app.netlify.com/projects/timely-croissant-26e162/deploys)
-
 A logistics and inventory management system for military warehouses. Built with **Next.js 16** (App Router), **Supabase** (PostgreSQL), and deployed on **Netlify**.
 
 Authentication is implemented with a custom session layer (iron-session + bcrypt) to minimise dependency on external providers and simplify future migrations to on-premise deployments.
 
+---
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/bdf2edfe-59ca-4dc1-a32a-fd8d85621657/deploy-status)](https://app.netlify.com/projects/timely-croissant-26e162/deploys)
+
 > DB status: [/api/debug](https://timely-croissant-26e162.netlify.app/api/debug)
 >
 > [Documentation](https://documenter.getpostman.com/view/40522977/2sBXwjvtDk)
+>
+> [Demo](https://timely-croissant-26e162.netlify.app/)
+
 
 ---
 
