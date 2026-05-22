@@ -8,6 +8,7 @@ export const PERMISSIONS = {
     DELETE_PRODUCTS:  "delete_products",
     DELETE_LOCATIONS: "delete_locations",
     DELETE_USERS:     "delete_users",
+    READ_DEBUG:       "read_debug"
 } as const;
 
 export type Permission = typeof PERMISSIONS[keyof typeof PERMISSIONS];
@@ -17,7 +18,7 @@ export const PERMISSION_PRESETS: Record<string, Permission[]> = {
     operator: ["read_products", "read_locations", "write_products", "write_locations"],
     manager:  ["read_products", "read_locations", "read_users",
         "write_products", "write_locations", "write_users",
-        "delete_products", "delete_locations"],
+        "delete_products", "delete_locations", "read_debug"],
     superuser: Object.values(PERMISSIONS) as Permission[],
 };
 
