@@ -57,14 +57,13 @@ export const notFound = (msg: string, details?: unknown) =>
  * Higher‑order wrapper that catches both {@link ApiError} and unexpected
  * exceptions, turning them into a uniform JSON response.
  */
-export function withErrorHandling(
-  handler: (...args: any[]) => Promise<NextResponse>
+export function withErrorHandling<TArgs extends any[]>(
+    handler: (...args: TArgs) => Promise<NextResponse>
 ) {
-  return async (...args: any[]) => {
+  return async (...args: TArgs): Promise<NextResponse> => {
     try {
       return await handler(...args);
-    } catch (err) {
-      // Known API error – just format it.
+    } catch (err: any) {
       if (err instanceof ApiError) {
         return errorResponse(err);
       }
@@ -75,11 +74,8 @@ export function withErrorHandling(
             new ApiError("Validation error", 400, { errors: details })
           );
         }
-      // Fallback – internal server error.
-      const message = err instanceof Error ? err.message : String(err);
-      return NextResponse.json(
-        { message: "Server error", details: message },
-        { status: 500 }
+      console.error(err);
+      return NextResponse.json({ message: "Internal server error" }, { status: 500 }
       );
     }
   };
