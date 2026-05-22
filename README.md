@@ -38,20 +38,22 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 
 ---
 
-## Roadmap
+## Roadmap - prioritate by positioning (upper = more critical)
 
 - [x] CRUD with in-memory database
 - [x] Supabase (PostgreSQL) integration
 - [x] Authentication via iron-session + bcrypt
 - [x] Product categories, filters, and classifications
-- [x] Warehouse location system
-  - [x] View product info by ID and location
-  - [x] Bulk location upload form
-  - [x] Per-product location breakdown with quantity tracking
+- [x] View product info by ID and location
+- [x] Bulk location upload form
+- [x] Per-product location breakdown with quantity tracking
+- [ ] Set enclosure for Adding/Editing products throught usual module (Locations) (without OrderID)
+- [ ] User action logging
+- [ ] Create module for In/Out bound products into system
   - [ ] Automatic/manual loading into field stores
 - [ ] Mobile-optimised layout
-- [ ] User action logging
-- [ ] SKU filtering by user access level
+- [ ] Set different SKUs filtering by user access level (UAL)
+- [ ] Limit to one login conection for Users
 
 ---
 
