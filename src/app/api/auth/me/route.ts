@@ -1,9 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
-import { withErrorHandling, unauthorized } from "@/lib/apiError";
+import {NextResponse} from "next/server";
+import {withErrorHandling} from "@/lib/apiError";
+import {requireAuth} from "@/lib/auth";
+import {toSafeUser} from "@/lib/storage";
 
-export const GET = withErrorHandling(async (req: NextRequest) => {
-  const user = await getCurrentUser();
-  if (!user) return unauthorized();
-  return NextResponse.json(user);
+export const GET = withErrorHandling(async (): Promise<NextResponse> => {
+  const userOrResp = await requireAuth();
+  if (userOrResp instanceof NextResponse) return userOrResp;
+
+  return NextResponse.json(toSafeUser(userOrResp));
 });

@@ -11,7 +11,7 @@ export interface User {
   id: string;
   username: string;
   password: string;
-  fullName: string;
+  full_name: string;
   rank: string;
   unit: string;
   callsign: string | null;
@@ -72,7 +72,7 @@ function dbToUser(row: DbUser): User {
     id: row.id,
     username: row.username,
     password: row.password,
-    fullName: row.full_name,
+    full_name: row.full_name,
     rank: row.rank,
     unit: row.unit,
     callsign: row.callsign,
@@ -267,7 +267,7 @@ class SupabaseStorage {
       .insert({
         username: insertUser.username,
         password: hashedPassword,
-        full_name: insertUser.fullName,
+        full_name: insertUser.full_name,
         rank: insertUser.rank,
         unit: insertUser.unit,
         callsign: insertUser.callsign ?? null,
@@ -289,7 +289,7 @@ class SupabaseStorage {
   async updateUser(id: string, updates: Partial<InsertUser>): Promise<SafeUser | undefined> {
     const dbUpdates: Record<string, unknown> = {};
     if (updates.username !== undefined) dbUpdates.username = updates.username;
-    if (updates.fullName !== undefined) dbUpdates.full_name = updates.fullName;
+    if (updates.full_name !== undefined) dbUpdates.full_name = updates.full_name;
     if (updates.rank !== undefined) dbUpdates.rank = updates.rank;
     if (updates.unit !== undefined) dbUpdates.unit = updates.unit;
     if (updates.callsign !== undefined) dbUpdates.callsign = updates.callsign ?? null;

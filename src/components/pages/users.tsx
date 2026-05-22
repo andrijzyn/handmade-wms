@@ -43,7 +43,7 @@ function UserForm({
   const form = useForm<InsertUser>({
     resolver: zodResolver(insertUserSchema) as any,
     defaultValues: {
-      username: "", password: "", fullName: "", rank: "", unit: "",
+      username: "", password: "", full_name: "", rank: "", unit: "",
       callsign: "", clearanceLevel: "No clearance", role: "user", isActive: true,
       ...defaultValues,
     },
@@ -71,7 +71,7 @@ function UserForm({
           )} />
         </div>
 
-        <FormField control={form.control} name="fullName" render={({ field }) => (
+        <FormField control={form.control} name="full_name" render={({ field }) => (
           <FormItem>
             <FormLabel className="text-xs">Full name</FormLabel>
             <FormControl><Input placeholder="Last First Middle" data-testid="input-user-fullname" {...field} /></FormControl>
@@ -259,7 +259,7 @@ export default function UsersPage() {
                 {users.map((u) => (
                   <TableRow key={u.id} data-testid={`row-user-${u.id}`}>
                     <TableCell>
-                      <div><p className="font-medium text-sm">{u.fullName}</p><p className="text-xs text-muted-foreground">@{u.username}</p></div>
+                      <div><p className="font-medium text-sm">{u.full_name}</p><p className="text-xs text-muted-foreground">@{u.username}</p></div>
                     </TableCell>
                     <TableCell className="text-sm">{u.rank}</TableCell>
                     <TableCell className="text-sm">{u.unit}</TableCell>
@@ -290,10 +290,10 @@ export default function UsersPage() {
       </Dialog>
 
       <Dialog open={!!editUser} onOpenChange={() => setEditUser(null)}>
-        <DialogContent className="max-w-[480px]"><DialogHeader><DialogTitle>Edit: {editUser?.fullName}</DialogTitle></DialogHeader>
+        <DialogContent className="max-w-[480px]"><DialogHeader><DialogTitle>Edit: {editUser?.full_name}</DialogTitle></DialogHeader>
           {editUser && (
             <UserForm isEdit defaultValues={{
-              username: editUser.username, password: "", fullName: editUser.fullName,
+              username: editUser.username, password: "", full_name: editUser.full_name,
               rank: editUser.rank, unit: editUser.unit, callsign: editUser.callsign ?? "",
               clearanceLevel: editUser.clearanceLevel as typeof CLEARANCE_LEVELS[number],
               role: editUser.role as "admin" | "user", isActive: editUser.isActive,
@@ -307,7 +307,7 @@ export default function UsersPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete user?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete <strong>{deleteTarget?.fullName}</strong> (@{deleteTarget?.username})? This action cannot be undone.
+              Are you sure you want to delete <strong>{deleteTarget?.full_name}</strong> (@{deleteTarget?.username})? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

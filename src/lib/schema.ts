@@ -117,7 +117,7 @@ export const CLEARANCE_LEVELS = [
 export const insertUserSchema = z.object({
   username:      z.string().min(3, "Min 3 characters").max(50),
   password:      z.string().min(6, "Min 6 characters"),
-  fullName:      z.string().min(1, "Required"),
+  full_name:      z.string().min(1, "Required"),
   rank:          z.string().min(1, "Required"),
   unit:          z.string().min(1, "Required"),
   callsign:      z.string().nullable().optional(),
@@ -132,3 +132,10 @@ export const updateUserSchema = insertUserSchema
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UpdateUser = z.infer<typeof updateUserSchema>;
+
+export const loginSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;
