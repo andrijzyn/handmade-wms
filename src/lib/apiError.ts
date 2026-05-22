@@ -43,9 +43,9 @@ export function raiseApiError(
  * wrapper.
  */
 export const unauthorized = () =>
-  raiseApiError("Необхідна авторизація", 401);
+  raiseApiError("Authorization required", 401);
 export const forbidden = () =>
-  raiseApiError("Недостатньо прав доступу", 403);
+  raiseApiError("Insufficient access rights", 403);
 export const conflict = (msg: string, details?: unknown) =>
   raiseApiError(msg, 409, details);
 export const badRequest = (msg: string, details?: unknown) =>

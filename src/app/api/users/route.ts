@@ -30,14 +30,14 @@ export const POST = withErrorHandling(
       const parsed = insertUserSchema.safeParse(body);
       if (!parsed.success) {
         return badRequest(
-            "Помилка валідації",
+            "Validation error",
             z.treeifyError(parsed.error)
         );
       }
 
       const existing = await storage.getUserByUsername(parsed.data.username);
       if (existing) {
-        return conflict("Користувач з таким логіном вже існує");
+        return conflict("This user already exists");
       }
 
       const created = await storage.createUser(parsed.data);

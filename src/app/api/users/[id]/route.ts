@@ -24,18 +24,18 @@ export const PATCH   = withErrorHandling(
 
       const partial = insertUserSchema.partial().safeParse(body);
       if (!partial.success) {
-        return badRequest("Помилка валідації", z.treeifyError(partial.error));
+        return badRequest("Validation error", z.treeifyError(partial.error));
       }
 
       if (partial.data.username) {
         const existing = await storage.getUserByUsername(partial.data.username);
         if (existing && existing.id !== id) {
-          return conflict("Користувач з таким логіном вже існує");
+          return conflict("This user already exists");
         }
       }
 
       const updated = await storage.updateUser(id, partial.data);
-      if (!updated) return notFound("Користувача не знайдено");
+      if (!updated) return notFound("No user found");
 
       return NextResponse.json(updated);
     }
@@ -54,12 +54,12 @@ export const DELETE = withErrorHandling(
 
       // Забороняємо видаляти себе
       if (currentUser.id === id) {
-        return badRequest("Не можна видалити власний акаунт");
+        return badRequest("You can't delete your own account");
       }
 
       const deleted = await storage.deleteUser(id);
-      if (!deleted) return notFound("Користувача не знайдено");
+      if (!deleted) return notFound("No user found");
 
-      return NextResponse.json({ message: "Користувача видалено" });
+      return NextResponse.json({ message: "User has been deleted" });
     }
 );

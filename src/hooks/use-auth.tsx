@@ -41,9 +41,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onError: (error: Error) => {
       toast({
         variant: "destructive",
-        title: "Помилка входу",
+        title: "Login Error",
         description: error.message.includes("401")
-            ? "Невірний логін або пароль"
+            ? "Incorrect login or password"
             : error.message,
       });
     },
@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onError: (error: Error) => {
       toast({
         variant: "destructive",
-        title: "Помилка виходу",
+        title: "Exit error",
         description: error.message,
       });
     },

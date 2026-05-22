@@ -62,5 +62,5 @@ export const DELETE = withErrorHandling(async (
   const { id } = await params;
   const deleted = await storage.deleteProduct(id);
   if (!deleted) return notFound("Product not found");
-  return NextResponse.json({ message: "Product deleted" });
+  return NextResponse.json({ message: "Product has been deleted" });
 });
