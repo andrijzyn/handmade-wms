@@ -2,65 +2,75 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { storage } from "@/lib/storage";
 import { insertProductSchema } from "@/lib/schema";
-import { getCurrentUser } from "@/lib/auth";
+import { requirePermission } from "@/lib/auth";
 import {
   withErrorHandling,
-  unauthorized,
-  notFound,
   badRequest,
   conflict,
+  notFound,
 } from "@/lib/apiError";
+import { PERMISSIONS } from "@/lib/permissions";
 
-export const GET = withErrorHandling(async (req: NextRequest) => {
-  const user = await getCurrentUser();
-  if (!user) return unauthorized();
+// GET /api/products/[id]
+export const GET = withErrorHandling(
+    async (
+        _req: NextRequest,
+        { params }: { params: Promise<{ id: string }> }
+    ): Promise<NextResponse> => {
+      const userOrResp = await requirePermission(PERMISSIONS.READ_PRODUCTS);
+      if (userOrResp instanceof NextResponse) return userOrResp;
 
-  const url = new URL(req.url);
-  const q = url.searchParams.get("q") ?? "";
-
-  const all = await storage.getLocations();
-  const filtered = q
-      ? all.filter((l) => l.label.toLowerCase().includes(q.toLowerCase()))
-      : all;
-
-  return NextResponse.json(filtered.slice(0, 20));
-});
-
-export const PATCH = withErrorHandling(async (
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) => {
-  const user = await getCurrentUser();
-  if (!user) return unauthorized();
-
-  const { id } = await params;
-  const body = await req.json();
-  const partial = insertProductSchema.partial().safeParse(body);
-    if (!partial.success) {
-      return badRequest("Validation error", z.treeifyError(partial.error));
+      const { id } = await params;
+      const product = await storage.getProduct(id);
+      if (!product) return notFound("Product not found");
+      return NextResponse.json(product);
     }
+);
 
-  if (partial.data.sku) {
-    const existing = await storage.getProductBySku(partial.data.sku);
-    if (existing && existing.id !== id) {
-      return conflict("A product with this SKU already exists");
+// PATCH /api/products/[id]
+export const PATCH = withErrorHandling(
+    async (
+        req: NextRequest,
+        { params }: { params: Promise<{ id: string }> }
+    ): Promise<NextResponse> => {
+      const userOrResp = await requirePermission(PERMISSIONS.WRITE_PRODUCTS);
+      if (userOrResp instanceof NextResponse) return userOrResp;
+
+      const { id } = await params;
+      const body = await req.json();
+
+      const partial = insertProductSchema.partial().safeParse(body);
+      if (!partial.success) {
+        return badRequest("Помилка валідації", z.treeifyError(partial.error));
+      }
+
+      if (partial.data.sku) {
+        const existing = await storage.getProductBySku(partial.data.sku);
+        if (existing && existing.id !== id) {
+          return conflict("Продукт з таким SKU вже існує");
+        }
+      }
+
+      const product = await storage.updateProduct(id, partial.data);
+      if (!product) return notFound("Product not found");
+
+      return NextResponse.json(product);
     }
-  }
+);
 
-  const product = await storage.updateProduct(id, partial.data);
-  if (!product) return notFound("Product not found");
-  return NextResponse.json(product);
-});
+// DELETE /api/products/[id]
+export const DELETE = withErrorHandling(
+    async (
+        _req: NextRequest,
+        { params }: { params: Promise<{ id: string }> }
+    ): Promise<NextResponse> => {
+      const userOrResp = await requirePermission(PERMISSIONS.DELETE_PRODUCTS);
+      if (userOrResp instanceof NextResponse) return userOrResp;
 
-export const DELETE = withErrorHandling(async (
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) => {
-  const user = await getCurrentUser();
-  if (!user) return unauthorized();
+      const { id } = await params;
+      const deleted = await storage.deleteProduct(id);
+      if (!deleted) return notFound("Product not found");
 
-  const { id } = await params;
-  const deleted = await storage.deleteProduct(id);
-  if (!deleted) return notFound("Product not found");
-  return NextResponse.json({ message: "Product has been deleted" });
-});
+      return NextResponse.json({ message: "Product has been deleted" });
+    }
+);
