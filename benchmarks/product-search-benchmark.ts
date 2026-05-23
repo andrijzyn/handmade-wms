@@ -50,22 +50,27 @@ async function runBatch(batchSize: number) {
         })
         .catch(() => {
           failed++;
-        })
+        }),
     );
   }
   await Promise.all(promises);
 }
 
 (async () => {
-  console.log(`Starting benchmark: ${TOTAL_REQUESTS} requests, ${CONCURRENCY} concurrency`);
+  console.log(
+    `Starting benchmark: ${TOTAL_REQUESTS} requests, ${CONCURRENCY} concurrency`,
+  );
   const batches = Math.ceil(TOTAL_REQUESTS / CONCURRENCY);
   for (let i = 0; i < batches; i++) {
-    const size = i === batches - 1 ? TOTAL_REQUESTS - i * CONCURRENCY : CONCURRENCY;
+    const size =
+      i === batches - 1 ? TOTAL_REQUESTS - i * CONCURRENCY : CONCURRENCY;
     // eslint-disable-next-line no-await-in-loop
     await runBatch(size);
-    process.stdout.write(`\rCompleted ${Math.min((i + 1) * CONCURRENCY, TOTAL_REQUESTS)} / ${TOTAL_REQUESTS}`);
+    process.stdout.write(
+      `\rCompleted ${Math.min((i + 1) * CONCURRENCY, TOTAL_REQUESTS)} / ${TOTAL_REQUESTS}`,
+    );
   }
-  console.log('\nBenchmark finished');
+  console.log("\nBenchmark finished");
   console.log(`Successful: ${completed}`);
   console.log(`Failed: ${failed}`);
   if (completed > 0) {

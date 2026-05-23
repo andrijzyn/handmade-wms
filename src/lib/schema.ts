@@ -4,7 +4,10 @@ import type { Permission } from "./permissions";
 
 // ── Permissions ───────────────────────────────────────
 
-const VALID_PERMISSIONS = Object.values(PERMISSIONS) as [Permission, ...Permission[]];
+const VALID_PERMISSIONS = Object.values(PERMISSIONS) as [
+  Permission,
+  ...Permission[],
+];
 const permissionSchema = z.enum(VALID_PERMISSIONS);
 
 // ── Product ───────────────────────────────────────────
@@ -41,12 +44,14 @@ export interface Location {
 }
 
 export const insertLocationSchema = z.object({
-  row:   z.number().int().min(1).max(100),
-  col:   z.number().int().min(1).max(100),
-  level: z.number().int().refine(
-      (v) => [0, 10, 20, 30, 40, 50, 60].includes(v),
-      { message: "Level must be 0, 10, 20, 30, 40, 50 or 60" }
-  ),
+  row: z.number().int().min(1).max(100),
+  col: z.number().int().min(1).max(100),
+  level: z
+    .number()
+    .int()
+    .refine((v) => [0, 10, 20, 30, 40, 50, 60].includes(v), {
+      message: "Level must be 0, 10, 20, 30, 40, 50 or 60",
+    }),
 });
 
 export type InsertLocation = z.infer<typeof insertLocationSchema>;
@@ -69,9 +74,9 @@ export interface ProductLocationView extends ProductLocation {
 }
 
 export const insertProductLocationSchema = z.object({
-  productId:  z.string().uuid("Invalid product ID"),
+  productId: z.string().uuid("Invalid product ID"),
   locationId: z.string().uuid("Invalid location ID"),
-  quantity:   z.number().int().min(0, "Quantity must be 0 or more"),
+  quantity: z.number().int().min(0, "Quantity must be 0 or more"),
 });
 
 export type InsertProductLocation = z.infer<typeof insertProductLocationSchema>;
@@ -112,20 +117,20 @@ export const CLEARANCE_LEVELS = [
 
 // ── Users ─────────────────────────────────────────────
 export const insertUserSchema = z.object({
-  username:      z.string().min(3, "Min 3 characters").max(50),
-  password:      z.string().min(6, "Min 6 characters"),
-  full_name:      z.string().min(1, "Required"),
-  rank:          z.string().min(1, "Required"),
-  unit:          z.string().min(1, "Required"),
-  callsign:      z.string().nullable().optional(),
+  username: z.string().min(3, "Min 3 characters").max(50),
+  password: z.string().min(6, "Min 6 characters"),
+  full_name: z.string().min(1, "Required"),
+  rank: z.string().min(1, "Required"),
+  unit: z.string().min(1, "Required"),
+  callsign: z.string().nullable().optional(),
   clearanceLevel: z.string().default("No clearance"),
-  permissions:   z.array(permissionSchema).default([]),
-  isActive:      z.boolean().default(true),
+  permissions: z.array(permissionSchema).default([]),
+  isActive: z.boolean().default(true),
 });
 
 export const updateUserSchema = insertUserSchema
-    .partial()
-    .omit({ password: true });
+  .partial()
+  .omit({ password: true });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UpdateUser = z.infer<typeof updateUserSchema>;

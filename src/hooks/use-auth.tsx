@@ -19,10 +19,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
 
-  const {
-    data: user,
-    isLoading,
-  } = useQuery<SafeUser | null>({
+  const { data: user, isLoading } = useQuery<SafeUser | null>({
     queryKey: ["/api/auth/me"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     staleTime: Infinity,
@@ -43,8 +40,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         variant: "destructive",
         title: "Login Error",
         description: error.message.includes("401")
-            ? "Incorrect login or password"
-            : error.message,
+          ? "Incorrect login or password"
+          : error.message,
       });
     },
   });
@@ -83,11 +80,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-      <AuthContext.Provider
-          value={{ user: user ?? null, isLoading, login, logout }}
-      >
-        {children}
-      </AuthContext.Provider>
+    <AuthContext.Provider
+      value={{ user: user ?? null, isLoading, login, logout }}
+    >
+      {children}
+    </AuthContext.Provider>
   );
 }
 

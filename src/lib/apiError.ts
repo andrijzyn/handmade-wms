@@ -33,7 +33,7 @@ export function errorResponse(error: ApiError): NextResponse {
 export function raiseApiError(
   message: string,
   status: number,
-  details?: unknown
+  details?: unknown,
 ): never {
   throw new ApiError(message, status, details);
 }
@@ -42,10 +42,9 @@ export function raiseApiError(
  * Common shortcuts – they throw an {@link ApiError} which will be caught by the
  * wrapper.
  */
-export const unauthorized = () =>
-  raiseApiError("Authorization required", 401);
+export const unauthorized = () => raiseApiError("Authorization required", 401);
 export const forbidden = () =>
-  raiseApiError("Insufficient access rights", 403);
+  raiseApiError("You do not have permissions to do that", 403);
 export const conflict = (msg: string, details?: unknown) =>
   raiseApiError(msg, 409, details);
 export const badRequest = (msg: string, details?: unknown) =>
@@ -58,7 +57,7 @@ export const notFound = (msg: string, details?: unknown) =>
  * exceptions, turning them into a uniform JSON response.
  */
 export function withErrorHandling<TArgs extends any[]>(
-    handler: (...args: TArgs) => Promise<NextResponse>
+  handler: (...args: TArgs) => Promise<NextResponse>,
 ) {
   return async (...args: TArgs): Promise<NextResponse> => {
     try {
@@ -67,15 +66,17 @@ export function withErrorHandling<TArgs extends any[]>(
       if (err instanceof ApiError) {
         return errorResponse(err);
       }
-        // Zod validation errors expose a `flatten` method.
-        if (err instanceof ZodError) {
-          const details = z.treeifyError(err);
-          return errorResponse(
-            new ApiError("Validation error", 400, { errors: details })
-          );
-        }
+      // Zod validation errors expose a `flatten` method.
+      if (err instanceof ZodError) {
+        const details = z.treeifyError(err);
+        return errorResponse(
+          new ApiError("Validation error", 400, { errors: details }),
+        );
+      }
       console.error(err);
-      return NextResponse.json({ message: "Internal server error" }, { status: 500 }
+      return NextResponse.json(
+        { message: "Internal server error" },
+        { status: 500 },
       );
     }
   };

@@ -4,11 +4,11 @@
 
 /* LIGHT MODE — inventory/productivity: cool slate + indigo accent */
 :root {
-  --button-outline: rgba(0,0,0, .10);
-  --badge-outline: rgba(0,0,0, .05);
+  --button-outline: rgba(0, 0, 0, 0.1);
+  --badge-outline: rgba(0, 0, 0, 0.05);
   --opaque-button-border-intensity: -8;
-  --elevate-1: rgba(0,0,0, .03);
-  --elevate-2: rgba(0,0,0, .08);
+  --elevate-1: rgba(0, 0, 0, 0.03);
+  --elevate-2: rgba(0, 0, 0, 0.08);
   --background: 220 20% 97%;
   --foreground: 222 24% 12%;
   --border: 220 13% 89%;
@@ -43,28 +43,38 @@
   --chart-3: 35 90% 52%;
   --chart-4: 280 60% 50%;
   --chart-5: 12 80% 55%;
-  --font-sans: 'General Sans', 'Inter', sans-serif;
+  --font-sans: "General Sans", "Inter", sans-serif;
   --font-serif: Georgia, serif;
-  --font-mono: 'JetBrains Mono', monospace;
-  --radius: .5rem;
+  --font-mono: "JetBrains Mono", monospace;
+  --radius: 0.5rem;
   --shadow-2xs: 0px 1px 2px 0px hsl(220 20% 20% / 0.04);
   --shadow-xs: 0px 1px 3px 0px hsl(220 20% 20% / 0.06);
-  --shadow-sm: 0px 1px 4px 0px hsl(220 20% 20% / 0.06), 0px 1px 2px -1px hsl(220 20% 20% / 0.04);
-  --shadow: 0px 2px 6px 0px hsl(220 20% 20% / 0.06), 0px 1px 3px -1px hsl(220 20% 20% / 0.04);
-  --shadow-md: 0px 4px 10px 0px hsl(220 20% 20% / 0.08), 0px 2px 4px -2px hsl(220 20% 20% / 0.04);
-  --shadow-lg: 0px 8px 20px 0px hsl(220 20% 20% / 0.10), 0px 4px 8px -2px hsl(220 20% 20% / 0.04);
-  --shadow-xl: 0px 16px 40px 0px hsl(220 20% 20% / 0.12), 0px 8px 16px -4px hsl(220 20% 20% / 0.04);
+  --shadow-sm:
+    0px 1px 4px 0px hsl(220 20% 20% / 0.06),
+    0px 1px 2px -1px hsl(220 20% 20% / 0.04);
+  --shadow:
+    0px 2px 6px 0px hsl(220 20% 20% / 0.06),
+    0px 1px 3px -1px hsl(220 20% 20% / 0.04);
+  --shadow-md:
+    0px 4px 10px 0px hsl(220 20% 20% / 0.08),
+    0px 2px 4px -2px hsl(220 20% 20% / 0.04);
+  --shadow-lg:
+    0px 8px 20px 0px hsl(220 20% 20% / 0.1),
+    0px 4px 8px -2px hsl(220 20% 20% / 0.04);
+  --shadow-xl:
+    0px 16px 40px 0px hsl(220 20% 20% / 0.12),
+    0px 8px 16px -4px hsl(220 20% 20% / 0.04);
   --shadow-2xl: 0px 24px 48px 0px hsl(220 20% 20% / 0.16);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 }
 
 .dark {
-  --button-outline: rgba(255,255,255, .10);
-  --badge-outline: rgba(255,255,255, .05);
+  --button-outline: rgba(255, 255, 255, 0.1);
+  --badge-outline: rgba(255, 255, 255, 0.05);
   --opaque-button-border-intensity: 9;
-  --elevate-1: rgba(255,255,255, .04);
-  --elevate-2: rgba(255,255,255, .09);
+  --elevate-1: rgba(255, 255, 255, 0.04);
+  --elevate-2: rgba(255, 255, 255, 0.09);
   --background: 222 20% 8%;
   --foreground: 220 14% 94%;
   --border: 222 12% 18%;
@@ -100,13 +110,18 @@
   --chart-4: 280 55% 65%;
   --chart-5: 12 75% 60%;
   --shadow-2xs: 0px 1px 2px 0px hsl(0 0% 0% / 0.15);
-  --shadow-xs: 0px 1px 3px 0px hsl(0 0% 0% / 0.20);
-  --shadow-sm: 0px 1px 4px 0px hsl(0 0% 0% / 0.20), 0px 1px 2px -1px hsl(0 0% 0% / 0.12);
-  --shadow: 0px 2px 6px 0px hsl(0 0% 0% / 0.20), 0px 1px 3px -1px hsl(0 0% 0% / 0.12);
-  --shadow-md: 0px 4px 10px 0px hsl(0 0% 0% / 0.25), 0px 2px 4px -2px hsl(0 0% 0% / 0.12);
-  --shadow-lg: 0px 8px 20px 0px hsl(0 0% 0% / 0.30), 0px 4px 8px -2px hsl(0 0% 0% / 0.12);
-  --shadow-xl: 0px 16px 40px 0px hsl(0 0% 0% / 0.35), 0px 8px 16px -4px hsl(0 0% 0% / 0.12);
-  --shadow-2xl: 0px 24px 48px 0px hsl(0 0% 0% / 0.40);
+  --shadow-xs: 0px 1px 3px 0px hsl(0 0% 0% / 0.2);
+  --shadow-sm:
+    0px 1px 4px 0px hsl(0 0% 0% / 0.2), 0px 1px 2px -1px hsl(0 0% 0% / 0.12);
+  --shadow:
+    0px 2px 6px 0px hsl(0 0% 0% / 0.2), 0px 1px 3px -1px hsl(0 0% 0% / 0.12);
+  --shadow-md:
+    0px 4px 10px 0px hsl(0 0% 0% / 0.25), 0px 2px 4px -2px hsl(0 0% 0% / 0.12);
+  --shadow-lg:
+    0px 8px 20px 0px hsl(0 0% 0% / 0.3), 0px 4px 8px -2px hsl(0 0% 0% / 0.12);
+  --shadow-xl:
+    0px 16px 40px 0px hsl(0 0% 0% / 0.35), 0px 8px 16px -4px hsl(0 0% 0% / 0.12);
+  --shadow-2xl: 0px 24px 48px 0px hsl(0 0% 0% / 0.4);
 }
 
 @layer base {

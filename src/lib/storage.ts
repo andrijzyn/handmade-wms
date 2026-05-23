@@ -1,9 +1,16 @@
 import bcrypt from "bcryptjs";
 import { getSupabase } from "./supabase";
-import type { Product, InsertProduct, InsertUser, Location, ProductLocationView, ProductLocation, InsertProductLocation, } from "./schema";
+import type {
+  Product,
+  InsertProduct,
+  InsertUser,
+  Location,
+  ProductLocationView,
+  ProductLocation,
+  InsertProductLocation,
+} from "./schema";
 import { Permission } from "@/lib/permissions";
 import type { User, SafeUser } from "@/lib/userTypes";
-
 
 // ── DB interfaces ─────────────────────────────────────
 
@@ -59,7 +66,7 @@ function dbToUser(row: DbUser): User {
     callsign: row.callsign,
     clearanceLevel: row.clearance_level,
     permissions: (row.user_permissions ?? []).map(
-      (up) => up.permissions.key as Permission
+      (up) => up.permissions.key as Permission,
     ),
     isActive: row.is_active,
     createdAt: row.created_at ? new Date(row.created_at) : null,
@@ -138,7 +145,7 @@ class SupabaseStorage {
 
   async updateProduct(
     id: string,
-    updates: Partial<InsertProduct>
+    updates: Partial<InsertProduct>,
   ): Promise<Product | undefined> {
     const dbUpdates: Record<string, unknown> = {};
     if (updates.name !== undefined) dbUpdates.name = updates.name;
@@ -146,8 +153,10 @@ class SupabaseStorage {
     if (updates.category !== undefined) dbUpdates.category = updates.category;
     if (updates.quantity !== undefined) dbUpdates.quantity = updates.quantity;
     if (updates.price !== undefined) dbUpdates.price = updates.price;
-    if (updates.lowStockThreshold !== undefined) dbUpdates.low_stock_threshold = updates.lowStockThreshold;
-    if (updates.description !== undefined) dbUpdates.description = updates.description;
+    if (updates.lowStockThreshold !== undefined)
+      dbUpdates.low_stock_threshold = updates.lowStockThreshold;
+    if (updates.description !== undefined)
+      dbUpdates.description = updates.description;
 
     const { data, error } = await this.db
       .from("products")
@@ -160,10 +169,7 @@ class SupabaseStorage {
   }
 
   async deleteProduct(id: string): Promise<boolean> {
-    const { error } = await this.db
-      .from("products")
-      .delete()
-      .eq("id", id);
+    const { error } = await this.db.from("products").delete().eq("id", id);
     return !error;
   }
 
@@ -172,7 +178,9 @@ class SupabaseStorage {
 
     if (query) {
       const search = `%${query}%`;
-      q = q.or(`name.ilike.${search},sku.ilike.${search},description.ilike.${search}`);
+      q = q.or(
+        `name.ilike.${search},sku.ilike.${search},description.ilike.${search}`,
+      );
     }
     if (category && category !== "all") {
       q = q.eq("category", category);
@@ -184,9 +192,7 @@ class SupabaseStorage {
   }
 
   async getCategories(): Promise<string[]> {
-    const { data, error } = await this.db
-      .from("products")
-      .select("category");
+    const { data, error } = await this.db.from("products").select("category");
     if (error) throw error;
     const categories = new Set<string>();
     for (const row of data as { category: string }[]) {
@@ -196,15 +202,15 @@ class SupabaseStorage {
   }
 
   async getStats() {
-    const { data, error } = await this.db
-      .from("products")
-      .select("*");
+    const { data, error } = await this.db.from("products").select("*");
     if (error) throw error;
     const products = (data as DbProduct[]).map(dbToProduct);
     return {
       totalProducts: products.length,
       totalValue: products.reduce((sum, p) => sum + p.price * p.quantity, 0),
-      lowStockCount: products.filter((p) => p.quantity > 0 && p.quantity <= p.lowStockThreshold).length,
+      lowStockCount: products.filter(
+        (p) => p.quantity > 0 && p.quantity <= p.lowStockThreshold,
+      ).length,
       outOfStockCount: products.filter((p) => p.quantity === 0).length,
       categoriesCount: new Set(products.map((p) => p.category)).size,
     };
@@ -267,14 +273,20 @@ class SupabaseStorage {
     return toSafeUser(user);
   }
 
-  async updateUser(id: string, updates: Partial<InsertUser>): Promise<SafeUser | undefined> {
+  async updateUser(
+    id: string,
+    updates: Partial<InsertUser>,
+  ): Promise<SafeUser | undefined> {
     const dbUpdates: Record<string, unknown> = {};
     if (updates.username !== undefined) dbUpdates.username = updates.username;
-    if (updates.full_name !== undefined) dbUpdates.full_name = updates.full_name;
+    if (updates.full_name !== undefined)
+      dbUpdates.full_name = updates.full_name;
     if (updates.rank !== undefined) dbUpdates.rank = updates.rank;
     if (updates.unit !== undefined) dbUpdates.unit = updates.unit;
-    if (updates.callsign !== undefined) dbUpdates.callsign = updates.callsign ?? null;
-    if (updates.clearanceLevel !== undefined) dbUpdates.clearance_level = updates.clearanceLevel;
+    if (updates.callsign !== undefined)
+      dbUpdates.callsign = updates.callsign ?? null;
+    if (updates.clearanceLevel !== undefined)
+      dbUpdates.clearance_level = updates.clearanceLevel;
     if (updates.isActive !== undefined) dbUpdates.is_active = updates.isActive;
     if (updates.password !== undefined)
       dbUpdates.password = await bcrypt.hash(updates.password, 10);
@@ -301,37 +313,29 @@ class SupabaseStorage {
     return !error;
   }
 
-  async validatePassword(
-    user: User,
-    password: string
-  ): Promise<boolean> {
+  async validatePassword(user: User, password: string): Promise<boolean> {
     return bcrypt.compare(password, user.password);
   }
 
   // Замінює всі дозволи юзера
   async setUserPermissions(
     userId: string,
-    permissions: Permission[]
+    permissions: Permission[],
   ): Promise<void> {
     const { data: perms } = await this.db
       .from("permissions")
       .select("id, key")
       .in("key", permissions);
 
-    await this.db
-      .from("user_permissions")
-      .delete()
-      .eq("user_id", userId);
+    await this.db.from("user_permissions").delete().eq("user_id", userId);
 
     if (perms?.length) {
-      await this.db
-        .from("user_permissions")
-        .insert(
-          perms.map((p: { id: string; key: string }) => ({
-            user_id: userId,
-            permission_id: p.id,
-          }))
-        );
+      await this.db.from("user_permissions").insert(
+        perms.map((p: { id: string; key: string }) => ({
+          user_id: userId,
+          permission_id: p.id,
+        })),
+      );
     }
   }
 
@@ -360,7 +364,8 @@ class SupabaseStorage {
   async getProductLocations(productId: string): Promise<ProductLocationView[]> {
     const { data, error } = await this.db
       .from("product_locations")
-      .select(`
+      .select(
+        `
         id,
         product_id,
         location_id,
@@ -372,7 +377,8 @@ class SupabaseStorage {
           col,
           level
         )
-      `)
+      `,
+      )
       .eq("product_id", productId);
 
     if (error) throw new Error(error.message);
@@ -392,7 +398,7 @@ class SupabaseStorage {
 
   async getProductLocation(
     productId: string,
-    locationId: string
+    locationId: string,
   ): Promise<ProductLocation | null> {
     const { data } = await this.db
       .from("product_locations")
@@ -404,7 +410,7 @@ class SupabaseStorage {
   }
 
   async createProductLocation(
-    input: InsertProductLocation
+    input: InsertProductLocation,
   ): Promise<ProductLocation> {
     const { data, error } = await this.db
       .from("product_locations")
@@ -422,7 +428,7 @@ class SupabaseStorage {
 
   async updateProductLocation(
     id: string,
-    quantity: number
+    quantity: number,
   ): Promise<ProductLocation | null> {
     const { data, error } = await this.db
       .from("product_locations")

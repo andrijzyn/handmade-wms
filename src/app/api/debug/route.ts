@@ -1,9 +1,8 @@
-
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
-import {requirePermission} from "@/lib/auth";
-import {withErrorHandling} from "@/lib/apiError";
-import {PERMISSIONS} from "@/lib/permissions";
+import { requirePermission } from "@/lib/auth";
+import { withErrorHandling } from "@/lib/apiError";
+import { PERMISSIONS } from "@/lib/permissions";
 
 /**
  * Діагностичний ендпоінт — перевіряє підключення до Supabase.
@@ -17,9 +16,16 @@ export const GET = withErrorHandling(async (req) => {
   const result: Record<string, unknown> = {
     timestamp: new Date().toISOString(),
     env: {
-      NEXT_PUBLIC_SUPABASE_DATABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_DATABASE_URL ? "✅ set" : "❌ missing",
-      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ? "✅ set" : "❌ missing",
-      SESSION_SECRET: process.env.SESSION_SECRET ? "✅ set" : "❌ missing (using default)",
+      NEXT_PUBLIC_SUPABASE_DATABASE_URL: process.env
+        .NEXT_PUBLIC_SUPABASE_DATABASE_URL
+        ? "✅ set"
+        : "❌ missing",
+      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY
+        ? "✅ set"
+        : "❌ missing",
+      SESSION_SECRET: process.env.SESSION_SECRET
+        ? "✅ set"
+        : "❌ missing (using default)",
     },
   };
 
@@ -27,16 +33,18 @@ export const GET = withErrorHandling(async (req) => {
     const db = getSupabase();
 
     const { data, error } = await db
-        .from("users")
-        .select(`
+      .from("users")
+      .select(
+        `
     id,
     username,
     is_active,
     user_permissions (
       permissions ( key )
     )
-  `)
-        .limit(10);
+  `,
+      )
+      .limit(10);
 
     if (error) {
       result.users = {
@@ -50,7 +58,7 @@ export const GET = withErrorHandling(async (req) => {
         username: row.username,
         isActive: row.is_active,
         permissions: (row.user_permissions ?? []).map(
-            (up: any) => up.permissions.key
+          (up: any) => up.permissions.key,
         ),
       }));
 
@@ -66,7 +74,10 @@ export const GET = withErrorHandling(async (req) => {
       .select("*", { count: "exact", head: true });
 
     if (productsError) {
-      result.products = { error: productsError.message, code: productsError.code };
+      result.products = {
+        error: productsError.message,
+        code: productsError.code,
+      };
     } else {
       result.products = { count };
     }

@@ -2,7 +2,13 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, DollarSign, AlertTriangle, XCircle, FolderOpen } from "lucide-react";
+import {
+  Package,
+  DollarSign,
+  AlertTriangle,
+  XCircle,
+  FolderOpen,
+} from "lucide-react";
 import type { Product } from "@/lib/schema";
 import { Badge } from "@/components/ui/badge";
 
@@ -15,7 +21,13 @@ interface Stats {
 }
 
 // Required for card navigation handling
-export default function Dashboard({ onNavigateAction }: { onNavigateAction: (page: "dashboard" | "products" | "users" | "locations") => void }) {
+export default function Dashboard({
+  onNavigateAction,
+}: {
+  onNavigateAction: (
+    page: "dashboard" | "products" | "users" | "locations",
+  ) => void;
+}) {
   const { data: stats, isLoading: statsLoading } = useQuery<Stats>({
     queryKey: ["/api/stats"],
   });
@@ -25,16 +37,23 @@ export default function Dashboard({ onNavigateAction }: { onNavigateAction: (pag
   });
 
   const lowStockProducts =
-    products?.filter((p) => p.quantity > 0 && p.quantity <= p.lowStockThreshold) ?? [];
+    products?.filter(
+      (p) => p.quantity > 0 && p.quantity <= p.lowStockThreshold,
+    ) ?? [];
   const outOfStockProducts = products?.filter((p) => p.quantity === 0) ?? [];
 
   return (
     <div className="space-y-6" data-testid="dashboard-page">
       <div>
-        <h1 className="text-xl font-semibold tracking-tight" data-testid="text-page-title">
+        <h1
+          className="text-xl font-semibold tracking-tight"
+          data-testid="text-page-title"
+        >
           Dashboard
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Overview of your inventory status</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          Overview of your inventory status
+        </p>
       </div>
 
       {/* Stats cards */}
@@ -51,7 +70,7 @@ export default function Dashboard({ onNavigateAction }: { onNavigateAction: (pag
               </div>
             </div>
             <div className="text-2xl font-semibold tracking-tight">
-              {statsLoading ? "—" : stats?.totalProducts ?? 0}
+              {statsLoading ? "—" : (stats?.totalProducts ?? 0)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">Total Products</p>
           </CardContent>
@@ -89,7 +108,7 @@ export default function Dashboard({ onNavigateAction }: { onNavigateAction: (pag
               </div>
             </div>
             <div className="text-2xl font-semibold tracking-tight">
-              {statsLoading ? "—" : stats?.lowStockCount ?? 0}
+              {statsLoading ? "—" : (stats?.lowStockCount ?? 0)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">Low Stock</p>
           </CardContent>
@@ -107,7 +126,7 @@ export default function Dashboard({ onNavigateAction }: { onNavigateAction: (pag
               </div>
             </div>
             <div className="text-2xl font-semibold tracking-tight">
-              {statsLoading ? "—" : stats?.outOfStockCount ?? 0}
+              {statsLoading ? "—" : (stats?.outOfStockCount ?? 0)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">Out of Stock</p>
           </CardContent>
@@ -121,7 +140,7 @@ export default function Dashboard({ onNavigateAction }: { onNavigateAction: (pag
               </div>
             </div>
             <div className="text-2xl font-semibold tracking-tight">
-              {statsLoading ? "—" : stats?.categoriesCount ?? 0}
+              {statsLoading ? "—" : (stats?.categoriesCount ?? 0)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">Categories</p>
           </CardContent>
@@ -152,7 +171,9 @@ export default function Dashboard({ onNavigateAction }: { onNavigateAction: (pag
                   >
                     <div>
                       <p className="text-sm font-medium">{product.name}</p>
-                      <p className="text-xs text-muted-foreground font-mono">{product.sku}</p>
+                      <p className="text-xs text-muted-foreground font-mono">
+                        {product.sku}
+                      </p>
                     </div>
                     <Badge
                       variant="outline"
@@ -189,7 +210,9 @@ export default function Dashboard({ onNavigateAction }: { onNavigateAction: (pag
                   >
                     <div>
                       <p className="text-sm font-medium">{product.name}</p>
-                      <p className="text-xs text-muted-foreground font-mono">{product.sku}</p>
+                      <p className="text-xs text-muted-foreground font-mono">
+                        {product.sku}
+                      </p>
                     </div>
                     <Badge variant="destructive" className="text-xs">
                       Out of stock

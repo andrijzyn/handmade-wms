@@ -16,8 +16,8 @@ export interface SessionData {
 export const sessionOptions: SessionOptions = {
   cookieName: "stockpulse_session",
   password:
-      process.env.SESSION_SECRET ||
-      "stockpulse-dev-secret-must-be-at-least-32-chars",
+    process.env.SESSION_SECRET ||
+    "stockpulse-dev-secret-must-be-at-least-32-chars",
   cookieOptions: {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -54,7 +54,7 @@ export async function requireAuth(): Promise<User | NextResponse> {
 }
 
 export async function requirePermission(
-    perm: Permission
+  perm: Permission,
 ): Promise<User | NextResponse> {
   const user = await getCurrentUser();
   if (!user) return unauthorized();
@@ -63,7 +63,7 @@ export async function requirePermission(
 }
 
 export async function requireAnyPermission(
-    perms: Permission[]
+  perms: Permission[],
 ): Promise<User | NextResponse> {
   const user = await getCurrentUser();
   if (!user) return unauthorized();
