@@ -43,7 +43,7 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 
 ---
 
-## Roadmap - prioritate by positioning (upper = more critical)
+## Done
 
 - [x] CRUD with in-memory database
 - [x] Supabase (PostgreSQL) integration
@@ -52,13 +52,62 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 - [x] View product info by ID and location
 - [x] Bulk location upload form
 - [x] Per-product location breakdown with quantity tracking
-- [ ] Set enclosure for Adding/Editing products throught usual module (Locations) (without OrderID)
-- [ ] User action logging
-- [ ] Create module for In/Out bound products into system
-  - [ ] Automatic/manual loading into field stores
-- [ ] Mobile-optimised layout
-- [ ] Set different SKUs filtering by user access level (UAL)
-- [ ] Limit to one login conection for Users
+
+***
+
+## Security and accesible
+
+- [ ] Separate functions by permissions — розділити що кожна роль може робити
+- [ ] Create module for permission assignment — UI для адміна, щоб призначати дозволи
+- [ ] Set different SKUs filtering by UAL — юзер бачить тільки те, до чого має допуск
+- [ ] Limit to one login connection per user — активна сесія одна, нова заходить і скидає стару
+
+***
+
+## Operational management (InBound / OutBound)
+
+- [ ] Create InBound / OutBound module — форми надходження і видачі з часом, відповідальним і підписом
+- [ ] Automatic/manual loading into field stores — автоматична/ручна алокація по складах при InBound
+- [ ] Set enclosure for adding/editing products without OrderID — додати продукти безпосередньо через продуктовий модуль
+
+***
+
+## Logging
+
+- [ ] User action logging — хто, що, коли: CreateProduct, EditQuantity, DeleteLocation, Login
+- [ ] Export audit log — вивантаження логу в CSV / PDF для підзвітності командиру
+- [ ] Dashboard руху запасів — графік руху товарів за часом
+
+***
+
+## UX
+
+- [ ] Mobile-optimised layout — склад не завжди має ПК
+- [ ] PWA support — встановити як застосунок на телефон без апстору
+- [ ] Barcode / QR scan — замість ручного вводу SKU на складі
+
+***
+
+## Ideas for to do
+
+| Функція | Чому важливо |
+|---|---|
+| Звіт по залишках (PDF/XLSX) | Офіцер звітує документом, не скріншотом |
+| Threshold alerts у реальному часі | Email або браузерне сповіщення при low stock |
+| Bulk import через CSV | Завести великий каталог без ручного введення |
+| Історія руху по продукту | Скільки і коли прийшло/пішло по конкретній позиції |
+| Multi-warehouse | Один інстанс для кількох об'єктів зі зведеним дашбордом |
+| Друк документів | Накладна, акт списання, картка продукту для підпису |
+
+***
+
+## Prioritate
+
+1. **Permissions module** — без цього все інше небезпечно
+2. **InBound/OutBound module** — без цього система не ведеться як облік
+3. **User action logging** — без цього немає підзвітності
+4. **Mobile layout** — без цього система не використовується на складі
+5. **Export документів** — без цього адміністративна робота ведеться в іншому місці
 
 ---
 
