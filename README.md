@@ -14,7 +14,6 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 >
 > [Demo](https://timely-croissant-26e162.netlify.app/)
 
-
 ---
 
 ## Features
@@ -31,15 +30,15 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 
 ## Technology Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 16 (App Router), React 19, TypeScript |
-| Styling | Tailwind CSS v3, shadcn/ui (Radix UI), Lucide icons |
-| State | TanStack Query v5 |
-| Forms | React Hook Form + Zod |
-| Auth | iron-session (cookie-based), bcrypt |
-| Database | Supabase (PostgreSQL) via `@supabase/supabase-js` |
-| Deployment | Netlify + `@netlify/plugin-nextjs` |
+| Layer      | Technology                                          |
+| ---------- | --------------------------------------------------- |
+| Framework  | Next.js 16 (App Router), React 19, TypeScript       |
+| Styling    | Tailwind CSS v3, shadcn/ui (Radix UI), Lucide icons |
+| State      | TanStack Query v5                                   |
+| Forms      | React Hook Form + Zod                               |
+| Auth       | iron-session (cookie-based), bcrypt                 |
+| Database   | Supabase (PostgreSQL) via `@supabase/supabase-js`   |
+| Deployment | Netlify + `@netlify/plugin-nextjs`                  |
 
 ---
 
@@ -114,18 +113,22 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 ## Database Setup (Supabase)
 
 ### 1. Create a project
+
 1. Go to [supabase.com](https://supabase.com) and create a new project.
 2. Choose a name, password, and region (EU-Central recommended).
 3. Wait for provisioning to complete.
 
 ### 2. Run migrations
+
 Open **SQL Editor** in the Supabase dashboard and execute in order:
 
 1. `supabase/schema.sql` — creates `products`, `users`, `locations`, and `product_locations` tables with foreign key constraints
 2. `supabase/seed.sql` — inserts default admin user and sample products
 
 ### 3. Get your API keys
+
 Go to **Supabase Dashboard → Settings → API** and copy:
+
 - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
 - **service_role key** → `SUPABASE_SERVICE_ROLE_KEY`
 
@@ -157,13 +160,14 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Environment Variables
 
-| Variable | Source | Description |
-|---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Settings → API → Project URL | Public Supabase project URL |
+| Variable                    | Source                                   | Description                         |
+| --------------------------- | ---------------------------------------- | ----------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`  | Supabase → Settings → API → Project URL  | Public Supabase project URL         |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Settings → API → service_role | Secret key — never expose to client |
-| `SESSION_SECRET` | Generate manually (32+ chars) | Cookie encryption secret |
+| `SESSION_SECRET`            | Generate manually (32+ chars)            | Cookie encryption secret            |
 
 Generate a session secret:
+
 ```bash
 openssl rand -base64 32
 ```
@@ -192,6 +196,7 @@ npm run build
 6. Open a Pull Request against the `dev` branch — include a short description of the change and any related issue numbers
 
 **Code style**
+
 - Follow existing ESLint and Prettier config — `npm run lint` fixes most issues automatically
 - Keep TypeScript types accurate; avoid `any` unless absolutely necessary
 - Write small, focused commits — one logical change per commit
@@ -200,18 +205,18 @@ npm run build
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET/POST | `/api/products` | List and create products |
-| GET/PATCH/DELETE | `/api/products/[id]` | Get, update, or delete a product |
-| GET/POST | `/api/products/[id]/locations` | List and assign locations to a product |
-| PATCH/DELETE | `/api/product-locations/[id]` | Update or remove a location assignment |
-| GET | `/api/locations` | Search available warehouse locations |
-| GET/POST | `/api/users` | List and create users |
-| PATCH/DELETE | `/api/users/[id]` | Update or delete a user |
-| POST | `/api/auth/login` | Authenticate and create session |
-| POST | `/api/auth/logout` | Destroy session |
-| GET | `/api/auth/me` | Get current session user |
-| GET | `/api/stats` | Dashboard KPI summary |
+| Method           | Endpoint                       | Description                            |
+| ---------------- | ------------------------------ | -------------------------------------- |
+| GET/POST         | `/api/products`                | List and create products               |
+| GET/PATCH/DELETE | `/api/products/[id]`           | Get, update, or delete a product       |
+| GET/POST         | `/api/products/[id]/locations` | List and assign locations to a product |
+| PATCH/DELETE     | `/api/product-locations/[id]`  | Update or remove a location assignment |
+| GET              | `/api/locations`               | Search available warehouse locations   |
+| GET/POST         | `/api/users`                   | List and create users                  |
+| PATCH/DELETE     | `/api/users/[id]`              | Update or delete a user                |
+| POST             | `/api/auth/login`              | Authenticate and create session        |
+| POST             | `/api/auth/logout`             | Destroy session                        |
+| GET              | `/api/auth/me`                 | Get current session user               |
+| GET              | `/api/stats`                   | Dashboard KPI summary                  |
 
 All endpoints require authentication. Unauthenticated requests return `401 Unauthorized`.

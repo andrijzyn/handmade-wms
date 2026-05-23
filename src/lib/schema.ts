@@ -1,6 +1,16 @@
 import { z } from "zod";
+import { PERMISSIONS } from "./permissions";
+import type { Permission } from "./permissions";
 
-// ── Products ────────────────────────────────────────
+// ── Permissions ───────────────────────────────────────
+
+const VALID_PERMISSIONS = Object.values(PERMISSIONS) as [
+  Permission,
+  ...Permission[],
+];
+const permissionSchema = z.enum(VALID_PERMISSIONS);
+
+// ── Product ───────────────────────────────────────────
 export interface Product {
   id: string;
   name: string;
@@ -16,16 +26,15 @@ export const insertProductSchema = z.object({
   name: z.string().min(1, "Name is required"),
   sku: z.string().min(1, "SKU is required"),
   category: z.string().min(1, "Category is required"),
-  quantity: z.number().int().min(0, "Quantity must be 0 or more"),
-  price: z.number().min(0, "Price must be 0 or more"),
+  quantity: z.number().int().min(0).default(0),
+  price: z.number().min(0).default(0),
   lowStockThreshold: z.number().int().min(0).default(10),
-  description: z.string().optional(),
+  description: z.string().nullable().optional(),
 });
 
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 
-// ── Location ─────────────────────────────────────────
-
+// ── Location ──────────────────────────────────────────
 export interface Location {
   id: string;
   row: number;
@@ -35,11 +44,14 @@ export interface Location {
 }
 
 export const insertLocationSchema = z.object({
-  row:   z.number().int().min(1).max(100),
-  col:   z.number().int().min(1).max(100),
-  level: z.number().int().refine(v => [0,10,20,30,40,50,60].includes(v), {
-    message: "Level must be 0, 10... 60",
-  }),
+  row: z.number().int().min(1).max(100),
+  col: z.number().int().min(1).max(100),
+  level: z
+    .number()
+    .int()
+    .refine((v) => [0, 10, 20, 30, 40, 50, 60].includes(v), {
+      message: "Level must be 0, 10, 20, 30, 40, 50 or 60",
+    }),
 });
 
 export type InsertLocation = z.infer<typeof insertLocationSchema>;
@@ -54,7 +66,6 @@ export interface ProductLocation {
   updatedAt: string;
 }
 
-// Joined view — для відображення в UI
 export interface ProductLocationView extends ProductLocation {
   locationLabel: string;
   locationRow: number;
@@ -63,9 +74,9 @@ export interface ProductLocationView extends ProductLocation {
 }
 
 export const insertProductLocationSchema = z.object({
-  productId:  z.string().uuid("Invalid product ID"),
-  locationId: z.string().uuid("Invalid location ID"),
-  quantity:   z.number().int().min(0, "Quantity must be 0 or more"),
+  productId: z.uuid({ error: "Invalid product ID" }),
+  locationId: z.uuid({ error: "Invalid location ID" }),
+  quantity: z.number().int().min(0, { error: "Quantity must be 0 or more" }),
 });
 
 export type InsertProductLocation = z.infer<typeof insertProductLocationSchema>;
@@ -104,42 +115,37 @@ export const CLEARANCE_LEVELS = [
   "Special importance",
 ] as const;
 
-// ── User roles ──────────────────────────────────────
-export const USER_ROLES = ["admin", "user"] as const;
-
-// ── Users ───────────────────────────────────────────
-export interface User {
-  id: string;
-  username: string;
-  password: string;
-  fullName: string;
-  rank: string;
-  unit: string;
-  callsign: string | null;
-  clearanceLevel: string;
-  role: string;
-  isActive: boolean;
-  createdAt: Date | null;
-}
-
-export type SafeUser = Omit<User, "password">;
-
+// ── Users ─────────────────────────────────────────────
 export const insertUserSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  fullName: z.string().min(1, "Full name is required"),
-  rank: z.string().min(1, "Rank is required"),
-  unit: z.string().min(1, "Unit is required"),
-  callsign: z.string().optional(),
-  clearanceLevel: z.enum(CLEARANCE_LEVELS).default("No clearance"),
-  role: z.enum(USER_ROLES).default("user"),
+  username: z.string().min(3, { error: "Min 3 characters" }).max(50),
+  password: z.string().min(6, { error: "Min 6 characters" }),
+  full_name: z.string().min(1, { error: "Required" }),
+  rank: z.string().min(1, { error: "Required" }),
+  unit: z.string().min(1, { error: "Required" }),
+  callsign: z.string().nullable().optional(),
+  clearanceLevel: z.string().default("No clearance"),
+  permissions: z.array(permissionSchema).default([]),
   isActive: z.boolean().default(true),
 });
 
-export const loginSchema = z.object({
-  username: z.string().min(1, "Enter username"),
-  password: z.string().min(1, "Enter password"),
-});
+const optionalPasswordSchema = z.preprocess(
+  (value) => (value === "" ? undefined : value),
+  z.string().min(6, { error: "Min 6 characters" }).optional()
+);
+
+export const updateUserSchema = insertUserSchema
+  .omit({ password: true })
+  .partial()
+  .extend({
+    password: optionalPasswordSchema,
+  });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
-export type LoginData = z.infer<typeof loginSchema>;
+export type UpdateUser = z.infer<typeof updateUserSchema>;
+
+export const loginSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;

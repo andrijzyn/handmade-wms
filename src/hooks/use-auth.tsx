@@ -3,13 +3,14 @@
 import { createContext, useContext, type ReactNode } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient, getQueryFn } from "@/lib/queryClient";
-import type { SafeUser, LoginData } from "@/lib/schema";
+import type { SafeUser } from "@/lib/userTypes";
+import type { LoginInput } from "@/lib/schema";
 import { useToast } from "@/hooks/use-toast";
 
 interface AuthContextType {
   user: SafeUser | null;
   isLoading: boolean;
-  login: (data: LoginData) => Promise<void>;
+  login: (data: LoginInput) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -18,10 +19,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
 
-  const {
-    data: user,
-    isLoading,
-  } = useQuery<SafeUser | null>({
+  const { data: user, isLoading } = useQuery<SafeUser | null>({
     queryKey: ["/api/auth/me"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     staleTime: Infinity,
@@ -29,9 +27,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const loginMutation = useMutation({
-    mutationFn: async (data: LoginData) => {
+    mutationFn: async (data: LoginInput): Promise<SafeUser> => {
       const res = await apiRequest("POST", "/api/auth/login", data);
-      return await res.json();
+      return res.json();
     },
     onSuccess: (userData: SafeUser) => {
       queryClient.setQueryData(["/api/auth/me"], userData);
@@ -40,9 +38,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onError: (error: Error) => {
       toast({
         variant: "destructive",
-        title: "Помилка входу",
+        title: "Login Error",
         description: error.message.includes("401")
-          ? "Невірний логін або пароль"
+          ? "Incorrect login or password"
           : error.message,
       });
     },
@@ -56,18 +54,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryClient.setQueryData(["/api/auth/me"], null);
       queryClient.clear();
     },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Exit error",
+        description: error.message,
+      });
+    },
   });
 
-  const login = async (data: LoginData) => {
-    await loginMutation.mutateAsync(data);
+  const login = async (data: LoginInput) => {
+    try {
+      await loginMutation.mutateAsync(data);
+    } catch {
+      // Помилка вже оброблена в onError, свідомо не пробрасываємо далі
+    }
   };
 
   const logout = async () => {
-    await logoutMutation.mutateAsync();
+    try {
+      await logoutMutation.mutateAsync();
+    } catch {
+      // Аналогічно, помилка вже показана тостом
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user: user ?? null, isLoading, login, logout }}>
+    <AuthContext.Provider
+      value={{ user: user ?? null, isLoading, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

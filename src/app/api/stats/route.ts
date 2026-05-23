@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
+import { withErrorHandling } from "@/lib/apiError";
+import { requireAuth } from "@/lib/auth";
 import { storage } from "@/lib/storage";
-import { getCurrentUser } from "@/lib/auth";
-import { withErrorHandling, unauthorized } from "@/lib/apiError";
 
 export const GET = withErrorHandling(async () => {
-  const user = await getCurrentUser();
-  if (!user) return unauthorized();
+  const userOrResp = await requireAuth();
+  if (userOrResp instanceof NextResponse) return userOrResp;
 
   const stats = await storage.getStats();
   return NextResponse.json(stats);

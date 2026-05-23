@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema, type LoginData } from "@/lib/schema";
+import { loginSchema, type LoginInput } from "@/lib/schema";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,17 +23,15 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isPending, setIsPending] = useState(false);
 
-  const form = useForm<LoginData>({
+  const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: { username: "", password: "" },
   });
 
-  const onSubmit = async (data: LoginData) => {
+  const onSubmit = async (data: LoginInput) => {
     setIsPending(true);
     try {
-      await login(data);
-    } catch {
-      // Error handled by AuthProvider toast
+      await login(data); // login очікує { username, password }
     } finally {
       setIsPending(false);
     }
@@ -48,10 +46,15 @@ export default function LoginPage() {
             <Shield className="h-7 w-7 text-primary" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold tracking-tight" data-testid="text-app-title">
+            <h1
+              className="text-xl font-semibold tracking-tight"
+              data-testid="text-app-title"
+            >
               StockPulse
             </h1>
-            <p className="text-sm text-muted-foreground mt-1">Warehouse management system</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Warehouse management system
+            </p>
           </div>
         </div>
 
@@ -62,13 +65,18 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent className="px-5 pb-5">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
                 <FormField
                   control={form.control}
                   name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-medium">Username</FormLabel>
+                      <FormLabel className="text-xs font-medium">
+                        Username
+                      </FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Enter username"
@@ -87,7 +95,9 @@ export default function LoginPage() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-medium">Password</FormLabel>
+                      <FormLabel className="text-xs font-medium">
+                        Password
+                      </FormLabel>
                       <div className="relative">
                         <FormControl>
                           <Input
@@ -138,7 +148,6 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        {/* Hint */}
         <p className="text-center text-xs text-muted-foreground">
           Access is granted by the system administrator
         </p>

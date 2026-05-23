@@ -2,45 +2,50 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { storage } from "@/lib/storage";
 import { insertProductSchema } from "@/lib/schema";
-import { getCurrentUser } from "@/lib/auth";
-import { withErrorHandling, unauthorized, badRequest, conflict } from "@/lib/apiError";
+import { requirePermission } from "@/lib/auth";
+import { withErrorHandling, badRequest, conflict } from "@/lib/apiError";
+import { PERMISSIONS } from "@/lib/permissions";
 
-export const GET = withErrorHandling(async (req: NextRequest) => {
-  const user = await getCurrentUser();
-  if (!user) return unauthorized();
+export const GET = withErrorHandling(
+  async (req: NextRequest): Promise<NextResponse> => {
+    const userOrResp = await requirePermission(PERMISSIONS.READ_PRODUCTS);
+    if (userOrResp instanceof NextResponse) return userOrResp;
 
-  const url = new URL(req.url);
-  const rawQuery = url.searchParams.get("q") || "";
-  const category = url.searchParams.get("category") || "";
+    const url = new URL(req.url);
+    const rawQuery = url.searchParams.get("q") || "";
+    const category = url.searchParams.get("category") || "";
 
-  // Normalise and validate the search term (max 100 chars after trimming)
-  const cleanedQuery = rawQuery.replace(/\++/g, " ").trim();
-  const querySchema = z.string().max(100, "Search term too long").optional();
-  const parsed = querySchema.safeParse(cleanedQuery);
-  if (!parsed.success) {
-    // Bad request will be turned into a proper JSON error by withErrorHandling
-    throw parsed.error;
-  }
+    const cleanedQuery = rawQuery.replace(/\++/g, " ").trim();
+    const querySchema = z.string().max(100, "Search term too long").optional();
+    const parsed = querySchema.safeParse(cleanedQuery);
 
-  const products = await storage.searchProducts(parsed.data ?? "", category);
-  return NextResponse.json(products);
-});
+    if (!parsed.success) {
+      return badRequest("Incorrect search query", z.treeifyError(parsed.error));
+    }
 
-export const POST = withErrorHandling(async (req: NextRequest) => {
-  const user = await getCurrentUser();
-  if (!user) return unauthorized();
+    const products = await storage.searchProducts(parsed.data ?? "", category);
+    return NextResponse.json(products);
+  },
+);
 
-  const body = await req.json();
-  const parsed = insertProductSchema.safeParse(body);
-  if (!parsed.success) {
-    return badRequest("Validation error", z.treeifyError(parsed.error));
-  }
+export const POST = withErrorHandling(
+  async (req: NextRequest): Promise<NextResponse> => {
+    const userOrResp = await requirePermission(PERMISSIONS.WRITE_PRODUCTS);
+    if (userOrResp instanceof NextResponse) return userOrResp;
 
-  const existing = await storage.getProductBySku(parsed.data.sku);
-  if (existing) {
-    return conflict("A product with this SKU already exists");
-  }
+    const body = await req.json();
+    const parsed = insertProductSchema.safeParse(body);
 
-  const product = await storage.createProduct(parsed.data);
-  return NextResponse.json(product, { status: 201 });
-});
+    if (!parsed.success) {
+      return badRequest("Validation error", z.treeifyError(parsed.error));
+    }
+
+    const existing = await storage.getProductBySku(parsed.data.sku);
+    if (existing) {
+      return conflict("A product with such a SKU already exists");
+    }
+
+    const product = await storage.createProduct(parsed.data);
+    return NextResponse.json(product, { status: 201 });
+  },
+);

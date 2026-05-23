@@ -2,7 +2,11 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertProductSchema, type InsertProduct, type Product } from "@/lib/schema";
+import {
+  insertProductSchema,
+  type InsertProduct,
+  type Product,
+} from "@/lib/schema";
 import { useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -10,7 +14,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
@@ -18,6 +27,57 @@ import { ArrowLeft } from "lucide-react";
 interface ProductFormProps {
   product?: Product;
   onClose: () => void;
+}
+
+type ApiClientError = Error & {
+  status?: number;
+};
+
+function getErrorStatus(error: unknown): number | undefined {
+  if (typeof error === "object" && error !== null && "status" in error) {
+    const status = (error as { status?: unknown }).status;
+    if (typeof status === "number") return status;
+  }
+
+  if (error instanceof Error) {
+    const match = error.message.match(/^(\d{3}):/);
+    if (match) return Number(match[1]);
+  }
+
+  return undefined;
+}
+
+function getErrorMessage(error: unknown, fallback = "Something went wrong") {
+  if (!(error instanceof Error)) return fallback;
+
+  const raw = error.message.trim();
+  if (!raw) return fallback;
+
+  const colonIndex = raw.indexOf(":");
+  const body = colonIndex >= 0 ? raw.slice(colonIndex + 1).trim() : raw;
+
+  if (body.startsWith("{") && body.endsWith("}")) {
+    try {
+      const parsed = JSON.parse(body) as { message?: string };
+      if (parsed.message) return parsed.message;
+    } catch {}
+  }
+
+  return body || fallback;
+}
+
+function getProductMutationMessage(error: unknown) {
+  const status = getErrorStatus(error);
+
+  if (status === 403) {
+    return "You do not have permission to manage products.";
+  }
+
+  if (status === 409) {
+    return "A product with this SKU already exists.";
+  }
+
+  return getErrorMessage(error);
 }
 
 export default function ProductForm({ product, onClose }: ProductFormProps) {
@@ -49,20 +109,20 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
       queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+
       toast({
         title: isEditing ? "Product updated" : "Product created",
         description: isEditing
           ? "The product has been updated successfully."
           : "The product has been added to inventory.",
       });
+
       onClose();
     },
-    onError: (error: Error) => {
+    onError: (error: ApiClientError) => {
       toast({
-        title: "Error",
-        description: error.message.includes("409")
-          ? "A product with this SKU already exists."
-          : "Something went wrong. Please try again.",
+        title: getErrorStatus(error) === 403 ? "Access denied" : "Error",
+        description: getProductMutationMessage(error),
         variant: "destructive",
       });
     },
@@ -75,15 +135,26 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
   return (
     <div className="space-y-5" data-testid="product-form-page">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={onClose} data-testid="button-back">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onClose}
+          data-testid="button-back"
+        >
           <ArrowLeft className="h-4 w-4" />
         </Button>
+
         <div>
-          <h1 className="text-xl font-semibold tracking-tight" data-testid="text-form-title">
+          <h1
+            className="text-xl font-semibold tracking-tight"
+            data-testid="text-form-title"
+          >
             {isEditing ? "Edit Product" : "Add Product"}
           </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            {isEditing ? "Update the product details below" : "Fill in the product details below"}
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            {isEditing
+              ? "Update the product details below"
+              : "Fill in the product details below"}
           </p>
         </div>
       </div>
@@ -92,76 +163,176 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
         <CardContent className="pt-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormField control={form.control} name="name" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Product Name</FormLabel>
-                    <FormControl><Input placeholder="e.g. Wireless Mouse" {...field} data-testid="input-name" /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="sku" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>SKU</FormLabel>
-                    <FormControl><Input placeholder="e.g. WM-001" {...field} data-testid="input-sku" /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Product Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. Wireless Mouse"
+                          {...field}
+                          data-testid="input-name"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="sku"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>SKU</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. WM-001"
+                          {...field}
+                          data-testid="input-sku"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
-              <FormField control={form.control} name="category" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category</FormLabel>
-                  <FormControl><Input placeholder="e.g. Electronics" {...field} data-testid="input-category" /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g. Electronics"
+                        {...field}
+                        data-testid="input-category"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <FormField control={form.control} name="quantity" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Quantity</FormLabel>
-                    <FormControl>
-                      <Input type="number" min="0" step="1" {...field} onChange={(e) => field.onChange(parseInt(e.target.value) || 0)} data-testid="input-quantity" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="price" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price ($)</FormLabel>
-                    <FormControl>
-                      <Input type="number" min="0" step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} data-testid="input-price" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="lowStockThreshold" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Low Stock Alert</FormLabel>
-                    <FormControl>
-                      <Input type="number" min="0" step="1" {...field} onChange={(e) => field.onChange(parseInt(e.target.value) || 0)} data-testid="input-threshold" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <FormField
+                  control={form.control}
+                  name="quantity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Quantity</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="1"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value, 10) || 0)
+                          }
+                          data-testid="input-quantity"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Price ($)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(parseFloat(e.target.value) || 0)
+                          }
+                          data-testid="input-price"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="lowStockThreshold"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Low Stock Alert</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="1"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value, 10) || 0)
+                          }
+                          data-testid="input-threshold"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
-              <FormField control={form.control} name="description" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Optional product description..." rows={3} {...field} value={field.value ?? ""} data-testid="input-description" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Optional product description..."
+                        rows={3}
+                        {...field}
+                        value={field.value ?? ""}
+                        data-testid="input-description"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <div className="flex items-center gap-3 pt-2">
-                <Button type="submit" disabled={mutation.isPending} data-testid="button-submit">
-                  {mutation.isPending ? (isEditing ? "Updating..." : "Creating...") : (isEditing ? "Update Product" : "Create Product")}
+                <Button
+                  type="submit"
+                  disabled={mutation.isPending}
+                  data-testid="button-submit"
+                >
+                  {mutation.isPending
+                    ? isEditing
+                      ? "Updating..."
+                      : "Creating..."
+                    : isEditing
+                      ? "Update Product"
+                      : "Create Product"}
                 </Button>
-                <Button type="button" variant="ghost" onClick={onClose} data-testid="button-cancel">Cancel</Button>
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={onClose}
+                  data-testid="button-cancel"
+                >
+                  Cancel
+                </Button>
               </div>
             </form>
           </Form>

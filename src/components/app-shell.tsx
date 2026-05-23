@@ -2,13 +2,23 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { LayoutDashboard, Package, Users, Sun, Moon, LogOut, Shield , FolderTree} from "lucide-react";
+import {
+  LayoutDashboard,
+  Package,
+  Users,
+  Sun,
+  Moon,
+  LogOut,
+  Shield,
+  FolderTree,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Dashboard from "@/components/pages/dashboard";
 import Products from "@/components/pages/products";
 import UsersPage from "@/components/pages/users";
 import Locations from "@/components/pages/locations";
+import { Permission, PERMISSIONS } from "@/lib/permissions";
 
 type Page = "dashboard" | "products" | "users" | "locations";
 
@@ -18,39 +28,56 @@ export default function AppShell() {
   const [dark, setDark] = useState(
     typeof window !== "undefined"
       ? window.matchMedia("(prefers-color-scheme: dark)").matches
-      : false
+      : false,
   );
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
 
+  const hasPermission = (permission: Permission): boolean =>
+    user?.permissions?.includes(permission) ?? false;
+
   const navItems = [
     { page: "dashboard" as Page, label: "Dashboard", icon: LayoutDashboard },
-    { page: "products" as Page, label: "Products", icon: Package },
 
-    ...(user?.role === "admin"
-        ? [{ page: "locations" as Page, label: "Locations", icon: FolderTree }]
-        : []),
+    ...(hasPermission(PERMISSIONS.READ_PRODUCTS)
+      ? [{ page: "products" as Page, label: "Products", icon: Package }]
+      : []),
 
-    // Example of role-based navigation: only show "Users" page to admins
-    ...(user?.role === "admin"
+    ...(hasPermission(PERMISSIONS.READ_LOCATIONS)
+      ? [{ page: "locations" as Page, label: "Locations", icon: FolderTree }]
+      : []),
+
+    ...(hasPermission(PERMISSIONS.READ_USERS)
       ? [{ page: "users" as Page, label: "Users", icon: Users }]
-      : [])
+      : []),
   ];
 
   const renderPage = () => {
     switch (currentPage) {
       case "dashboard":
-        return <Dashboard onNavigate={setCurrentPage} />;
+        return <Dashboard onNavigateAction={setCurrentPage} />;
       case "products":
-        return <Products />;
+        return hasPermission(PERMISSIONS.READ_PRODUCTS) ? (
+          <Products />
+        ) : (
+          <Dashboard onNavigateAction={setCurrentPage} />
+        );
       case "locations":
-        return <Locations />;
+        return hasPermission(PERMISSIONS.READ_LOCATIONS) ? (
+          <Locations />
+        ) : (
+          <Dashboard onNavigateAction={setCurrentPage} />
+        );
       case "users":
-        return user?.role === "admin" ? <UsersPage /> : <Dashboard onNavigate={setCurrentPage} />;
+        return hasPermission(PERMISSIONS.READ_USERS) ? (
+          <UsersPage />
+        ) : (
+          <Dashboard onNavigateAction={setCurrentPage} />
+        );
       default:
-        return <Dashboard onNavigate={setCurrentPage} />;
+        return <Dashboard onNavigateAction={setCurrentPage} />;
     }
   };
 
@@ -64,10 +91,40 @@ export default function AppShell() {
         {/* Logo */}
         <div className="h-14 flex items-center px-5 border-b border-sidebar-border">
           <div className="flex items-center gap-2.5">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-label="StockPulse logo">
-              <rect x="2" y="6" width="6" height="12" rx="1.5" fill="currentColor" className="text-primary" />
-              <rect x="9" y="3" width="6" height="18" rx="1.5" fill="currentColor" className="text-primary/70" />
-              <rect x="16" y="9" width="6" height="9" rx="1.5" fill="currentColor" className="text-primary/40" />
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-label="StockPulse logo"
+            >
+              <rect
+                x="2"
+                y="6"
+                width="6"
+                height="12"
+                rx="1.5"
+                fill="currentColor"
+                className="text-primary"
+              />
+              <rect
+                x="9"
+                y="3"
+                width="6"
+                height="18"
+                rx="1.5"
+                fill="currentColor"
+                className="text-primary/70"
+              />
+              <rect
+                x="16"
+                y="9"
+                width="6"
+                height="9"
+                rx="1.5"
+                fill="currentColor"
+                className="text-primary/40"
+              />
             </svg>
             <span className="font-semibold text-sm tracking-tight text-sidebar-foreground">
               StockPulse
@@ -110,12 +167,17 @@ export default function AppShell() {
                     className="text-xs font-medium truncate text-sidebar-foreground"
                     data-testid="text-current-user"
                   >
-                    {user.callsign ? user.callsign : user.fullName}
+                    {user.callsign ? user.callsign : user.full_name}
                   </p>
-                  <p className="text-[10px] text-muted-foreground truncate">{user.rank}</p>
+                  <p className="text-[10px] text-muted-foreground truncate">
+                    {user.rank}
+                  </p>
                 </div>
               </div>
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-normal">
+              <Badge
+                variant="outline"
+                className="text-[10px] px-1.5 py-0 h-4 font-normal"
+              >
                 {user.clearanceLevel}
               </Badge>
             </div>
@@ -129,7 +191,11 @@ export default function AppShell() {
               onClick={() => setDark(!dark)}
               data-testid="button-theme-toggle"
             >
-              {dark ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+              {dark ? (
+                <Sun className="h-3.5 w-3.5" />
+              ) : (
+                <Moon className="h-3.5 w-3.5" />
+              )}
               {dark ? "Light theme" : "Dark theme"}
             </Button>
             <Button

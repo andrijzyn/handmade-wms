@@ -1,8 +1,8 @@
-
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
-import { getCurrentUser } from "@/lib/auth";
-import { withErrorHandling, unauthorized } from "@/lib/apiError";
+import { requirePermission } from "@/lib/auth";
+import { withErrorHandling } from "@/lib/apiError";
+import { PERMISSIONS } from "@/lib/permissions";
 
 /**
  * Діагностичний ендпоінт — перевіряє підключення до Supabase.
@@ -10,30 +10,62 @@ import { withErrorHandling, unauthorized } from "@/lib/apiError";
  * ВИДАЛИТИ ПЕРЕД ПРОДАКШЕНОМ!
  */
 export const GET = withErrorHandling(async (req) => {
-  const user = await getCurrentUser();
-  if (!user) return unauthorized();
+  const userOrResp = await requirePermission(PERMISSIONS.READ_DEBUG);
+  if (userOrResp instanceof NextResponse) return userOrResp;
+
   const result: Record<string, unknown> = {
     timestamp: new Date().toISOString(),
     env: {
-      NEXT_PUBLIC_SUPABASE_DATABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_DATABASE_URL ? "✅ set" : "❌ missing",
-      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ? "✅ set" : "❌ missing",
-      SESSION_SECRET: process.env.SESSION_SECRET ? "✅ set" : "❌ missing (using default)",
+      NEXT_PUBLIC_SUPABASE_DATABASE_URL: process.env
+        .NEXT_PUBLIC_SUPABASE_DATABASE_URL
+        ? "✅ set"
+        : "❌ missing",
+      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY
+        ? "✅ set"
+        : "❌ missing",
+      SESSION_SECRET: process.env.SESSION_SECRET
+        ? "✅ set"
+        : "❌ missing (using default)",
     },
   };
 
   try {
     const db = getSupabase();
 
-    // Перевірка: чи є таблиця users і чи є в ній дані
-    const { data: users, error: usersError } = await db
+    const { data, error } = await db
       .from("users")
-      .select("id, username, role, is_active")
+      .select(
+        `
+    id,
+    username,
+    is_active,
+    user_permissions (
+      permissions ( key )
+    )
+  `,
+      )
       .limit(10);
 
-    if (usersError) {
-      result.users = { error: usersError.message, code: usersError.code, hint: usersError.hint };
+    if (error) {
+      result.users = {
+        error: error.message,
+        code: error.code,
+        hint: error.hint,
+      };
     } else {
-      result.users = { count: users?.length ?? 0, rows: users };
+      const usersWithPermissions = (data ?? []).map((row: any) => ({
+        id: row.id,
+        username: row.username,
+        isActive: row.is_active,
+        permissions: (row.user_permissions ?? []).map(
+          (up: any) => up.permissions.key,
+        ),
+      }));
+
+      result.users = {
+        count: usersWithPermissions.length,
+        rows: usersWithPermissions,
+      };
     }
 
     // Перевірка: чи є таблиця products
@@ -42,7 +74,10 @@ export const GET = withErrorHandling(async (req) => {
       .select("*", { count: "exact", head: true });
 
     if (productsError) {
-      result.products = { error: productsError.message, code: productsError.code };
+      result.products = {
+        error: productsError.message,
+        code: productsError.code,
+      };
     } else {
       result.products = { count };
     }

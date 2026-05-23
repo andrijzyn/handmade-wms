@@ -3,16 +3,44 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {
-  if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+  if (res.ok) return;
+
+  let message = res.statusText || "Request failed";
+
+  const contentType = res.headers.get("content-type") || "";
+
+  if (contentType.includes("application/json")) {
+    const data = await res.json().catch(() => null);
+
+    if (data && typeof data === "object") {
+      if ("message" in data && typeof data.message === "string") {
+        message = data.message;
+      } else if ("error" in data && typeof data.error === "string") {
+        message = data.error;
+      }
+    }
+  } else {
+    const text = await res.text().catch(() => "");
+    if (text) {
+      message = text;
+    }
   }
+
+  const error = new Error(message) as Error & {
+    status?: number;
+    response?: Response;
+  };
+
+  error.status = res.status;
+  error.response = res;
+
+  throw error;
 }
 
 export async function apiRequest(
   method: string,
   url: string,
-  data?: unknown
+  data?: unknown,
 ): Promise<Response> {
   const res = await fetch(url, {
     method,

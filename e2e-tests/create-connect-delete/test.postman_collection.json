@@ -25,14 +25,8 @@
         },
         "url": {
           "raw": "{{baseUrl}}/api/auth/login",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "auth",
-            "login"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "login"]
         },
         "description": "Authenticates a user and returns the authenticated user profile.\n\n**Endpoint**  \n`POST {{baseUrl}}/api/auth/login`\n\n**Request body**  \nSends a JSON object with:\n\n- `username`: The user's login name.\n    \n- `password`: The user's password.\n    \n\nDo not store real credentials in shared examples or documentation.\n\n**Successful response**  \nReturns `200 OK` with a JSON object describing the authenticated user, including identifiers and profile/access fields such as:\n\n- `id`\n    \n- `username`\n    \n- `fullName`\n    \n- `rank`\n    \n- `unit`\n    \n- `callsign`\n    \n- `clearanceLevel`\n    \n- `role`\n    \n- `isActive`\n    \n- `createdAt`\n    \n\nThis response indicates the credentials were accepted and the user's account details were retrieved successfully."
       },
@@ -100,13 +94,8 @@
         },
         "url": {
           "raw": "{{baseUrl}}/api/products",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "products"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "products"]
         }
       },
       "response": []
@@ -183,13 +172,8 @@
         },
         "url": {
           "raw": "{{baseUrl}}/api/locations?q={{random_label}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "locations"
-          ],
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "locations"],
           "query": [
             {
               "key": "q",
@@ -216,15 +200,8 @@
         },
         "url": {
           "raw": "{{baseUrl}}/api/products/{{temp_product_id}}/locations",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "products",
-            "{{temp_product_id}}",
-            "locations"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "products", "{{temp_product_id}}", "locations"]
         }
       },
       "response": []
@@ -245,14 +222,8 @@
         },
         "url": {
           "raw": "{{baseUrl}}/api/products/{{temp_product_id}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "products",
-            "{{temp_product_id}}"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "products", "{{temp_product_id}}"]
         }
       },
       "response": []
@@ -264,14 +235,8 @@
         "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/auth/logout",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "auth",
-            "logout"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "logout"]
         }
       },
       "response": []

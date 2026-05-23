@@ -14,7 +14,7 @@ export function getSupabase(): SupabaseClient {
 
   if (!url || !key) {
     throw new Error(
-      "Missing Supabase env: NEXT_PUBLIC_SUPABASE_DATABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set"
+      "Missing Supabase env: NEXT_PUBLIC_SUPABASE_DATABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set",
     );
   }
 
