@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { storage } from "./storage";
 import { hasPermission } from "./permissions";
 import type { Permission } from "./permissions";
-import type { User } from "./storage";
+import type { User } from "./userTypes";
 import { unauthorized, forbidden } from "@/lib/apiError";
 
 export interface SessionData {

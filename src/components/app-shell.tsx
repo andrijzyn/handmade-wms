@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { LayoutDashboard, Package, Users, Sun, Moon, LogOut, Shield , FolderTree} from "lucide-react";
+import { LayoutDashboard, Package, Users, Sun, Moon, LogOut, Shield, FolderTree } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Dashboard from "@/components/pages/dashboard";
 import Products from "@/components/pages/products";
 import UsersPage from "@/components/pages/users";
 import Locations from "@/components/pages/locations";
+import {Permission, PERMISSIONS} from "@/lib/permissions";
 
 type Page = "dashboard" | "products" | "users" | "locations";
 
@@ -16,41 +17,52 @@ export default function AppShell() {
   const { user, logout } = useAuth();
   const [currentPage, setCurrentPage] = useState<Page>("dashboard");
   const [dark, setDark] = useState(
-    typeof window !== "undefined"
-      ? window.matchMedia("(prefers-color-scheme: dark)").matches
-      : false
+      typeof window !== "undefined"
+          ? window.matchMedia("(prefers-color-scheme: dark)").matches
+          : false
   );
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
 
+  const hasPermission = (permission: Permission): boolean =>
+      user?.permissions?.includes(permission) ?? false;
+
   const navItems = [
     { page: "dashboard" as Page, label: "Dashboard", icon: LayoutDashboard },
-    { page: "products" as Page, label: "Products", icon: Package },
 
-    ...(user?.role === "admin"
+    ...(hasPermission(PERMISSIONS.READ_PRODUCTS)
+        ? [{ page: "products" as Page, label: "Products", icon: Package }]
+        : []),
+
+    ...(hasPermission(PERMISSIONS.READ_LOCATIONS)
         ? [{ page: "locations" as Page, label: "Locations", icon: FolderTree }]
         : []),
 
-    // Example of role-based navigation: only show "Users" page to admins
-    ...(user?.role === "admin"
-      ? [{ page: "users" as Page, label: "Users", icon: Users }]
-      : [])
+    ...(hasPermission(PERMISSIONS.READ_USERS)
+        ? [{ page: "users" as Page, label: "Users", icon: Users }]
+        : []),
   ];
 
   const renderPage = () => {
     switch (currentPage) {
       case "dashboard":
-        return <Dashboard onNavigate={setCurrentPage} />;
+        return <Dashboard onNavigateAction={setCurrentPage} />;
       case "products":
-        return <Products />;
+        return hasPermission(PERMISSIONS.READ_PRODUCTS)
+            ? <Products />
+            : <Dashboard onNavigateAction={setCurrentPage} />;
       case "locations":
-        return <Locations />;
+        return hasPermission(PERMISSIONS.READ_LOCATIONS)
+            ? <Locations />
+            : <Dashboard onNavigateAction={setCurrentPage} />;
       case "users":
-        return user?.role === "admin" ? <UsersPage /> : <Dashboard onNavigate={setCurrentPage} />;
+        return hasPermission(PERMISSIONS.READ_USERS)
+            ? <UsersPage />
+            : <Dashboard onNavigateAction={setCurrentPage} />;
       default:
-        return <Dashboard onNavigate={setCurrentPage} />;
+        return <Dashboard onNavigateAction={setCurrentPage} />;
     }
   };
 

@@ -3,7 +3,7 @@
 import { createContext, useContext, type ReactNode } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient, getQueryFn } from "@/lib/queryClient";
-import type { SafeUser } from "@/lib/storage";
+import type { SafeUser } from "@/lib/userTypes";
 import type { LoginInput } from "@/lib/schema";
 import { useToast } from "@/hooks/use-toast";
 
@@ -30,9 +30,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const loginMutation = useMutation({
-    mutationFn: async (data: LoginInput) => {
+    mutationFn: async (data: LoginInput): Promise<SafeUser> => {
       const res = await apiRequest("POST", "/api/auth/login", data);
-      return await res.json();
+      return res.json();
     },
     onSuccess: (userData: SafeUser) => {
       queryClient.setQueryData(["/api/auth/me"], userData);

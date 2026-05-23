@@ -111,9 +111,6 @@ export const CLEARANCE_LEVELS = [
 ] as const;
 
 // ── Users ─────────────────────────────────────────────
-// interface User та SafeUser живуть у storage.ts
-// тут тільки Zod схеми для валідації вхідних даних
-
 export const insertUserSchema = z.object({
   username:      z.string().min(3, "Min 3 characters").max(50),
   password:      z.string().min(6, "Min 6 characters"),

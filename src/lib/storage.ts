@@ -1,28 +1,9 @@
 import bcrypt from "bcryptjs";
-import { z } from "zod";
 import { getSupabase } from "./supabase";
 import type { Product, InsertProduct, InsertUser, Location, ProductLocationView, ProductLocation, InsertProductLocation, } from "./schema";
+import { Permission } from "@/lib/permissions";
+import type { User, SafeUser } from "@/lib/userTypes";
 
-import {Permission} from "@/lib/permissions";
-
-// ── Types ─────────────────────────────────────────────
-
-export interface User {
-  id: string;
-  username: string;
-  password: string;
-  full_name: string;
-  rank: string;
-  unit: string;
-  callsign: string | null;
-  clearanceLevel: string;
-  permissions: Permission[];
-  isActive: boolean;
-  createdAt: Date | null;
-  sessionVersion: string | null;
-}
-
-export type SafeUser = Omit<User, "password">;
 
 // ── DB interfaces ─────────────────────────────────────
 

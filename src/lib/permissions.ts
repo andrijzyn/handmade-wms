@@ -13,13 +13,22 @@ export const PERMISSIONS = {
 
 export type Permission = typeof PERMISSIONS[keyof typeof PERMISSIONS];
 
-export const PERMISSION_PRESETS: Record<string, Permission[]> = {
-    viewer:   ["read_products", "read_locations"],
-    operator: ["read_products", "read_locations", "write_products", "write_locations"],
-    manager:  ["read_products", "read_locations", "read_users",
-        "write_products", "write_locations", "write_users",
-        "delete_products", "delete_locations", "read_debug"],
-    superuser: Object.values(PERMISSIONS) as Permission[],
+export const PERMISSION_META: Record<
+    Permission,
+    { label: string; group: "Read" | "Write" | "Delete" }
+> = {
+    [PERMISSIONS.READ_PRODUCTS]: { label: "Products", group: "Read" },
+    [PERMISSIONS.READ_LOCATIONS]: { label: "Locations", group: "Read" },
+    [PERMISSIONS.READ_USERS]: { label: "Users", group: "Read" },
+    [PERMISSIONS.READ_DEBUG]: { label: "Debug", group: "Read" },
+
+    [PERMISSIONS.WRITE_PRODUCTS]: { label: "Products", group: "Write" },
+    [PERMISSIONS.WRITE_LOCATIONS]: { label: "Locations", group: "Write" },
+    [PERMISSIONS.WRITE_USERS]: { label: "Users", group: "Write" },
+
+    [PERMISSIONS.DELETE_PRODUCTS]: { label: "Products", group: "Delete" },
+    [PERMISSIONS.DELETE_LOCATIONS]: { label: "Locations", group: "Delete" },
+    [PERMISSIONS.DELETE_USERS]: { label: "Users", group: "Delete" },
 };
 
 export const hasPermission = (user: { permissions: Permission[] }, perm: Permission): boolean =>
