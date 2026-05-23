@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
-import type { InsertUser } from "@/lib/schema";
+import type {InsertUser, UpdateUser} from "@/lib/schema";
 import type { SafeUser } from "@/lib/userTypes";
 import { PERMISSIONS } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
@@ -85,17 +85,12 @@ export default function UsersPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: Partial<InsertUser>;
-    }) => {
+    mutationFn: async ({ id, data }: { id: string; data: UpdateUser }) => {
       const payload = { ...data };
       if (!payload.password) delete payload.password;
       const res = await apiRequest("PATCH", `/api/users/${id}`, payload);
       return await res.json();
+
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
@@ -130,9 +125,6 @@ export default function UsersPage() {
   });
 
   const activeCount = users.filter((u) => u.isActive).length;
-  const superuserCount = users.filter((u) =>
-    u.permissions.includes(PERMISSIONS.DELETE_USERS),
-  ).length;
 
   return (
     <div className="space-y-5" data-testid="users-page">
@@ -162,7 +154,6 @@ export default function UsersPage() {
         {[
           { label: "Total", value: users.length },
           { label: "Active", value: activeCount },
-          { label: "Superusers", value: superuserCount },
         ].map(({ label, value }) => (
           <Card key={label}>
             <CardContent className="p-4">
@@ -284,6 +275,7 @@ export default function UsersPage() {
               isEdit
               defaultValues={{
                 username: editUser.username,
+                password: "",
                 full_name: editUser.full_name,
                 rank: editUser.rank,
                 unit: editUser.unit,
@@ -293,7 +285,10 @@ export default function UsersPage() {
                 isActive: editUser.isActive,
               }}
               onSubmit={(data) =>
-                updateMutation.mutate({ id: editUser.id, data })
+                updateMutation.mutate({
+                  id: editUser.id,
+                  data,
+                })
               }
               isPending={updateMutation.isPending}
             />

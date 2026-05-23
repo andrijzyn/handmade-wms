@@ -74,9 +74,9 @@ export interface ProductLocationView extends ProductLocation {
 }
 
 export const insertProductLocationSchema = z.object({
-  productId: z.string().uuid("Invalid product ID"),
-  locationId: z.string().uuid("Invalid location ID"),
-  quantity: z.number().int().min(0, "Quantity must be 0 or more"),
+  productId: z.uuid({ error: "Invalid product ID" }),
+  locationId: z.uuid({ error: "Invalid location ID" }),
+  quantity: z.number().int().min(0, { error: "Quantity must be 0 or more" }),
 });
 
 export type InsertProductLocation = z.infer<typeof insertProductLocationSchema>;
@@ -117,20 +117,28 @@ export const CLEARANCE_LEVELS = [
 
 // ── Users ─────────────────────────────────────────────
 export const insertUserSchema = z.object({
-  username: z.string().min(3, "Min 3 characters").max(50),
-  password: z.string().min(6, "Min 6 characters"),
-  full_name: z.string().min(1, "Required"),
-  rank: z.string().min(1, "Required"),
-  unit: z.string().min(1, "Required"),
+  username: z.string().min(3, { error: "Min 3 characters" }).max(50),
+  password: z.string().min(6, { error: "Min 6 characters" }),
+  full_name: z.string().min(1, { error: "Required" }),
+  rank: z.string().min(1, { error: "Required" }),
+  unit: z.string().min(1, { error: "Required" }),
   callsign: z.string().nullable().optional(),
   clearanceLevel: z.string().default("No clearance"),
   permissions: z.array(permissionSchema).default([]),
   isActive: z.boolean().default(true),
 });
 
+const optionalPasswordSchema = z.preprocess(
+  (value) => (value === "" ? undefined : value),
+  z.string().min(6, { error: "Min 6 characters" }).optional()
+);
+
 export const updateUserSchema = insertUserSchema
+  .omit({ password: true })
   .partial()
-  .omit({ password: true });
+  .extend({
+    password: optionalPasswordSchema,
+  });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UpdateUser = z.infer<typeof updateUserSchema>;

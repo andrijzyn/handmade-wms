@@ -1,9 +1,11 @@
-import type { InsertUser } from "@/lib/schema";
+"use client";
+
+import type { InsertUser, UpdateUser } from "@/lib/schema";
 import {
   MILITARY_RANKS,
   CLEARANCE_LEVELS,
   insertUserSchema,
-  updateUserSchema
+  updateUserSchema,
 } from "@/lib/schema";
 import { PERMISSIONS } from "@/lib/permissions";
 import type { Permission } from "@/lib/permissions";
@@ -71,38 +73,93 @@ const PERMISSION_LABELS: Record<Permission, string> = {
   delete_users: "Users",
 };
 
-type UserFormProps = {
+type UserFormValues = {
+  username: string;
+  password: string;
+  full_name: string;
+  rank: string;
+  unit: string;
+  callsign: string;
+  clearanceLevel: string;
+  permissions: Permission[];
+  isActive: boolean;
+};
+
+type CreateUserFormProps = {
+  isEdit?: false;
   onSubmit: (data: InsertUser) => void;
   defaultValues?: Partial<InsertUser>;
-  isEdit?: boolean;
   isPending?: boolean;
 };
 
-export default function UserForm({
-  onSubmit,
-  defaultValues,
-  isEdit,
-  isPending,
-}: UserFormProps) {
-  const form = useForm<InsertUser>({
-    resolver: zodResolver(insertUserSchema) as any,
+type EditUserFormProps = {
+  isEdit: true;
+  onSubmit: (data: UpdateUser) => void;
+  defaultValues?: Partial<UpdateUser>;
+  isPending?: boolean;
+};
+
+type UserFormProps = CreateUserFormProps | EditUserFormProps;
+
+export default function UserForm(props: UserFormProps) {
+  const form = useForm<UserFormValues>({
+    resolver: zodResolver(
+      props.isEdit ? updateUserSchema : insertUserSchema
+    ) as any,
     defaultValues: {
-      username: "",
+      username: props.defaultValues?.username ?? "",
       password: "",
-      full_name: "",
-      rank: "",
-      unit: "",
-      callsign: "",
-      clearanceLevel: "No clearance",
-      permissions: [],
-      isActive: true,
-      ...defaultValues,
+      full_name: props.defaultValues?.full_name ?? "",
+      rank: props.defaultValues?.rank ?? "",
+      unit: props.defaultValues?.unit ?? "",
+      callsign:
+        typeof props.defaultValues?.callsign === "string"
+          ? props.defaultValues.callsign
+          : "",
+      clearanceLevel: props.defaultValues?.clearanceLevel ?? "No clearance",
+      permissions: props.defaultValues?.permissions ?? [],
+      isActive: props.defaultValues?.isActive ?? true,
     },
   });
 
+  function handleSubmit(data: UserFormValues) {
+    const normalizedCallsign = data.callsign.trim() ? data.callsign.trim() : null;
+
+    if (props.isEdit) {
+      const payload: UpdateUser = {
+        username: data.username,
+        full_name: data.full_name,
+        rank: data.rank,
+        unit: data.unit,
+        callsign: normalizedCallsign,
+        clearanceLevel: data.clearanceLevel,
+        permissions: data.permissions,
+        isActive: data.isActive,
+        ...(data.password.trim() ? { password: data.password } : {}),
+      };
+
+      props.onSubmit(payload);
+      return;
+    }
+
+    const payload: InsertUser = {
+      username: data.username,
+      password: data.password,
+      full_name: data.full_name,
+      rank: data.rank,
+      unit: data.unit,
+      callsign: normalizedCallsign,
+      clearanceLevel: data.clearanceLevel,
+      permissions: data.permissions,
+      isActive: data.isActive,
+    };
+
+    props.onSubmit(payload);
+  }
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="username"
@@ -110,7 +167,7 @@ export default function UserForm({
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -123,10 +180,10 @@ export default function UserForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                {isEdit ? "New password (optional)" : "Password"}
+                {props.isEdit ? "New password (optional)" : "Password"}
               </FormLabel>
               <FormControl>
-                <Input type="password" {...field} />
+                <Input type="password" {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -140,7 +197,7 @@ export default function UserForm({
             <FormItem>
               <FormLabel>Full name</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -153,7 +210,7 @@ export default function UserForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Rank</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value ?? ""}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select rank" />
@@ -179,7 +236,7 @@ export default function UserForm({
             <FormItem>
               <FormLabel>Unit</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -206,7 +263,7 @@ export default function UserForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Clearance level</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value ?? ""}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select level" />
@@ -228,45 +285,50 @@ export default function UserForm({
         <FormField
           control={form.control}
           name="permissions"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Permissions</FormLabel>
-              <div className="space-y-3 rounded-md border p-3">
-                {PERMISSION_GROUPS.map((group) => (
-                  <div key={group.label}>
-                    <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      {group.label}
-                    </p>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-                      {group.perms.map((perm) => {
-                        const current = (field.value ?? []) as Permission[];
-                        const checked = current.includes(perm);
+          render={({ field }) => {
+            const current = field.value ?? [];
 
-                        return (
-                          <label
-                            key={perm}
-                            className="flex cursor-pointer select-none items-center gap-2 text-sm"
-                          >
-                            <Checkbox
-                              checked={checked}
-                              onCheckedChange={(value) => {
-                                const next = value
-                                  ? [...current, perm]
-                                  : current.filter((p) => p !== perm);
-                                field.onChange(next);
-                              }}
-                            />
-                            {PERMISSION_LABELS[perm]}
-                          </label>
-                        );
-                      })}
+            return (
+              <FormItem>
+                <FormLabel>Permissions</FormLabel>
+                <div className="space-y-3 rounded-md border p-3">
+                  {PERMISSION_GROUPS.map((group) => (
+                    <div key={group.label}>
+                      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        {group.label}
+                      </p>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                        {group.perms.map((perm) => {
+                          const checked = current.includes(perm);
+
+                          return (
+                            <label
+                              key={perm}
+                              className="flex cursor-pointer select-none items-center gap-2 text-sm"
+                            >
+                              <Checkbox
+                                checked={checked}
+                                onCheckedChange={(value) => {
+                                  const next =
+                                    value === true
+                                      ? Array.from(new Set([...current, perm]))
+                                      : current.filter((p) => p !== perm);
+
+                                  field.onChange(next);
+                                }}
+                              />
+                              {PERMISSION_LABELS[perm]}
+                            </label>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
+                  ))}
+                </div>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
         />
 
         <FormField
@@ -285,13 +347,13 @@ export default function UserForm({
           )}
         />
 
-        <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? (
+        <Button type="submit" className="w-full" disabled={props.isPending}>
+          {props.isPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {isEdit ? "Saving..." : "Creating..."}
+              {props.isEdit ? "Saving..." : "Creating..."}
             </>
-          ) : isEdit ? (
+          ) : props.isEdit ? (
             "Save changes"
           ) : (
             "Create user"
