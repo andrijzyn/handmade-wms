@@ -15,7 +15,7 @@ interface Stats {
 }
 
 // Required for card navigation handling
-export default function Dashboard({ onNavigate }: { onNavigate: (page: "dashboard" | "products" | "users" | "locations") => void }) {
+export default function Dashboard({ onNavigateAction }: { onNavigateAction: (page: "dashboard" | "products" | "users" | "locations") => void }) {
   const { data: stats, isLoading: statsLoading } = useQuery<Stats>({
     queryKey: ["/api/stats"],
   });
@@ -41,7 +41,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: "dashboar
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <Card
           className="cursor-pointer hover:border-primary/30 transition-colors"
-          onClick={() => onNavigate("products")}
+          onClick={() => onNavigateAction("products")}
           data-testid="card-total-products"
         >
           <CardContent className="pt-5 pb-4 px-5">
@@ -79,7 +79,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: "dashboar
 
         <Card
           className="cursor-pointer hover:border-amber-400/30 transition-colors"
-          onClick={() => onNavigate("products")}
+          onClick={() => onNavigateAction("products")}
           data-testid="card-low-stock"
         >
           <CardContent className="pt-5 pb-4 px-5">
@@ -97,7 +97,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: "dashboar
 
         <Card
           className="cursor-pointer hover:border-red-400/30 transition-colors"
-          onClick={() => onNavigate("products")}
+          onClick={() => onNavigateAction("products")}
           data-testid="card-out-of-stock"
         >
           <CardContent className="pt-5 pb-4 px-5">
