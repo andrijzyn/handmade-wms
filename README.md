@@ -10,7 +10,7 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/bdf2edfe-59ca-4dc1-a32a-fd8d85621657/deploy-status)](https://app.netlify.com/projects/timely-croissant-26e162/deploys)
 
-> [Documentation](https://documenter.getpostman.com/view/40522977/2sBXwjvtDk)
+[Docs](https://documenter.getpostman.com/view/40522977/2sBXwjvtDk)
 
 ---
 
@@ -65,6 +65,7 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 - [ ] Create InBound / OutBound module — форми надходження і видачі з часом, відповідальним і підписом
 - [ ] Automatic/manual loading into field stores — автоматична/ручна алокація по складах при InBound
 - [ ] Set enclosure for adding/editing products without OrderID — додати продукти безпосередньо через продуктовий модуль
+- [ ] Build Order Management module (Creating, Picking, Checking, Dispatching), which should connect warehouse workers with (products & locations)
 
 ***
 
