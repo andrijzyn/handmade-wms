@@ -66,11 +66,11 @@ function dbToUser(row: DbUser): User {
     callsign: row.callsign,
     clearanceLevel: row.clearance_level,
     permissions: (row.user_permissions ?? []).map(
-      (up) => up.permissions.key as Permission,
+      (up) => up.permissions.key as Permission
     ),
     isActive: row.is_active,
     createdAt: row.created_at ? new Date(row.created_at) : null,
-    sessionVersion: row.session_version,
+    sessionVersion: row.session_version ?? undefined,
   };
 }
 

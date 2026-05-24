@@ -42,10 +42,7 @@ export const POST = withErrorHandling(
     // Створюємо сесію
     const session = await getSession();
     session.userId = user.id;
-    // Якщо в User є поле sessionVersion, встанови його тут
-    // Інакше або прибери цю логіку, або додай поле в схему користувача
-    // @ts-expect-error якщо TS ще не знає про це поле
-    session.sessionVersion = user.sessionVersion;
+    session.sessionVersion = user.sessionVersion ?? undefined;
     await session.save();
 
     return NextResponse.json(safeUser);

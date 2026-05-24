@@ -12,7 +12,7 @@ export interface User {
   permissions: Permission[];
   isActive: boolean;
   createdAt: Date | null;
-  sessionVersion: string | null;
+  sessionVersion?: string;
 }
 
 export type SafeUser = Omit<User, "password">;
