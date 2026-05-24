@@ -66,6 +66,7 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 - [ ] Automatic/manual loading into field stores — автоматична/ручна алокація по складах при InBound
 - [ ] Set enclosure for adding/editing products without OrderID — додати продукти безпосередньо через продуктовий модуль
 - [ ] Build Order Management module (Creating, Picking, Checking, Dispatching), which should connect warehouse workers with (products & locations)
+- [ ] System for Disposing of Damaged Products
 
 ***
 
