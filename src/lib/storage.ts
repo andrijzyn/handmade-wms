@@ -169,8 +169,17 @@ class SupabaseStorage {
   }
 
   async deleteProduct(id: string): Promise<boolean> {
-    const { error } = await this.db.from("products").delete().eq("id", id);
-    return !error;
+    const { data, error, count } = await this.db
+      .from("products")
+      .delete({ count: "exact" })
+      .eq("id", id)
+      .select("id");
+
+    if (error) {
+      throw error;
+    }
+
+    return (count ?? data?.length ?? 0) > 0;
   }
 
   async searchProducts(query: string, category?: string): Promise<Product[]> {
