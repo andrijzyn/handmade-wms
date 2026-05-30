@@ -45,7 +45,7 @@ export const POST = withErrorHandling(
       return conflict("A product with such a SKU already exists");
     }
 
-    const product = await storage.createProduct(parsed.data);
+    const product = await storage.createProduct(parsed.data, userOrResp.id);
     return NextResponse.json(product, { status: 201 });
   },
 );

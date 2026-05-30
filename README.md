@@ -75,10 +75,11 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 
 - [ ] User action logging — хто, що, коли: CreateProduct, EditQuantity, DeleteLocation, Login
   - [ ] Implement backend throwing user_id for DB audit trigger for each API modules
-    - [ ] Products module audit
+    - [x] Products module audit
     - [ ] Locations module audit
     - [ ] Users module audit
     - [ ] Sessions module audit
+  - [ ] UI form for review logs
 - [ ] Export audit log — вивантаження логу в CSV / PDF для підзвітності командиру
 - [ ] Dashboard руху запасів — графік руху товарів за часом
 

@@ -11,6 +11,7 @@ import type {
 } from "./schema";
 import { Permission } from "@/lib/permissions";
 import type { User, SafeUser } from "@/lib/userTypes";
+import { randomUUID } from "node:crypto";
 
 // ── DB interfaces ─────────────────────────────────────
 
@@ -105,6 +106,18 @@ class SupabaseStorage {
     return (data as DbProduct[]).map(dbToProduct);
   }
 
+  // ── Helpers ────────────────────────────────
+  private audit(actorUserId?: string) {
+    if (!actorUserId) {
+      throw new Error("Missing actorUserId for audited RPC call");
+    }
+
+    return {
+      p_actor_user_id: actorUserId,
+      p_correlation_id: randomUUID(),
+    };
+  }
+
   async getProduct(id: string): Promise<Product | undefined> {
     const { data, error } = await this.db
       .from("products")
@@ -114,6 +127,8 @@ class SupabaseStorage {
     if (error) return undefined;
     return dbToProduct(data as DbProduct);
   }
+
+  // ── Products ──────────────────────────────────────────
 
   async getProductBySku(sku: string): Promise<Product | undefined> {
     const { data, error } = await this.db
@@ -125,20 +140,21 @@ class SupabaseStorage {
     return dbToProduct(data as DbProduct);
   }
 
-  async createProduct(insertProduct: InsertProduct): Promise<Product> {
-    const { data, error } = await this.db
-      .from("products")
-      .insert({
-        name: insertProduct.name,
-        sku: insertProduct.sku,
-        category: insertProduct.category,
-        quantity: insertProduct.quantity,
-        price: insertProduct.price,
-        low_stock_threshold: insertProduct.lowStockThreshold,
-        description: insertProduct.description ?? null,
-      })
-      .select()
-      .single();
+  async createProduct(
+    insertProduct: InsertProduct,
+    actorUserId: string,
+  ): Promise<Product> {
+    const { data, error } = await this.db.rpc("create_product_with_audit", {
+      p_name: insertProduct.name,
+      p_sku: insertProduct.sku,
+      p_category: insertProduct.category,
+      p_quantity: insertProduct.quantity,
+      p_price: insertProduct.price,
+      p_low_stock_threshold: insertProduct.lowStockThreshold,
+      p_description: insertProduct.description ?? null,
+      ...this.audit(actorUserId),
+    });
+
     if (error) throw error;
     return dbToProduct(data as DbProduct);
   }
@@ -146,6 +162,7 @@ class SupabaseStorage {
   async updateProduct(
     id: string,
     updates: Partial<InsertProduct>,
+    actorUserId: string,
   ): Promise<Product | undefined> {
     const dbUpdates: Record<string, unknown> = {};
     if (updates.name !== undefined) dbUpdates.name = updates.name;
@@ -153,33 +170,36 @@ class SupabaseStorage {
     if (updates.category !== undefined) dbUpdates.category = updates.category;
     if (updates.quantity !== undefined) dbUpdates.quantity = updates.quantity;
     if (updates.price !== undefined) dbUpdates.price = updates.price;
-    if (updates.lowStockThreshold !== undefined)
+    if (updates.lowStockThreshold !== undefined) {
       dbUpdates.low_stock_threshold = updates.lowStockThreshold;
-    if (updates.description !== undefined)
+    }
+    if (updates.description !== undefined) {
       dbUpdates.description = updates.description;
+    }
 
-    const { data, error } = await this.db
-      .from("products")
-      .update(dbUpdates)
-      .eq("id", id)
-      .select()
-      .single();
-    if (error) return undefined;
+    if (!Object.keys(dbUpdates).length) {
+      return this.getProduct(id);
+    }
+
+    const { data, error } = await this.db.rpc("update_product_with_audit", {
+      p_product_id: id,
+      p_updates: dbUpdates,
+      ...this.audit(actorUserId),
+    });
+
+    if (error) throw error;
+    if (!data) return undefined;
     return dbToProduct(data as DbProduct);
   }
 
-  async deleteProduct(id: string): Promise<boolean> {
-    const { data, error, count } = await this.db
-      .from("products")
-      .delete({ count: "exact" })
-      .eq("id", id)
-      .select("id");
+  async deleteProduct(id: string, actorUserId: string): Promise<boolean> {
+    const { data, error } = await this.db.rpc("delete_product_with_audit", {
+      p_product_id: id,
+      ...this.audit(actorUserId),
+    });
 
-    if (error) {
-      throw error;
-    }
-
-    return (count ?? data?.length ?? 0) > 0;
+    if (error) throw error;
+    return Boolean(data);
   }
 
   async searchProducts(query: string, category?: string): Promise<Product[]> {
@@ -255,29 +275,35 @@ class SupabaseStorage {
     return dbToUser(data as DbUser);
   }
 
-  async createUser(insertUser: InsertUser): Promise<SafeUser> {
+  async createUser(
+    insertUser: InsertUser,
+    actorUserId: string,
+  ): Promise<SafeUser> {
     const hashedPassword = await bcrypt.hash(insertUser.password, 10);
 
-    const { data, error } = await this.db
-      .from("users")
-      .insert({
-        username: insertUser.username,
-        password: hashedPassword,
-        full_name: insertUser.full_name,
-        rank: insertUser.rank,
-        unit: insertUser.unit,
-        callsign: insertUser.callsign ?? null,
-        clearance_level: insertUser.clearanceLevel ?? "Без допуску",
-        is_active: insertUser.isActive ?? true,
-      })
-      .select("id")
-      .single();
+    const { data, error } = await this.db.rpc("create_user_with_audit", {
+      p_username: insertUser.username,
+      p_password: hashedPassword,
+      p_full_name: insertUser.full_name,
+      p_rank: insertUser.rank,
+      p_unit: insertUser.unit,
+      p_callsign: insertUser.callsign ?? null,
+      p_clearance_level: insertUser.clearanceLevel ?? "Без допуску",
+      p_is_active: insertUser.isActive ?? true,
+      ...this.audit(actorUserId),
+    });
 
     if (error) throw error;
 
-    await this.setUserPermissions(data.id, insertUser.permissions);
+    const createdUserId = data as string;
 
-    const user = await this.getUser(data.id);
+    await this.setUserPermissions(
+      createdUserId,
+      insertUser.permissions,
+      actorUserId,
+    );
+
+    const user = await this.getUser(createdUserId);
     if (!user) throw new Error("Failed to fetch created user");
     return toSafeUser(user);
   }
@@ -285,31 +311,42 @@ class SupabaseStorage {
   async updateUser(
     id: string,
     updates: Partial<InsertUser>,
+    actorUserId: string,
   ): Promise<SafeUser | undefined> {
     const dbUpdates: Record<string, unknown> = {};
+
     if (updates.username !== undefined) dbUpdates.username = updates.username;
-    if (updates.full_name !== undefined)
+    if (updates.full_name !== undefined) {
       dbUpdates.full_name = updates.full_name;
+    }
     if (updates.rank !== undefined) dbUpdates.rank = updates.rank;
     if (updates.unit !== undefined) dbUpdates.unit = updates.unit;
-    if (updates.callsign !== undefined)
+    if (updates.callsign !== undefined) {
       dbUpdates.callsign = updates.callsign ?? null;
-    if (updates.clearanceLevel !== undefined)
+    }
+    if (updates.clearanceLevel !== undefined) {
       dbUpdates.clearance_level = updates.clearanceLevel;
-    if (updates.isActive !== undefined) dbUpdates.is_active = updates.isActive;
-    if (updates.password !== undefined)
+    }
+    if (updates.isActive !== undefined) {
+      dbUpdates.is_active = updates.isActive;
+    }
+    if (updates.password !== undefined) {
       dbUpdates.password = await bcrypt.hash(updates.password, 10);
+    }
 
     if (Object.keys(dbUpdates).length) {
-      const { error } = await this.db
-        .from("users")
-        .update(dbUpdates)
-        .eq("id", id);
-      if (error) return undefined;
+      const { data, error } = await this.db.rpc("update_user_with_audit", {
+        p_user_id: id,
+        p_updates: dbUpdates,
+        ...this.audit(actorUserId),
+      });
+
+      if (error) throw error;
+      if (!data) return undefined;
     }
 
     if (updates.permissions !== undefined) {
-      await this.setUserPermissions(id, updates.permissions);
+      await this.setUserPermissions(id, updates.permissions, actorUserId);
     }
 
     const user = await this.getUser(id);
@@ -317,35 +354,38 @@ class SupabaseStorage {
     return toSafeUser(user);
   }
 
-  async deleteUser(id: string): Promise<boolean> {
-    const { error } = await this.db.from("users").delete().eq("id", id);
-    return !error;
+  async deleteUser(
+    id: string,
+    actorUserId: string,
+  ): Promise<boolean> {
+    const { data, error } = await this.db.rpc("delete_user_with_audit", {
+      p_user_id: id,
+      ...this.audit(actorUserId),
+    });
+
+    if (error) throw error;
+    return Boolean(data);
   }
 
   async validatePassword(user: User, password: string): Promise<boolean> {
     return bcrypt.compare(password, user.password);
   }
 
-  // Замінює всі дозволи юзера
   async setUserPermissions(
     userId: string,
     permissions: Permission[],
+    actorUserId: string,
   ): Promise<void> {
-    const { data: perms } = await this.db
-      .from("permissions")
-      .select("id, key")
-      .in("key", permissions);
+    const { error } = await this.db.rpc(
+      "replace_user_permissions_with_audit",
+      {
+        p_user_id: userId,
+        p_permission_keys: permissions,
+        ...this.audit(actorUserId),
+      },
+    );
 
-    await this.db.from("user_permissions").delete().eq("user_id", userId);
-
-    if (perms?.length) {
-      await this.db.from("user_permissions").insert(
-        perms.map((p: { id: string; key: string }) => ({
-          user_id: userId,
-          permission_id: p.id,
-        })),
-      );
-    }
+    if (error) throw error;
   }
 
   // ── Locations ────────────────────────────────────────
@@ -420,44 +460,54 @@ class SupabaseStorage {
 
   async createProductLocation(
     input: InsertProductLocation,
+    actorUserId: string,
   ): Promise<ProductLocation> {
-    const { data, error } = await this.db
-      .from("product_locations")
-      .insert({
-        product_id: input.productId,
-        location_id: input.locationId,
-        quantity: input.quantity,
-      })
-      .select()
-      .single();
+    const { data, error } = await this.db.rpc(
+      "create_product_location_with_audit",
+      {
+        p_product_id: input.productId,
+        p_location_id: input.locationId,
+        p_quantity: input.quantity,
+        ...this.audit(actorUserId),
+      },
+    );
 
-    if (error) throw new Error(error.message);
-    return data;
+    if (error) throw error;
+    return data as ProductLocation;
   }
 
   async updateProductLocation(
     id: string,
     quantity: number,
+    actorUserId: string,
   ): Promise<ProductLocation | null> {
-    const { data, error } = await this.db
-      .from("product_locations")
-      .update({ quantity, updated_at: new Date().toISOString() })
-      .eq("id", id)
-      .select()
-      .single();
+    const { data, error } = await this.db.rpc(
+      "update_product_location_with_audit",
+      {
+        p_id: id,
+        p_quantity: quantity,
+        ...this.audit(actorUserId),
+      },
+    );
 
-    if (error) return null;
-    return data;
+    if (error) throw error;
+    return (data as ProductLocation | null) ?? null;
   }
 
-  async deleteProductLocation(id: string): Promise<boolean> {
-    const { error, count } = await this.db
-      .from("product_locations")
-      .delete({ count: "exact" })
-      .eq("id", id);
+  async deleteProductLocation(
+    id: string,
+    actorUserId: string,
+  ): Promise<boolean> {
+    const { data, error } = await this.db.rpc(
+      "delete_product_location_with_audit",
+      {
+        p_id: id,
+        ...this.audit(actorUserId),
+      },
+    );
 
-    if (error) return false;
-    return (count ?? 0) > 0;
+    if (error) throw error;
+    return Boolean(data);
   }
 }
 
