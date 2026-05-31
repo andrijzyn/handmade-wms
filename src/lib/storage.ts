@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import { randomUUID } from "node:crypto";
 import { getSupabase } from "./supabase";
 import type {
   Product,
@@ -9,9 +10,8 @@ import type {
   ProductLocation,
   InsertProductLocation,
 } from "./schema";
-import { Permission } from "@/lib/permissions";
+import type { Permission } from "@/lib/permissions";
 import type { User, SafeUser } from "@/lib/userTypes";
-import { randomUUID } from "node:crypto";
 
 // ── DB interfaces ─────────────────────────────────────
 
@@ -41,6 +41,55 @@ interface DbUser {
   session_version: string | null;
 }
 
+interface DbProductLocationViewRow {
+  id: string;
+  product_id: string;
+  location_id: string;
+  quantity: number;
+  updated_at: string;
+  locations: {
+    label: string;
+    row: number;
+    col: number;
+    level: number;
+  } | null;
+}
+
+// ── Update payload types ──────────────────────────────
+
+type ProductUpdateDbPayload = Partial<{
+  name: string;
+  sku: string;
+  category: string;
+  quantity: number;
+  price: number;
+  low_stock_threshold: number;
+  description: string | null;
+}>;
+
+export type UpdateUserInput = {
+  username?: string;
+  full_name?: string;
+  rank?: string;
+  unit?: string;
+  callsign?: string | null;
+  clearanceLevel?: string;
+  isActive?: boolean;
+  password?: string;
+  permissions?: Permission[];
+};
+
+type UserUpdateDbPayload = Partial<{
+  username: string;
+  full_name: string;
+  rank: string;
+  unit: string;
+  callsign: string | null;
+  clearance_level: string;
+  is_active: boolean;
+  password: string;
+}>;
+
 // ── Mappers ───────────────────────────────────────────
 
 function dbToProduct(row: DbProduct): Product {
@@ -67,7 +116,7 @@ function dbToUser(row: DbUser): User {
     callsign: row.callsign,
     clearanceLevel: row.clearance_level,
     permissions: (row.user_permissions ?? []).map(
-      (up) => up.permissions.key as Permission
+      (up) => up.permissions.key as Permission,
     ),
     isActive: row.is_active,
     createdAt: row.created_at ? new Date(row.created_at) : null,
@@ -76,7 +125,7 @@ function dbToUser(row: DbUser): User {
 }
 
 export function toSafeUser(user: User): SafeUser {
-  const { password: _, ...safe } = user;
+  const { password: _password, ...safe } = user;
   return safe;
 }
 
@@ -89,33 +138,89 @@ const USER_WITH_PERMISSIONS = `
   )
 ` as const;
 
+// ── Shared helpers ────────────────────────────────────
+
+function hasKeys(obj: object): boolean {
+  return Object.keys(obj).length > 0;
+}
+
 // ── Supabase Storage ──────────────────────────────────
 
 class SupabaseStorage {
+  private static readonly PASSWORD_ROUNDS = 10;
+
   private get db() {
     return getSupabase();
   }
 
-  // ── Products ──────────────────────────────────────────
+  // ── Audit helpers ───────────────────────────────────
+
+  private audit(actorUserId: string) {
+    return {
+      p_actor_user_id: actorUserId,
+      p_correlation_id: randomUUID(),
+    };
+  }
+
+  private async hashPassword(password: string): Promise<string> {
+    return bcrypt.hash(password, SupabaseStorage.PASSWORD_ROUNDS);
+  }
+
+  private buildProductUpdatePayload(
+    updates: Partial<InsertProduct>,
+  ): ProductUpdateDbPayload {
+    const payload: ProductUpdateDbPayload = {};
+
+    if (updates.name !== undefined) payload.name = updates.name;
+    if (updates.sku !== undefined) payload.sku = updates.sku;
+    if (updates.category !== undefined) payload.category = updates.category;
+    if (updates.quantity !== undefined) payload.quantity = updates.quantity;
+    if (updates.price !== undefined) payload.price = updates.price;
+    if (updates.lowStockThreshold !== undefined) {
+      payload.low_stock_threshold = updates.lowStockThreshold;
+    }
+    if (updates.description !== undefined) {
+      payload.description = updates.description;
+    }
+
+    return payload;
+  }
+
+  private async buildUserUpdatePayload(
+    updates: UpdateUserInput,
+  ): Promise<UserUpdateDbPayload> {
+    const payload: UserUpdateDbPayload = {};
+
+    if (updates.username !== undefined) payload.username = updates.username;
+    if (updates.full_name !== undefined) payload.full_name = updates.full_name;
+    if (updates.rank !== undefined) payload.rank = updates.rank;
+    if (updates.unit !== undefined) payload.unit = updates.unit;
+    if (updates.callsign !== undefined) payload.callsign = updates.callsign;
+    if (updates.clearanceLevel !== undefined) {
+      payload.clearance_level = updates.clearanceLevel;
+    }
+    if (updates.isActive !== undefined) {
+      payload.is_active = updates.isActive;
+    }
+
+    const normalizedPassword = updates.password?.trim();
+    if (normalizedPassword) {
+      payload.password = await this.hashPassword(normalizedPassword);
+    }
+
+    return payload;
+  }
+
+  // ── Products ────────────────────────────────────────
+
   async getProducts(): Promise<Product[]> {
     const { data, error } = await this.db
       .from("products")
       .select("*")
       .order("name");
+
     if (error) throw error;
     return (data as DbProduct[]).map(dbToProduct);
-  }
-
-  // ── Helpers ────────────────────────────────
-  private audit(actorUserId?: string) {
-    if (!actorUserId) {
-      throw new Error("Missing actorUserId for audited RPC call");
-    }
-
-    return {
-      p_actor_user_id: actorUserId,
-      p_correlation_id: randomUUID(),
-    };
   }
 
   async getProduct(id: string): Promise<Product | undefined> {
@@ -124,11 +229,10 @@ class SupabaseStorage {
       .select("*")
       .eq("id", id)
       .single();
+
     if (error) return undefined;
     return dbToProduct(data as DbProduct);
   }
-
-  // ── Products ──────────────────────────────────────────
 
   async getProductBySku(sku: string): Promise<Product | undefined> {
     const { data, error } = await this.db
@@ -136,6 +240,7 @@ class SupabaseStorage {
       .select("*")
       .eq("sku", sku)
       .single();
+
     if (error) return undefined;
     return dbToProduct(data as DbProduct);
   }
@@ -164,20 +269,9 @@ class SupabaseStorage {
     updates: Partial<InsertProduct>,
     actorUserId: string,
   ): Promise<Product | undefined> {
-    const dbUpdates: Record<string, unknown> = {};
-    if (updates.name !== undefined) dbUpdates.name = updates.name;
-    if (updates.sku !== undefined) dbUpdates.sku = updates.sku;
-    if (updates.category !== undefined) dbUpdates.category = updates.category;
-    if (updates.quantity !== undefined) dbUpdates.quantity = updates.quantity;
-    if (updates.price !== undefined) dbUpdates.price = updates.price;
-    if (updates.lowStockThreshold !== undefined) {
-      dbUpdates.low_stock_threshold = updates.lowStockThreshold;
-    }
-    if (updates.description !== undefined) {
-      dbUpdates.description = updates.description;
-    }
+    const dbUpdates = this.buildProductUpdatePayload(updates);
 
-    if (!Object.keys(dbUpdates).length) {
+    if (!hasKeys(dbUpdates)) {
       return this.getProduct(id);
     }
 
@@ -189,6 +283,7 @@ class SupabaseStorage {
 
     if (error) throw error;
     if (!data) return undefined;
+
     return dbToProduct(data as DbProduct);
   }
 
@@ -211,29 +306,37 @@ class SupabaseStorage {
         `name.ilike.${search},sku.ilike.${search},description.ilike.${search}`,
       );
     }
+
     if (category && category !== "all") {
       q = q.eq("category", category);
     }
 
     const { data, error } = await q.order("name");
+
     if (error) throw error;
     return (data as DbProduct[]).map(dbToProduct);
   }
 
   async getCategories(): Promise<string[]> {
     const { data, error } = await this.db.from("products").select("category");
+
     if (error) throw error;
+
     const categories = new Set<string>();
     for (const row of data as { category: string }[]) {
       categories.add(row.category);
     }
+
     return Array.from(categories).sort();
   }
 
   async getStats() {
     const { data, error } = await this.db.from("products").select("*");
+
     if (error) throw error;
+
     const products = (data as DbProduct[]).map(dbToProduct);
+
     return {
       totalProducts: products.length,
       totalValue: products.reduce((sum, p) => sum + p.price * p.quantity, 0),
@@ -245,13 +348,16 @@ class SupabaseStorage {
     };
   }
 
-  // ── Users ─────────────────────────────────────────────
+  // ── Users ───────────────────────────────────────────
+
   async getUsers(): Promise<SafeUser[]> {
     const { data, error } = await this.db
       .from("users")
       .select(USER_WITH_PERMISSIONS)
       .order("created_at");
+
     if (error) throw error;
+
     return (data as DbUser[]).map(dbToUser).map(toSafeUser);
   }
 
@@ -261,6 +367,7 @@ class SupabaseStorage {
       .select(USER_WITH_PERMISSIONS)
       .eq("id", id)
       .single();
+
     if (error) return undefined;
     return dbToUser(data as DbUser);
   }
@@ -271,6 +378,7 @@ class SupabaseStorage {
       .select(USER_WITH_PERMISSIONS)
       .ilike("username", username)
       .single();
+
     if (error) return undefined;
     return dbToUser(data as DbUser);
   }
@@ -279,7 +387,7 @@ class SupabaseStorage {
     insertUser: InsertUser,
     actorUserId: string,
   ): Promise<SafeUser> {
-    const hashedPassword = await bcrypt.hash(insertUser.password, 10);
+    const hashedPassword = await this.hashPassword(insertUser.password);
 
     const { data, error } = await this.db.rpc("create_user_with_audit", {
       p_username: insertUser.username,
@@ -299,50 +407,33 @@ class SupabaseStorage {
 
     await this.setUserPermissions(
       createdUserId,
-      insertUser.permissions,
+      insertUser.permissions ?? [],
       actorUserId,
     );
 
     const user = await this.getUser(createdUserId);
-    if (!user) throw new Error("Failed to fetch created user");
+    if (!user) {
+      throw new Error("Failed to fetch created user");
+    }
+
     return toSafeUser(user);
   }
 
   async updateUser(
     id: string,
-    updates: Partial<InsertUser>,
+    updates: UpdateUserInput,
     actorUserId: string,
   ): Promise<SafeUser | undefined> {
-    const dbUpdates: Record<string, unknown> = {};
+    const dbUpdates = await this.buildUserUpdatePayload(updates);
 
-    if (updates.username !== undefined) dbUpdates.username = updates.username;
-    if (updates.full_name !== undefined) {
-      dbUpdates.full_name = updates.full_name;
-    }
-    if (updates.rank !== undefined) dbUpdates.rank = updates.rank;
-    if (updates.unit !== undefined) dbUpdates.unit = updates.unit;
-    if (updates.callsign !== undefined) {
-      dbUpdates.callsign = updates.callsign ?? null;
-    }
-    if (updates.clearanceLevel !== undefined) {
-      dbUpdates.clearance_level = updates.clearanceLevel;
-    }
-    if (updates.isActive !== undefined) {
-      dbUpdates.is_active = updates.isActive;
-    }
-    if (updates.password !== undefined) {
-      dbUpdates.password = await bcrypt.hash(updates.password, 10);
-    }
-
-    if (Object.keys(dbUpdates).length) {
-      const { data, error } = await this.db.rpc("update_user_with_audit", {
+    if (hasKeys(dbUpdates)) {
+      const { error } = await this.db.rpc("update_user_with_audit", {
         p_user_id: id,
         p_updates: dbUpdates,
         ...this.audit(actorUserId),
       });
 
       if (error) throw error;
-      if (!data) return undefined;
     }
 
     if (updates.permissions !== undefined) {
@@ -350,14 +441,10 @@ class SupabaseStorage {
     }
 
     const user = await this.getUser(id);
-    if (!user) return undefined;
-    return toSafeUser(user);
+    return user ? toSafeUser(user) : undefined;
   }
 
-  async deleteUser(
-    id: string,
-    actorUserId: string,
-  ): Promise<boolean> {
+  async deleteUser(id: string, actorUserId: string): Promise<boolean> {
     const { data, error } = await this.db.rpc("delete_user_with_audit", {
       p_user_id: id,
       ...this.audit(actorUserId),
@@ -388,7 +475,7 @@ class SupabaseStorage {
     if (error) throw error;
   }
 
-  // ── Locations ────────────────────────────────────────
+  // ── Locations ───────────────────────────────────────
 
   async getLocations(filters?: { q?: string }): Promise<Location[]> {
     let query = this.db
@@ -404,11 +491,12 @@ class SupabaseStorage {
     }
 
     const { data, error } = await query;
-    if (error) throw new Error(error.message);
-    return data ?? [];
+
+    if (error) throw error;
+    return (data ?? []) as Location[];
   }
 
-  // ── Product Locations ────────────────────────────────
+  // ── Product Locations ───────────────────────────────
 
   async getProductLocations(productId: string): Promise<ProductLocationView[]> {
     const { data, error } = await this.db
@@ -430,18 +518,18 @@ class SupabaseStorage {
       )
       .eq("product_id", productId);
 
-    if (error) throw new Error(error.message);
+    if (error) throw error;
 
-    return (data ?? []).map((row: any) => ({
+    return ((data ?? []) as DbProductLocationViewRow[]).map((row) => ({
       id: row.id,
       productId: row.product_id,
       locationId: row.location_id,
       quantity: row.quantity,
       updatedAt: row.updated_at,
-      locationLabel: row.locations.label,
-      locationRow: row.locations.row,
-      locationCol: row.locations.col,
-      locationLevel: row.locations.level,
+      locationLabel: row.locations?.label ?? "",
+      locationRow: row.locations?.row ?? 0,
+      locationCol: row.locations?.col ?? 0,
+      locationLevel: row.locations?.level ?? 0,
     }));
   }
 
@@ -449,13 +537,15 @@ class SupabaseStorage {
     productId: string,
     locationId: string,
   ): Promise<ProductLocation | null> {
-    const { data } = await this.db
+    const { data, error } = await this.db
       .from("product_locations")
       .select("*")
       .eq("product_id", productId)
       .eq("location_id", locationId)
       .single();
-    return data ?? null;
+
+    if (error) return null;
+    return (data as ProductLocation) ?? null;
   }
 
   async createProductLocation(
