@@ -122,40 +122,32 @@ export default function UserForm(props: UserFormProps) {
     },
   });
 
-  function handleSubmit(data: UserFormValues) {
-    const normalizedCallsign = data.callsign.trim() ? data.callsign.trim() : null;
+function handleSubmit(data: UserFormValues) {
+  const password = data.password?.trim();
+  const basePayload = {
+    username: data.username.trim(),
+    full_name: data.full_name.trim(),
+    rank: data.rank,
+    unit: data.unit,
+    callsign: data.callsign?.trim() || null,
+    clearanceLevel: data.clearanceLevel,
+    permissions: data.permissions,
+    isActive: data.isActive,
+  };
 
-    if (props.isEdit) {
-      const payload: UpdateUser = {
-        username: data.username,
-        full_name: data.full_name,
-        rank: data.rank,
-        unit: data.unit,
-        callsign: normalizedCallsign,
-        clearanceLevel: data.clearanceLevel,
-        permissions: data.permissions,
-        isActive: data.isActive,
-        ...(data.password.trim() ? { password: data.password } : {}),
-      };
-
-      props.onSubmit(payload);
-      return;
-    }
-
-    const payload: InsertUser = {
-      username: data.username,
-      password: data.password,
-      full_name: data.full_name,
-      rank: data.rank,
-      unit: data.unit,
-      callsign: normalizedCallsign,
-      clearanceLevel: data.clearanceLevel,
-      permissions: data.permissions,
-      isActive: data.isActive,
-    };
-
-    props.onSubmit(payload);
+  if (props.isEdit) {
+    props.onSubmit({
+      ...basePayload,
+      ...(password ? { password } : {}),
+    });
+    return;
   }
+
+  props.onSubmit({
+    ...basePayload,
+    password: password ?? "",
+  });
+}
 
   return (
     <Form {...form}>
