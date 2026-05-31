@@ -1,6 +1,8 @@
-# StockPulse — Military Inventory Management System
+# StockPulse — Military Inventory Management System 
 
 A logistics and inventory management system for military warehouses. Built with **Next.js 16** (App Router), **Supabase** (PostgreSQL), and deployed on **Netlify**.
+
+> (RN only for one division as the basis of the system)
 
 Authentication is implemented with a custom session layer (iron-session + bcrypt) to minimise dependency on external providers and simplify future migrations to on-premise deployments.
 
@@ -8,23 +10,20 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/bdf2edfe-59ca-4dc1-a32a-fd8d85621657/deploy-status)](https://app.netlify.com/projects/timely-croissant-26e162/deploys)
 
-> DB status: [/api/debug](https://timely-croissant-26e162.netlify.app/api/debug)
->
-> [Documentation](https://documenter.getpostman.com/view/40522977/2sBXwjvtDk)
->
-> [Demo](https://timely-croissant-26e162.netlify.app/)
+[Docs](https://documenter.getpostman.com/view/40522977/2sBXwjvtDk)
 
 ---
 
 ## Features
 
-- **Product management** — create, edit, and delete inventory items with SKU, category, price, and stock thresholds
-- **Location tracking** — assign products to warehouse locations (row / column / level) and track allocated vs. unallocated quantities
+- **Product management** — create, edit, and delete inventory items with SKU, category, price, stock thresholds, categories, filters, and classifications
+- **Location tracking** — assign products to warehouse locations (row / column / level), view product info by ID and location, and track allocated vs. unallocated quantities with per-product location breakdown
 - **Allocation indicator** — visual balance status per product: Balanced, Unallocated, or Exceeded
-- **User management** — role-based access with admin controls
-- **Authentication** — cookie-based sessions with bcrypt password hashing
+- **User management** — permissions-based access to functions with dedicated permission assignment module for administration
+- **Authentication** — cookie-based sessions via iron-session with bcrypt password hashing
 - **Search & sort** — filter products and locations by name, SKU, and category
 - **Low stock alerts** — configurable per-product threshold with dashboard indicators
+- **Database integration** — Supabase (PostgreSQL) used for persistent product, location, and access data storage
 
 ---
 
@@ -32,7 +31,7 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 
 | Layer      | Technology                                          |
 | ---------- | --------------------------------------------------- |
-| Framework  | Next.js 16 (App Router), React 19, TypeScript       |
+| Framework  | Next.js 15 (App Router), React 19, TypeScript       |
 | Styling    | Tailwind CSS v3, shadcn/ui (Radix UI), Lucide icons |
 | State      | TanStack Query v5                                   |
 | Forms      | React Hook Form + Zod                               |
@@ -44,20 +43,18 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 
 ## Done
 
-- [x] CRUD with in-memory database
-- [x] Supabase (PostgreSQL) integration
+- [x] Build Supabase (PostgreSQL) integration
 - [x] Authentication via iron-session + bcrypt
-- [x] Product categories, filters, and classifications
+- [x] Add Product table with - Categories, Filters, and Classifications
 - [x] View product info by ID and location
-- [x] Bulk location upload form
 - [x] Per-product location breakdown with quantity tracking
+- [x] Separate functions by permissions
+- [x] Create module for permission assignment
 
 ***
 
 ## Security and accesible
 
-- [ ] Separate functions by permissions — розділити що кожна роль може робити
-- [ ] Create module for permission assignment — UI для адміна, щоб призначати дозволи
 - [ ] Set different SKUs filtering by UAL — юзер бачить тільки те, до чого має допуск
 - [ ] Limit to one login connection per user — активна сесія одна, нова заходить і скидає стару
 
@@ -68,17 +65,15 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 - [ ] Create InBound / OutBound module — форми надходження і видачі з часом, відповідальним і підписом
 - [ ] Automatic/manual loading into field stores — автоматична/ручна алокація по складах при InBound
 - [ ] Set enclosure for adding/editing products without OrderID — додати продукти безпосередньо через продуктовий модуль
+- [ ] Build Order Management module (Creating, Picking, Checking, Dispatching), which should connect warehouse workers with (products & locations)
+- [ ] System for Disposing of Damaged Products
 
 ***
 
 ## Logging
 
 - [ ] User action logging — хто, що, коли: CreateProduct, EditQuantity, DeleteLocation, Login
-  - [ ] Implement backend throwing user_id for DB audit trigger for each API modules
-    - [x] Products module audit
-    - [ ] Locations module audit
-    - [ ] Users module audit
-    - [ ] Sessions module audit
+  - [x] Implement backend throwing user_id for DB audit trigger for each API modules
   - [ ] UI form for review logs
 - [ ] Export audit log — вивантаження логу в CSV / PDF для підзвітності командиру
 - [ ] Dashboard руху запасів — графік руху товарів за часом
@@ -90,6 +85,7 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 - [ ] Mobile-optimised layout — склад не завжди має ПК
 - [ ] PWA support — встановити як застосунок на телефон без апстору
 - [ ] Barcode / QR scan — замість ручного вводу SKU на складі
+- [ ] Unify Windows by example of "User-form"
 
 ***
 
