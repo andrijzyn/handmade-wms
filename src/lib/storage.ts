@@ -52,7 +52,7 @@ interface DbProductLocationViewRow {
     row: number;
     col: number;
     level: number;
-  } | null;
+  }[] | null;
 }
 
 // ── Update payload types ──────────────────────────────
@@ -520,17 +520,21 @@ class SupabaseStorage {
 
     if (error) throw error;
 
-    return ((data ?? []) as DbProductLocationViewRow[]).map((row) => ({
-      id: row.id,
-      productId: row.product_id,
-      locationId: row.location_id,
-      quantity: row.quantity,
-      updatedAt: row.updated_at,
-      locationLabel: row.locations?.label ?? "",
-      locationRow: row.locations?.row ?? 0,
-      locationCol: row.locations?.col ?? 0,
-      locationLevel: row.locations?.level ?? 0,
-    }));
+    return ((data ?? []) as DbProductLocationViewRow[]).map((row) => {
+      const location = row.locations?.[0];
+
+      return {
+        id: row.id,
+        productId: row.product_id,
+        locationId: row.location_id,
+        quantity: row.quantity,
+        updatedAt: row.updated_at,
+        locationLabel: location?.label ?? "",
+        locationRow: location?.row ?? 0,
+        locationCol: location?.col ?? 0,
+        locationLevel: location?.level ?? 0,
+      };
+    });
   }
 
   async getProductLocation(
