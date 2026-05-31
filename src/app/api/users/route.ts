@@ -31,7 +31,7 @@ export const POST = withErrorHandling(
       return conflict("This user already exists");
     }
 
-    const created = await storage.createUser(parsed.data);
+    const created = await storage.createUser(parsed.data, userOrResp.id);
     return NextResponse.json(created, { status: 201 });
   },
 );

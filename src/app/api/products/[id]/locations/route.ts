@@ -64,7 +64,7 @@ export const POST = withErrorHandling(
       return conflict("This location is already assigned to the product");
     }
 
-    const entry = await storage.createProductLocation(parsed.data);
+    const entry = await storage.createProductLocation(parsed.data, userOrResp.id);
     return NextResponse.json(entry, { status: 201 });
   },
 );
