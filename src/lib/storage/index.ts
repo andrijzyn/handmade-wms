@@ -1,0 +1,46 @@
+import bcrypt from "bcryptjs";
+import { randomUUID } from "node:crypto";
+import { getSupabase } from "../supabase";
+import type { StorageContext } from "./shared";
+import { createProductsStorage } from "./products";
+import { createUsersStorage } from "./users";
+import { createLocationsStorage } from "./locations";
+import { createProductLocationsStorage } from "./productLocations";
+import { createAuditStorage } from "./audit";
+
+const PASSWORD_ROUNDS = 10;
+
+const ctx: StorageContext = {
+  db: () => getSupabase(),
+
+  audit(actorUserId: string) {
+    if (!actorUserId) {
+      throw new Error("Missing actorUserId for audited RPC call");
+    }
+
+    return {
+      p_actor_user_id: actorUserId,
+      p_correlation_id: randomUUID(),
+    };
+  },
+
+  async hashPassword(password: string) {
+    return bcrypt.hash(password, PASSWORD_ROUNDS);
+  },
+};
+
+export const storage = {
+  ...createProductsStorage(ctx),
+  ...createUsersStorage(ctx),
+  ...createLocationsStorage(ctx),
+  ...createProductLocationsStorage(ctx),
+  ...createAuditStorage(ctx),
+};
+
+export type {
+  UpdateUserInput,
+  AuditAction,
+  AuditLogFilters,
+  AuditLogItem,
+} from "./shared";
+export { toSafeUser } from "./shared";

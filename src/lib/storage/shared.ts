@@ -1,0 +1,213 @@
+import type { getSupabase } from "../supabase";
+import type {
+  Product,
+  ProductLocationView,
+} from "../schema";
+import type { Permission } from "../permissions";
+import type { User, SafeUser } from "../userTypes";
+
+export interface DbProduct {
+  id: string;
+  name: string;
+  sku: string;
+  category: string;
+  quantity: number;
+  price: number;
+  low_stock_threshold: number;
+  description: string | null;
+}
+
+export interface DbUser {
+  id: string;
+  username: string;
+  password: string;
+  full_name: string;
+  rank: string;
+  unit: string;
+  callsign: string | null;
+  clearance_level: string;
+  is_active: boolean;
+  created_at: string | null;
+  user_permissions?: { permissions: { key: string } }[];
+  session_version: string | null;
+}
+
+export interface DbProductLocationViewRow {
+  id: string;
+  product_id: string;
+  location_id: string;
+  quantity: number;
+  updated_at: string;
+  locations: {
+    label: string;
+    row: number;
+    col: number;
+    level: number;
+  }[] | null;
+}
+
+export type AuditAction = "INSERT" | "UPDATE" | "DELETE";
+
+export interface DbAuditLogRow {
+  id: string;
+  table_name: string;
+  record_id: string | null;
+  action: AuditAction;
+  actor_user_id: string | null;
+  correlation_id: string | null;
+  old_values: Record<string, unknown> | null;
+  new_values: Record<string, unknown> | null;
+  created_at: string;
+  users?: {
+    username: string;
+    full_name: string;
+  }[] | null;
+}
+
+export type ProductUpdateDbPayload = Partial<{
+  name: string;
+  sku: string;
+  category: string;
+  quantity: number;
+  price: number;
+  low_stock_threshold: number;
+  description: string | null;
+}>;
+
+export type UpdateUserInput = {
+  username?: string;
+  full_name?: string;
+  rank?: string;
+  unit?: string;
+  callsign?: string | null;
+  clearanceLevel?: string;
+  isActive?: boolean;
+  password?: string;
+  permissions?: Permission[];
+};
+
+export type UserUpdateDbPayload = Partial<{
+  username: string;
+  full_name: string;
+  rank: string;
+  unit: string;
+  call_sign: string | null;
+  clearance_level: string;
+  is_active: boolean;
+  password: string;
+}>;
+
+export type AuditLogFilters = {
+  q?: string;
+  tableName?: string;
+  action?: AuditAction | "all";
+  actorUserId?: string;
+  limit?: number;
+};
+
+export type AuditLogItem = {
+  id: string;
+  tableName: string;
+  recordId: string | null;
+  action: AuditAction;
+  actorUserId: string | null;
+  actorUsername: string | null;
+  actorFullName: string | null;
+  correlationId: string | null;
+  oldValues: Record<string, unknown> | null;
+  newValues: Record<string, unknown> | null;
+  createdAt: string;
+};
+
+export type StorageContext = {
+  db: () => ReturnType<typeof getSupabase>;
+  audit: (actorUserId: string) => {
+    p_actor_user_id: string;
+    p_correlation_id: string;
+  };
+  hashPassword: (password: string) => Promise<string>;
+};
+
+export const USER_WITH_PERMISSIONS = `
+  *,
+  user_permissions (
+    permissions ( key )
+  )
+` as const;
+
+export function hasKeys(obj: object): boolean {
+  return Object.keys(obj).length > 0;
+}
+
+export function dbToProduct(row: DbProduct): Product {
+  return {
+    id: row.id,
+    name: row.name,
+    sku: row.sku,
+    category: row.category,
+    quantity: row.quantity,
+    price: Number(row.price),
+    lowStockThreshold: row.low_stock_threshold,
+    description: row.description,
+  };
+}
+
+export function dbToUser(row: DbUser): User {
+  return {
+    id: row.id,
+    username: row.username,
+    password: row.password,
+    full_name: row.full_name,
+    rank: row.rank,
+    unit: row.unit,
+    callsign: row.callsign,
+    clearanceLevel: row.clearance_level,
+    permissions: (row.user_permissions ?? []).map(
+      (up) => up.permissions.key as Permission,
+    ),
+    isActive: row.is_active,
+    createdAt: row.created_at ? new Date(row.created_at) : null,
+    sessionVersion: row.session_version ?? undefined,
+  };
+}
+
+export function toSafeUser(user: User): SafeUser {
+  const { password: _password, ...safe } = user;
+  return safe;
+}
+
+export function dbToProductLocationView(
+  row: DbProductLocationViewRow,
+): ProductLocationView {
+  const location = row.locations?.[0];
+
+  return {
+    id: row.id,
+    productId: row.product_id,
+    locationId: row.location_id,
+    quantity: row.quantity,
+    updatedAt: row.updated_at,
+    locationLabel: location?.label ?? "",
+    locationRow: location?.row ?? 0,
+    locationCol: location?.col ?? 0,
+    locationLevel: location?.level ?? 0,
+  };
+}
+
+export function dbToAuditLog(row: DbAuditLogRow): AuditLogItem {
+  const actor = row.users?.[0];
+
+  return {
+    id: row.id,
+    tableName: row.table_name,
+    recordId: row.record_id,
+    action: row.action,
+    actorUserId: row.actor_user_id,
+    actorUsername: actor?.username ?? null,
+    actorFullName: actor?.full_name ?? null,
+    correlationId: row.correlation_id,
+    oldValues: row.old_values,
+    newValues: row.new_values,
+    createdAt: row.created_at,
+  };
+}
