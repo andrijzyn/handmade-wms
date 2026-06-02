@@ -24,7 +24,7 @@ export interface DbUser {
   full_name: string;
   rank: string;
   unit: string;
-  callsign: string | null;
+  call_sign: string | null;
   clearance_level: string;
   is_active: boolean;
   created_at: string | null;
@@ -79,7 +79,7 @@ export type UpdateUserInput = {
   full_name?: string;
   rank?: string;
   unit?: string;
-  callsign?: string | null;
+  call_sign?: string | null;
   clearanceLevel?: string;
   isActive?: boolean;
   password?: string;
@@ -160,7 +160,7 @@ export function dbToUser(row: DbUser): User {
     full_name: row.full_name,
     rank: row.rank,
     unit: row.unit,
-    callsign: row.callsign,
+    call_sign: row.call_sign,
     clearanceLevel: row.clearance_level,
     permissions: (row.user_permissions ?? []).map(
       (up) => up.permissions.key as Permission,

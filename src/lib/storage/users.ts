@@ -25,7 +25,7 @@ async function buildUserUpdatePayload(
   if (updates.full_name !== undefined) payload.full_name = updates.full_name;
   if (updates.rank !== undefined) payload.rank = updates.rank;
   if (updates.unit !== undefined) payload.unit = updates.unit;
-  if (updates.callsign !== undefined) payload.call_sign = updates.callsign;
+  if (updates.call_sign !== undefined) payload.call_sign = updates.call_sign;
   if (updates.clearanceLevel !== undefined) {
     payload.clearance_level = updates.clearanceLevel;
   }
@@ -87,7 +87,7 @@ export function createUsersStorage(ctx: StorageContext) {
         p_full_name: insertUser.full_name,
         p_rank: insertUser.rank,
         p_unit: insertUser.unit,
-        p_callsign: insertUser.callsign ?? null,
+        p_call_sign: insertUser.call_sign ?? null,
         p_clearance_level: insertUser.clearanceLevel ?? "Без допуску",
         p_is_active: insertUser.isActive ?? true,
         ...ctx.audit(actorUserId),
