@@ -6,7 +6,7 @@ import { createProductsStorage } from "./products";
 import { createUsersStorage } from "./users";
 import { createLocationsStorage } from "./locations";
 import { createProductLocationsStorage } from "./productLocations";
-import { createAuditStorage } from "./audit";
+import { createAuditStorage } from "./logs";
 
 const PASSWORD_ROUNDS = 10;
 

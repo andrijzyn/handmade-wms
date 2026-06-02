@@ -172,6 +172,14 @@ export function dbToProductLocationView(
 
 export type AuditAction = "INSERT" | "UPDATE" | "DELETE";
 
+export interface AuditLogFilters {
+  action?: AuditAction | "all";
+  actorUserId?: string;
+  limit?: number;
+  q?: string;
+  tableName?: string;
+}
+
 export interface DbAuditLogRow {
   id: string;
   actor_user_id: string | null;
@@ -183,23 +191,16 @@ export interface DbAuditLogRow {
   created_at: string;
 }
 
-export type AuditLogFilters = {
-  q?: string;
-  entityType?: string;
-  action?: AuditAction | "all";
-  actorUserId?: string;
-  limit?: number;
-};
-
-export type AuditLogItem = {
+export interface AuditLogItem {
   id: string;
-  entityType: string;
-  entityId: string | null;
+  tableName: string;
+  recordId: string | null;
   action: AuditAction;
   actorUserId: string | null;
   actorUsername: string | null;
   actorFullName: string | null;
   correlationId: string | null;
-  payload: Record<string, unknown> | null;
+  oldValues: Record<string, unknown> | null;
+  newValues: Record<string, unknown> | null;
   createdAt: string;
-};
+}

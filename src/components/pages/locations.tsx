@@ -20,7 +20,7 @@ import LocationForm from "@/components/pages/location-form";
 type SortKey = "label" | "row" | "col" | "level";
 type SortDir = "asc" | "desc";
 
-export default function Locations() {
+export default function LocationsPage() {
   const [search, setSearch] = useState("");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("label");

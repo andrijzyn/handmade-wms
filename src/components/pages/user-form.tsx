@@ -65,6 +65,7 @@ const PERMISSION_LABELS: Record<Permission, string> = {
   read_locations: "Locations",
   read_users: "Users",
   read_debug: "Debug",
+  read_logs: "Logs",
   write_products: "Products",
   write_locations: "Locations",
   write_users: "Users",
