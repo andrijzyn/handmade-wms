@@ -71,13 +71,32 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 ***
 
 > [!IMPORTANT]
-> **In prioritate now**
-> 
+> **Current priority**
+>
 > ## Logging
-> 
-> - [ ] User action logging — хто, що, коли: CreateProduct, EditQuantity, DeleteLocation, Login
-> - [ ] Export audit log — вивантаження логу в CSV / PDF для підзвітності командиру
-> - [ ] Dashboard руху запасів — графік руху товарів за часом
+>
+> - [x] Create `audit_logs` table structure for append-only activity tracking
+> - [x] Add core audit fields: `actor_user_id`, `action`, `table_name`, `record_id`, `old_values`, `new_values`, `created_at`, `correlation_id`
+> - [x] Add audit log lookup with `getAuditLogs()` in storage
+> - [x] Join audit records with `users` to resolve readable actor information
+> - [x] Add backend filtering by action, entity type, actor, and search query
+> - [x] Sort audit records by newest first and limit large result sets
+> - [ ] Create `GET /api/audit-logs` API route
+> - [ ] Add permission to access the audit log
+> - [ ] Create Audit Log page
+> - [ ] Build audit table with `User`, `Action`, `Object`, and `Time` columns
+> - [ ] Add human-readable action formatter
+> - [ ] Add badges for `INSERT`, `UPDATE`, and `DELETE`
+> - [ ] Display timestamps in a readable format
+> - [ ] Add search by user, table, and record ID
+> - [ ] Add filters by operation type and entity type
+> - [ ] Add modal or drawer for record details
+> - [ ] Show `old_values` and `new_values` in the details view
+> - [ ] Show field-level changes in a `before -> after` format
+> - [ ] Add loading state for the audit table
+> - [ ] Add empty state when no audit records exist
+> - [ ] Export audit log to CSV / PDF for reporting
+> - [ ] Add stock movement dashboard with time-based charts
 
 ***
 
