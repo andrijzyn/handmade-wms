@@ -79,7 +79,7 @@ type UserFormValues = {
   full_name: string;
   rank: string;
   unit: string;
-  call_sign: string;
+  callsign: string;
   clearanceLevel: string;
   permissions: Permission[];
   isActive: boolean;
@@ -112,9 +112,9 @@ export default function UserForm(props: UserFormProps) {
       full_name: props.defaultValues?.full_name ?? "",
       rank: props.defaultValues?.rank ?? "",
       unit: props.defaultValues?.unit ?? "",
-      call_sign:
-        typeof props.defaultValues?.call_sign === "string"
-          ? props.defaultValues.call_sign
+      callsign:
+        typeof props.defaultValues?.callsign === "string"
+          ? props.defaultValues.callsign
           : "",
       clearanceLevel: props.defaultValues?.clearanceLevel ?? "No clearance",
       permissions: props.defaultValues?.permissions ?? [],
@@ -129,7 +129,7 @@ function handleSubmit(data: UserFormValues) {
     full_name: data.full_name.trim(),
     rank: data.rank,
     unit: data.unit,
-    call_sign: data.call_sign?.trim() || null,
+    callsign: data.callsign?.trim() || null,
     clearanceLevel: data.clearanceLevel,
     permissions: data.permissions,
     isActive: data.isActive,
@@ -237,7 +237,7 @@ function handleSubmit(data: UserFormValues) {
 
         <FormField
           control={form.control}
-          name="call_sign"
+          name="callsign"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Call sign</FormLabel>

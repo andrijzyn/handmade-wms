@@ -7,7 +7,7 @@ export interface User {
   full_name: string;
   rank: string;
   unit: string;
-  call_sign: string | null;
+  callsign: string | null;
   clearanceLevel: string;
   permissions: Permission[];
   isActive: boolean;

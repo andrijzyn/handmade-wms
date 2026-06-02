@@ -122,7 +122,7 @@ export const insertUserSchema = z.object({
   full_name: z.string().min(1, { error: "Required" }),
   rank: z.string().min(1, { error: "Required" }),
   unit: z.string().min(1, { error: "Required" }),
-  call_sign: z.string().nullable().optional(),
+  callsign: z.string().nullable().optional(),
   clearanceLevel: z.string().default("No clearance"),
   permissions: z.array(permissionSchema).default([]),
   isActive: z.boolean().default(true),

@@ -198,7 +198,7 @@ export default function UsersPage() {
                     <TableCell className="text-sm">{u.rank}</TableCell>
                     <TableCell className="text-sm">{u.unit}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {u.call_sign || "—"}
+                      {u.callsign || "—"}
                     </TableCell>
                     <TableCell>
                       <Badge variant={clearanceBadgeVariant(u.clearanceLevel)}>
@@ -279,7 +279,7 @@ export default function UsersPage() {
                 full_name: editUser.full_name,
                 rank: editUser.rank,
                 unit: editUser.unit,
-                call_sign: editUser.call_sign ?? "",
+                callsign: editUser.callsign ?? "",
                 clearanceLevel: editUser.clearanceLevel,
                 permissions: editUser.permissions,
                 isActive: editUser.isActive,

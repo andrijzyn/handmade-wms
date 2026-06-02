@@ -5,7 +5,7 @@
 create extension if not exists "uuid-ossp";
 
 -- 1) Audit table
-create table if not exists public.audit_log (
+create table if not exists public.logs (
                                               id uuid primary key default uuid_generate_v4(),
   actor_user_id uuid,
   action text not null,
@@ -16,20 +16,20 @@ create table if not exists public.audit_log (
   created_at timestamptz not null default now()
   );
 
-create index if not exists idx_audit_log_actor_user_id
-  on public.audit_log (actor_user_id);
+create index if not exists idx_logs_actor_user_id
+  on public.logs (actor_user_id);
 
-create index if not exists idx_audit_log_entity
-  on public.audit_log (entity_type, entity_id);
+create index if not exists idx_logs_entity
+  on public.logs (entity_type, entity_id);
 
-create index if not exists idx_audit_log_correlation_id
-  on public.audit_log (correlation_id);
+create index if not exists idx_logs_correlation_id
+  on public.logs (correlation_id);
 
-create index if not exists idx_audit_log_created_at
-  on public.audit_log (created_at desc);
+create index if not exists idx_logs_created_at
+  on public.logs (created_at desc);
 
 -- 2) Common audit helper
-create or replace function public.log_audit_event(
+create or replace function public.logs_audit_event(
   p_actor_user_id uuid,
   p_action text,
   p_entity_type text,
@@ -41,7 +41,7 @@ returns void
 language plpgsql
 as $$
 begin
-insert into public.audit_log (
+insert into public.logs (
   actor_user_id,
   action,
   entity_type,
@@ -101,7 +101,7 @@ values (
        )
   returning * into v_product;
 
-perform public.log_audit_event(
+perform public.logs_audit_event(
     p_actor_user_id,
     'create',
     'product',
@@ -172,7 +172,7 @@ where id = p_product_id
     return null;
 end if;
 
-  perform public.log_audit_event(
+  perform public.logs_audit_event(
     p_actor_user_id,
     'update',
     'product',
@@ -204,7 +204,7 @@ if v_product is null then
     return false;
 end if;
 
-  perform public.log_audit_event(
+  perform public.logs_audit_event(
     p_actor_user_id,
     'delete',
     'product',
@@ -269,7 +269,7 @@ values (
        )
   returning id into v_user_id;
 
-perform public.log_audit_event(
+perform public.logs_audit_event(
     p_actor_user_id,
     'create',
     'user',
@@ -344,7 +344,7 @@ if not v_updated then
     return false;
 end if;
 
-  perform public.log_audit_event(
+  perform public.logs_audit_event(
     p_actor_user_id,
     'update',
     'user',
@@ -380,7 +380,7 @@ if v_user is null then
     return false;
 end if;
 
-  perform public.log_audit_event(
+  perform public.logs_audit_event(
     p_actor_user_id,
     'delete',
     'user',
@@ -421,7 +421,7 @@ select
 from public.permissions p
 where p.key = any(coalesce(p_permission_keys, array[]::text[]));
 
-perform public.log_audit_event(
+perform public.logs_audit_event(
     p_actor_user_id,
     'replace_permissions',
     'user',
@@ -465,7 +465,7 @@ values (
        )
   returning * into v_row;
 
-perform public.log_audit_event(
+perform public.logs_audit_event(
     p_actor_user_id,
     'create',
     'product_location',
@@ -505,7 +505,7 @@ if v_row is null then
     return null;
 end if;
 
-  perform public.log_audit_event(
+  perform public.logs_audit_event(
     p_actor_user_id,
     'update',
     'product_location',
@@ -541,7 +541,7 @@ if v_row is null then
     return false;
 end if;
 
-  perform public.log_audit_event(
+  perform public.logs_audit_event(
     p_actor_user_id,
     'delete',
     'product_location',
