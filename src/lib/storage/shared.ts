@@ -46,8 +46,6 @@ export interface DbProductLocationViewRow {
   }[] | null;
 }
 
-export type AuditAction = "INSERT" | "UPDATE" | "DELETE";
-
 export interface DbAuditLogRow {
   id: string;
   table_name: string;
@@ -96,28 +94,6 @@ export type UserUpdateDbPayload = Partial<{
   is_active: boolean;
   password: string;
 }>;
-
-export type AuditLogFilters = {
-  q?: string;
-  tableName?: string;
-  action?: AuditAction | "all";
-  actorUserId?: string;
-  limit?: number;
-};
-
-export type AuditLogItem = {
-  id: string;
-  tableName: string;
-  recordId: string | null;
-  action: AuditAction;
-  actorUserId: string | null;
-  actorUsername: string | null;
-  actorFullName: string | null;
-  correlationId: string | null;
-  oldValues: Record<string, unknown> | null;
-  newValues: Record<string, unknown> | null;
-  createdAt: string;
-};
 
 export type StorageContext = {
   db: () => ReturnType<typeof getSupabase>;
@@ -194,20 +170,36 @@ export function dbToProductLocationView(
   };
 }
 
-export function dbToAuditLog(row: DbAuditLogRow): AuditLogItem {
-  const actor = row.users?.[0];
+export type AuditAction = "INSERT" | "UPDATE" | "DELETE";
 
-  return {
-    id: row.id,
-    tableName: row.table_name,
-    recordId: row.record_id,
-    action: row.action,
-    actorUserId: row.actor_user_id,
-    actorUsername: actor?.username ?? null,
-    actorFullName: actor?.full_name ?? null,
-    correlationId: row.correlation_id,
-    oldValues: row.old_values,
-    newValues: row.new_values,
-    createdAt: row.created_at,
-  };
+export interface DbAuditLogRow {
+  id: string;
+  actor_user_id: string | null;
+  action: AuditAction;
+  entity_type: string;
+  entity_id: string | null;
+  correlation_id: string | null;
+  payload: Record<string, unknown> | null;
+  created_at: string;
 }
+
+export type AuditLogFilters = {
+  q?: string;
+  entityType?: string;
+  action?: AuditAction | "all";
+  actorUserId?: string;
+  limit?: number;
+};
+
+export type AuditLogItem = {
+  id: string;
+  entityType: string;
+  entityId: string | null;
+  action: AuditAction;
+  actorUserId: string | null;
+  actorUsername: string | null;
+  actorFullName: string | null;
+  correlationId: string | null;
+  payload: Record<string, unknown> | null;
+  createdAt: string;
+};
