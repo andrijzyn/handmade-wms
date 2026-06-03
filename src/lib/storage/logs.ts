@@ -28,8 +28,8 @@ function attachActorsToLogs(
     const newValues =
       payload && "newValues" in payload
         ? (payload.newValues as Record<string, unknown> | null)
-        : payload && "new_values" in payload
-          ? (payload.new_values as Record<string, unknown> | null)
+        : payload && "newValues" in payload
+          ? (payload.newValues as Record<string, unknown> | null)
           : null;
 
     return {

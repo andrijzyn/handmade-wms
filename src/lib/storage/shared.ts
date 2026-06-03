@@ -54,7 +54,7 @@ export interface DbAuditLogRow {
   actorUserID: string | null;
   correlationID: string | null;
   oldValues: Record<string, unknown> | null;
-  new_values: Record<string, unknown> | null;
+  newValues: Record<string, unknown> | null;
   createdAt: string;
   users?: {
     username: string;
