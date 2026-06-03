@@ -156,7 +156,7 @@ export function createUsersStorage(ctx: StorageContext) {
       actorUserId: string,
     ): Promise<void> {
       const { error } = await ctx.db().rpc(
-        "replace_user_permissions_with_audit",
+        "replace_userPermissions_with_audit",
         {
           p_user_id: userId,
           p_permission_keys: permissions,

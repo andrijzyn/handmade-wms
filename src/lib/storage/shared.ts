@@ -28,7 +28,7 @@ export interface DbUser {
   clearanceLevel: string;
   isActive: boolean;
   createdAt: string | null;
-  user_permissions?: { permissions: { key: string } }[];
+  userPermissions?: { permissions: { key: string } }[];
   session_version: string | null;
 }
 
@@ -106,7 +106,7 @@ export type StorageContext = {
 
 export const USER_WITH_PERMISSIONS = `
   *,
-  user_permissions (
+  userPermissions (
     permissions ( key )
   )
 ` as const;
@@ -138,7 +138,7 @@ export function dbToUser(row: DbUser): User {
     unit: row.unit,
     callsign: row.callsign,
     clearanceLevel: row.clearanceLevel,
-    permissions: (row.user_permissions ?? []).map(
+    permissions: (row.userPermissions ?? []).map(
       (up) => up.permissions.key as Permission,
     ),
     isActive: row.isActive,
