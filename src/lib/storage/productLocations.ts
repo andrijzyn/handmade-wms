@@ -15,7 +15,7 @@ export function createProductLocationsStorage(ctx: StorageContext) {
           `
           id,
           productID,
-          location_id,
+          locationID,
           quantity,
           updated_at,
           locations (
@@ -43,7 +43,7 @@ export function createProductLocationsStorage(ctx: StorageContext) {
         .from("product_locations")
         .select("*")
         .eq("productID", productId)
-        .eq("location_id", locationId)
+        .eq("locationID", locationId)
         .single();
 
       if (error) return null;
@@ -58,7 +58,7 @@ export function createProductLocationsStorage(ctx: StorageContext) {
         "create_product_location_with_audit",
         {
           p_productID: input.productId,
-          p_location_id: input.locationId,
+          p_locationID: input.locationId,
           p_quantity: input.quantity,
           ...ctx.audit(actorUserId),
         },
