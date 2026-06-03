@@ -4,7 +4,7 @@ export interface User {
   id: string;
   username: string;
   password: string;
-  full_name: string;
+  fullName: string;
   rank: string;
   unit: string;
   callsign: string | null;

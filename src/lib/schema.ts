@@ -119,7 +119,7 @@ export const CLEARANCE_LEVELS = [
 export const insertUserSchema = z.object({
   username: z.string().min(3, { error: "Min 3 characters" }).max(50),
   password: z.string().min(6, { error: "Min 6 characters" }),
-  full_name: z.string().min(1, { error: "Required" }),
+  fullName: z.string().min(1, { error: "Required" }),
   rank: z.string().min(1, { error: "Required" }),
   unit: z.string().min(1, { error: "Required" }),
   callsign: z.string().nullable().optional(),

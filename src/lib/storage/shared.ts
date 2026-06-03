@@ -21,7 +21,7 @@ export interface DbUser {
   id: string;
   username: string;
   password: string;
-  full_name: string;
+  fullName: string;
   rank: string;
   unit: string;
   callsign: string | null;
@@ -58,7 +58,7 @@ export interface DbAuditLogRow {
   created_at: string;
   users?: {
     username: string;
-    full_name: string;
+    fullName: string;
   }[] | null;
 }
 
@@ -74,7 +74,7 @@ export type ProductUpdateDbPayload = Partial<{
 
 export type UpdateUserInput = {
   username?: string;
-  full_name?: string;
+  fullName?: string;
   rank?: string;
   unit?: string;
   callsign?: string | null;
@@ -86,7 +86,7 @@ export type UpdateUserInput = {
 
 export type UserUpdateDbPayload = Partial<{
   username: string;
-  full_name: string;
+  fullName: string;
   rank: string;
   unit: string;
   callsign: string | null;
@@ -133,7 +133,7 @@ export function dbToUser(row: DbUser): User {
     id: row.id,
     username: row.username,
     password: row.password,
-    full_name: row.full_name,
+    fullName: row.fullName,
     rank: row.rank,
     unit: row.unit,
     callsign: row.callsign,

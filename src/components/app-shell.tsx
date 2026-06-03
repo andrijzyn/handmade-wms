@@ -179,7 +179,7 @@ export default function AppShell() {
                     className="text-xs font-medium truncate text-sidebar-foreground"
                     data-testid="text-current-user"
                   >
-                    {user.callsign ? user.callsign : user.full_name}
+                    {user.callsign ? user.callsign : user.fullName}
                   </p>
                   <p className="text-[10px] text-muted-foreground truncate">
                     {user.rank}

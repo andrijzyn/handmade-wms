@@ -18,7 +18,7 @@ export async function getUserDisplayMapByIds(
   const { data, error } = await ctx
     .db()
     .from("users")
-    .select("id, username, full_name")
+    .select("id, username, fullName")
     .in("id", uniqueIds);
 
   if (error) throw error;
@@ -28,7 +28,7 @@ export async function getUserDisplayMapByIds(
       user.id,
       {
         username: user.username ?? null,
-        fullName: user.full_name ?? null,
+        fullName: user.fullName ?? null,
       },
     ]),
   );

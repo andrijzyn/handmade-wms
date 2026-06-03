@@ -190,7 +190,7 @@ export default function UsersPage() {
                 {users.map((u) => (
                   <TableRow key={u.id} data-testid={`row-user-${u.id}`}>
                     <TableCell>
-                      <p className="text-sm font-medium">{u.full_name}</p>
+                      <p className="text-sm font-medium">{u.fullName}</p>
                       <p className="text-xs text-muted-foreground">
                         @{u.username}
                       </p>
@@ -267,7 +267,7 @@ export default function UsersPage() {
       >
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit: {editUser?.full_name}</DialogTitle>
+            <DialogTitle>Edit: {editUser?.fullName}</DialogTitle>
             <DialogDescription>Update user account details</DialogDescription>
           </DialogHeader>
           {editUser && (
@@ -276,7 +276,7 @@ export default function UsersPage() {
               defaultValues={{
                 username: editUser.username,
                 password: "",
-                full_name: editUser.full_name,
+                fullName: editUser.fullName,
                 rank: editUser.rank,
                 unit: editUser.unit,
                 callsign: editUser.callsign ?? "",
@@ -304,7 +304,7 @@ export default function UsersPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete user?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {deleteTarget?.full_name} (@
+              Are you sure you want to delete {deleteTarget?.fullName} (@
               {deleteTarget?.username})? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

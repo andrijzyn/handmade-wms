@@ -77,7 +77,7 @@ const PERMISSION_LABELS: Record<Permission, string> = {
 type UserFormValues = {
   username: string;
   password: string;
-  full_name: string;
+  fullName: string;
   rank: string;
   unit: string;
   callsign: string;
@@ -110,7 +110,7 @@ export default function UserForm(props: UserFormProps) {
     defaultValues: {
       username: props.defaultValues?.username ?? "",
       password: "",
-      full_name: props.defaultValues?.full_name ?? "",
+      fullName: props.defaultValues?.fullName ?? "",
       rank: props.defaultValues?.rank ?? "",
       unit: props.defaultValues?.unit ?? "",
       callsign:
@@ -127,7 +127,7 @@ function handleSubmit(data: UserFormValues) {
   const password = data.password?.trim();
   const basePayload = {
     username: data.username.trim(),
-    full_name: data.full_name.trim(),
+    fullName: data.fullName.trim(),
     rank: data.rank,
     unit: data.unit,
     callsign: data.callsign?.trim() || null,
@@ -185,7 +185,7 @@ function handleSubmit(data: UserFormValues) {
 
         <FormField
           control={form.control}
-          name="full_name"
+          name="fullName"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Full name</FormLabel>

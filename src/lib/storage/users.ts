@@ -22,7 +22,7 @@ async function buildUserUpdatePayload(
   const payload: UserUpdateDbPayload = {};
 
   if (updates.username !== undefined) payload.username = updates.username;
-  if (updates.full_name !== undefined) payload.full_name = updates.full_name;
+  if (updates.fullName !== undefined) payload.fullName = updates.fullName;
   if (updates.rank !== undefined) payload.rank = updates.rank;
   if (updates.unit !== undefined) payload.unit = updates.unit;
   if (updates.callsign !== undefined) payload.callsign = updates.callsign;
@@ -84,7 +84,7 @@ export function createUsersStorage(ctx: StorageContext) {
       const { data, error } = await ctx.db().rpc("create_user_with_audit", {
         p_username: insertUser.username,
         p_password: hashedPassword,
-        p_full_name: insertUser.full_name,
+        p_fullName: insertUser.fullName,
         p_rank: insertUser.rank,
         p_unit: insertUser.unit,
         p_callsign: insertUser.callsign ?? null,
