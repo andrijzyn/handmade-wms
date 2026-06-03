@@ -11,8 +11,8 @@ function attachActorsToLogs(
   userMap: Map<string, { username: string | null; fullName: string | null }>,
 ): AuditLogItem[] {
   return rows.map((row) => {
-    const actor = row.actor_user_id
-      ? userMap.get(row.actor_user_id)
+    const actor = row.actorUserID
+      ? userMap.get(row.actorUserID)
       : undefined;
 
     const payload =
@@ -37,7 +37,7 @@ function attachActorsToLogs(
       tableName: row.entity_type,
       recordId: row.entity_id,
       action: String(row.action).toUpperCase() as AuditLogItem["action"],
-      actorUserId: row.actor_user_id,
+      actorUserId: row.actorUserID,
       actorUsername: actor?.username ?? null,
       actorFullName: actor?.fullName ?? null,
       correlationId: row.correlation_id,
@@ -56,7 +56,7 @@ export function createAuditStorage(ctx: StorageContext) {
         .from("logs")
         .select(`
           id,
-          actor_user_id,
+          actorUserID,
           action,
           entity_type,
           entity_id,
@@ -76,7 +76,7 @@ export function createAuditStorage(ctx: StorageContext) {
       }
 
       if (filters?.actorUserId) {
-        query = query.eq("actor_user_id", filters.actorUserId);
+        query = query.eq("actorUserID", filters.actorUserId);
       }
 
       if (filters?.q?.trim()) {
@@ -93,7 +93,7 @@ export function createAuditStorage(ctx: StorageContext) {
 
       const actorIds = [...new Set(
         rows
-          .map((row) => row.actor_user_id)
+          .map((row) => row.actorUserID)
           .filter((id): id is string => Boolean(id))
       )];
 
