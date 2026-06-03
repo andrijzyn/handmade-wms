@@ -48,8 +48,8 @@ export interface DbProductLocationViewRow {
 
 export interface DbAuditLogRow {
   id: string;
-  table_name: string;
-  record_id: string | null;
+  tableName: string;
+  recordID: string | null;
   action: AuditAction;
   actor_user_id: string | null;
   correlation_id: string | null;
