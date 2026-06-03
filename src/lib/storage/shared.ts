@@ -29,7 +29,7 @@ export interface DbUser {
   isActive: boolean;
   createdAt: string | null;
   userPermissions?: { permissions: { key: string } }[];
-  session_version: string | null;
+  sessionVersion: string | null;
 }
 
 export interface DbProductLocationViewRow {
@@ -143,7 +143,7 @@ export function dbToUser(row: DbUser): User {
     ),
     isActive: row.isActive,
     createdAt: row.createdAt ? new Date(row.createdAt) : null,
-    sessionVersion: row.session_version ?? undefined,
+    sessionVersion: row.sessionVersion ?? undefined,
   };
 }
 
