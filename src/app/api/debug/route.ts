@@ -38,7 +38,7 @@ export const GET = withErrorHandling(async (req) => {
         `
     id,
     username,
-    is_active,
+    isActive,
     user_permissions (
       permissions ( key )
     )
@@ -56,7 +56,7 @@ export const GET = withErrorHandling(async (req) => {
       const usersWithPermissions = (data ?? []).map((row: any) => ({
         id: row.id,
         username: row.username,
-        isActive: row.is_active,
+        isActive: row.isActive,
         permissions: (row.user_permissions ?? []).map(
           (up: any) => up.permissions.key,
         ),

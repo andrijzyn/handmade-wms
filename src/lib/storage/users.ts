@@ -30,7 +30,7 @@ async function buildUserUpdatePayload(
     payload.clearanceLevel = updates.clearanceLevel;
   }
   if (updates.isActive !== undefined) {
-    payload.is_active = updates.isActive;
+    payload.isActive = updates.isActive;
   }
 
   const normalizedPassword = updates.password?.trim();
@@ -89,7 +89,7 @@ export function createUsersStorage(ctx: StorageContext) {
         p_unit: insertUser.unit,
         p_callsign: insertUser.callsign ?? null,
         p_clearanceLevel: insertUser.clearanceLevel ?? "Без допуску",
-        p_is_active: insertUser.isActive ?? true,
+        p_isActive: insertUser.isActive ?? true,
         ...ctx.audit(actorUserId),
       });
 

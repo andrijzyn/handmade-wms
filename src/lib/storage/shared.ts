@@ -26,7 +26,7 @@ export interface DbUser {
   unit: string;
   callsign: string | null;
   clearanceLevel: string;
-  is_active: boolean;
+  isActive: boolean;
   created_at: string | null;
   user_permissions?: { permissions: { key: string } }[];
   session_version: string | null;
@@ -91,7 +91,7 @@ export type UserUpdateDbPayload = Partial<{
   unit: string;
   callsign: string | null;
   clearanceLevel: string;
-  is_active: boolean;
+  isActive: boolean;
   password: string;
 }>;
 
@@ -141,7 +141,7 @@ export function dbToUser(row: DbUser): User {
     permissions: (row.user_permissions ?? []).map(
       (up) => up.permissions.key as Permission,
     ),
-    isActive: row.is_active,
+    isActive: row.isActive,
     createdAt: row.created_at ? new Date(row.created_at) : null,
     sessionVersion: row.session_version ?? undefined,
   };
