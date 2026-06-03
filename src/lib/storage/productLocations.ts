@@ -14,7 +14,7 @@ export function createProductLocationsStorage(ctx: StorageContext) {
         .select(
           `
           id,
-          product_id,
+          productID,
           location_id,
           quantity,
           updated_at,
@@ -26,7 +26,7 @@ export function createProductLocationsStorage(ctx: StorageContext) {
           )
         `,
         )
-        .eq("product_id", productId);
+        .eq("productID", productId);
 
       if (error) throw error;
 
@@ -42,7 +42,7 @@ export function createProductLocationsStorage(ctx: StorageContext) {
       const { data, error } = await ctx.db()
         .from("product_locations")
         .select("*")
-        .eq("product_id", productId)
+        .eq("productID", productId)
         .eq("location_id", locationId)
         .single();
 
@@ -57,7 +57,7 @@ export function createProductLocationsStorage(ctx: StorageContext) {
       const { data, error } = await ctx.db().rpc(
         "create_product_location_with_audit",
         {
-          p_product_id: input.productId,
+          p_productID: input.productId,
           p_location_id: input.locationId,
           p_quantity: input.quantity,
           ...ctx.audit(actorUserId),

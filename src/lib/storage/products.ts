@@ -87,7 +87,7 @@ export function createProductsStorage(ctx: StorageContext) {
       }
 
       const { data, error } = await ctx.db().rpc("update_product_with_audit", {
-        p_product_id: id,
+        p_productID: id,
         p_updates: dbUpdates,
         ...ctx.audit(actorUserId),
       });
@@ -100,7 +100,7 @@ export function createProductsStorage(ctx: StorageContext) {
 
     async deleteProduct(id: string, actorUserId: string): Promise<boolean> {
       const { data, error } = await ctx.db().rpc("delete_product_with_audit", {
-        p_product_id: id,
+        p_productID: id,
         ...ctx.audit(actorUserId),
       });
 
