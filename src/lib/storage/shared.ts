@@ -53,7 +53,7 @@ export interface DbAuditLogRow {
   action: AuditAction;
   actorUserID: string | null;
   correlationID: string | null;
-  old_values: Record<string, unknown> | null;
+  oldValues: Record<string, unknown> | null;
   new_values: Record<string, unknown> | null;
   createdAt: string;
   users?: {

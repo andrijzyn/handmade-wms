@@ -21,8 +21,8 @@ function attachActorsToLogs(
     const oldValues =
       payload && "oldValues" in payload
         ? (payload.oldValues as Record<string, unknown> | null)
-        : payload && "old_values" in payload
-          ? (payload.old_values as Record<string, unknown> | null)
+        : payload && "oldValues" in payload
+          ? (payload.oldValues as Record<string, unknown> | null)
           : null;
 
     const newValues =
