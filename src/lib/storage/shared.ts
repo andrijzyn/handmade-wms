@@ -25,7 +25,7 @@ export interface DbUser {
   rank: string;
   unit: string;
   callsign: string | null;
-  clearance_level: string;
+  clearanceLevel: string;
   is_active: boolean;
   created_at: string | null;
   user_permissions?: { permissions: { key: string } }[];
@@ -90,7 +90,7 @@ export type UserUpdateDbPayload = Partial<{
   rank: string;
   unit: string;
   callsign: string | null;
-  clearance_level: string;
+  clearanceLevel: string;
   is_active: boolean;
   password: string;
 }>;
@@ -137,7 +137,7 @@ export function dbToUser(row: DbUser): User {
     rank: row.rank,
     unit: row.unit,
     callsign: row.callsign,
-    clearanceLevel: row.clearance_level,
+    clearanceLevel: row.clearanceLevel,
     permissions: (row.user_permissions ?? []).map(
       (up) => up.permissions.key as Permission,
     ),
