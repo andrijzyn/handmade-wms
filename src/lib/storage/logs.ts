@@ -40,7 +40,7 @@ function attachActorsToLogs(
       actorUserId: row.actorUserID,
       actorUsername: actor?.username ?? null,
       actorFullName: actor?.fullName ?? null,
-      correlationId: row.correlation_id,
+      correlationId: row.correlationID,
       oldValues,
       newValues,
       createdAt: row.createdAt,
@@ -60,7 +60,7 @@ export function createAuditStorage(ctx: StorageContext) {
           action,
           entity_type,
           entity_id,
-          correlation_id,
+          correlationID,
           payload,
           createdAt
         `)
@@ -82,7 +82,7 @@ export function createAuditStorage(ctx: StorageContext) {
       if (filters?.q?.trim()) {
         const q = filters.q.trim();
         query = query.or(
-          `entity_type.ilike.%${q}%,entity_id::text.ilike.%${q}%,correlation_id::text.ilike.%${q}%`
+          `entity_type.ilike.%${q}%,entity_id::text.ilike.%${q}%,correlationID::text.ilike.%${q}%`
         );
       }
 

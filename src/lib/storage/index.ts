@@ -20,7 +20,7 @@ const ctx: StorageContext = {
 
     return {
       p_actorUserID: actorUserId,
-      p_correlation_id: randomUUID(),
+      p_correlationID: randomUUID(),
     };
   },
 

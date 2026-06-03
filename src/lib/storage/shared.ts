@@ -52,7 +52,7 @@ export interface DbAuditLogRow {
   recordID: string | null;
   action: AuditAction;
   actorUserID: string | null;
-  correlation_id: string | null;
+  correlationID: string | null;
   old_values: Record<string, unknown> | null;
   new_values: Record<string, unknown> | null;
   createdAt: string;
@@ -99,7 +99,7 @@ export type StorageContext = {
   db: () => ReturnType<typeof getSupabase>;
   audit: (actorUserId: string) => {
     p_actorUserID: string;
-    p_correlation_id: string;
+    p_correlationID: string;
   };
   hashPassword: (password: string) => Promise<string>;
 };
@@ -186,7 +186,7 @@ export interface DbAuditLogRow {
   action: AuditAction;
   entity_type: string;
   entity_id: string | null;
-  correlation_id: string | null;
+  correlationID: string | null;
   payload: Record<string, unknown> | null;
   createdAt: string;
 }
