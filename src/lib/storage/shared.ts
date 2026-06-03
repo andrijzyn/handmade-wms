@@ -27,7 +27,7 @@ export interface DbUser {
   callsign: string | null;
   clearanceLevel: string;
   isActive: boolean;
-  created_at: string | null;
+  createdAt: string | null;
   user_permissions?: { permissions: { key: string } }[];
   session_version: string | null;
 }
@@ -55,7 +55,7 @@ export interface DbAuditLogRow {
   correlation_id: string | null;
   old_values: Record<string, unknown> | null;
   new_values: Record<string, unknown> | null;
-  created_at: string;
+  createdAt: string;
   users?: {
     username: string;
     fullName: string;
@@ -142,7 +142,7 @@ export function dbToUser(row: DbUser): User {
       (up) => up.permissions.key as Permission,
     ),
     isActive: row.isActive,
-    createdAt: row.created_at ? new Date(row.created_at) : null,
+    createdAt: row.createdAt ? new Date(row.createdAt) : null,
     sessionVersion: row.session_version ?? undefined,
   };
 }
@@ -188,7 +188,7 @@ export interface DbAuditLogRow {
   entity_id: string | null;
   correlation_id: string | null;
   payload: Record<string, unknown> | null;
-  created_at: string;
+  createdAt: string;
 }
 
 export interface AuditLogItem {

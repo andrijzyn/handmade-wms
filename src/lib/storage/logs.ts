@@ -43,7 +43,7 @@ function attachActorsToLogs(
       correlationId: row.correlation_id,
       oldValues,
       newValues,
-      createdAt: row.created_at,
+      createdAt: row.createdAt,
     };
   });
 }
@@ -62,9 +62,9 @@ export function createAuditStorage(ctx: StorageContext) {
           entity_id,
           correlation_id,
           payload,
-          created_at
+          createdAt
         `)
-        .order("created_at", { ascending: false })
+        .order("createdAt", { ascending: false })
         .limit(filters?.limit ?? 100);
 
       if (filters?.tableName && filters.tableName !== "all") {

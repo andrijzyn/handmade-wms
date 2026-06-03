@@ -47,7 +47,7 @@ export function createUsersStorage(ctx: StorageContext) {
       const { data, error } = await ctx.db()
         .from("users")
         .select(USER_WITH_PERMISSIONS)
-        .order("created_at");
+        .order("createdAt");
 
       if (error) throw error;
       return (data as DbUser[]).map(dbToUser).map(toSafeUser);
