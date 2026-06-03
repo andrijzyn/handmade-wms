@@ -34,8 +34,8 @@ function attachActorsToLogs(
 
     return {
       id: row.id,
-      tableName: row.entity_type,
-      recordId: row.entity_id,
+      tableName: row.entityType,
+      recordId: row.entityID,
       action: String(row.action).toUpperCase() as AuditLogItem["action"],
       actorUserId: row.actorUserID,
       actorUsername: actor?.username ?? null,
@@ -58,8 +58,8 @@ export function createAuditStorage(ctx: StorageContext) {
           id,
           actorUserID,
           action,
-          entity_type,
-          entity_id,
+          entityType,
+          entityID,
           correlationID,
           payload,
           createdAt
@@ -68,7 +68,7 @@ export function createAuditStorage(ctx: StorageContext) {
         .limit(filters?.limit ?? 100);
 
       if (filters?.tableName && filters.tableName !== "all") {
-        query = query.eq("entity_type", filters.tableName);
+        query = query.eq("entityType", filters.tableName);
       }
 
       if (filters?.action && filters.action !== "all") {
@@ -82,7 +82,7 @@ export function createAuditStorage(ctx: StorageContext) {
       if (filters?.q?.trim()) {
         const q = filters.q.trim();
         query = query.or(
-          `entity_type.ilike.%${q}%,entity_id::text.ilike.%${q}%,correlationID::text.ilike.%${q}%`
+          `entityType.ilike.%${q}%,entityID::text.ilike.%${q}%,correlationID::text.ilike.%${q}%`
         );
       }
 

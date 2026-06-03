@@ -98,8 +98,10 @@ export type UserUpdateDbPayload = Partial<{
 export type StorageContext = {
   db: () => ReturnType<typeof getSupabase>;
   audit: (actorUserId: string) => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     p_actorUserID: string;
-    p_correlationID: string;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+     cx: string;
   };
   hashPassword: (password: string) => Promise<string>;
 };
@@ -184,8 +186,8 @@ export interface DbAuditLogRow {
   id: string;
   actorUserID: string | null;
   action: AuditAction;
-  entity_type: string;
-  entity_id: string | null;
+  entityType: string;
+  entityID: string | null;
   correlationID: string | null;
   payload: Record<string, unknown> | null;
   createdAt: string;
