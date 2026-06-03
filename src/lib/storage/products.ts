@@ -13,7 +13,7 @@ function buildProductUpdatePayload(
   if (updates.quantity !== undefined) payload.quantity = updates.quantity;
   if (updates.price !== undefined) payload.price = updates.price;
   if (updates.lowStockThreshold !== undefined) {
-    payload.low_stock_threshold = updates.lowStockThreshold;
+    payload.lowStockThreshold = updates.lowStockThreshold;
   }
   if (updates.description !== undefined) {
     payload.description = updates.description;
@@ -66,7 +66,7 @@ export function createProductsStorage(ctx: StorageContext) {
         p_category: insertProduct.category,
         p_quantity: insertProduct.quantity,
         p_price: insertProduct.price,
-        p_low_stock_threshold: insertProduct.lowStockThreshold,
+        p_lowStockThreshold: insertProduct.lowStockThreshold,
         p_description: insertProduct.description ?? null,
         ...ctx.audit(actorUserId),
       });

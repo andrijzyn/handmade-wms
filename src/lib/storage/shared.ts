@@ -13,7 +13,7 @@ export interface DbProduct {
   category: string;
   quantity: number;
   price: number;
-  low_stock_threshold: number;
+  lowStockThreshold: number;
   description: string | null;
 }
 
@@ -68,7 +68,7 @@ export type ProductUpdateDbPayload = Partial<{
   category: string;
   quantity: number;
   price: number;
-  low_stock_threshold: number;
+  lowStockThreshold: number;
   description: string | null;
 }>;
 
@@ -123,7 +123,7 @@ export function dbToProduct(row: DbProduct): Product {
     category: row.category,
     quantity: row.quantity,
     price: Number(row.price),
-    lowStockThreshold: row.low_stock_threshold,
+    lowStockThreshold: row.lowStockThreshold,
     description: row.description,
   };
 }
