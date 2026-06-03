@@ -17,7 +17,7 @@ export function createProductLocationsStorage(ctx: StorageContext) {
           productID,
           locationID,
           quantity,
-          updated_at,
+          updatedAt,
           locations (
             label,
             row,

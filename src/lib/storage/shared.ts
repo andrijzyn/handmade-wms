@@ -37,7 +37,7 @@ export interface DbProductLocationViewRow {
   productID: string;
   locationID: string;
   quantity: number;
-  updated_at: string;
+  updatedAt: string;
   locations: {
     label: string;
     row: number;
@@ -162,7 +162,7 @@ export function dbToProductLocationView(
     productId: row.productID,
     locationId: row.locationID,
     quantity: row.quantity,
-    updatedAt: row.updated_at,
+    updatedAt: row.updatedAt,
     locationLabel: location?.label ?? "",
     locationRow: location?.row ?? 0,
     locationCol: location?.col ?? 0,
