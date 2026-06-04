@@ -8,7 +8,7 @@ import {
   badRequest,
   conflict,
   notFound,
-} from "@/lib/apiError";
+} from "../../../../lib/apiServerError";
 import { PERMISSIONS } from "@/lib/permissions";
 
 // GET /api/products/[id]

@@ -7,7 +7,7 @@ import {
   badRequest,
   notFound,
   conflict,
-} from "@/lib/apiError";
+} from "../../../../../lib/apiServerError";
 import { requirePermission } from "@/lib/auth";
 import { PERMISSIONS } from "@/lib/permissions";
 

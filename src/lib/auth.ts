@@ -5,7 +5,7 @@ import { storage } from "./storage";
 import { hasPermission } from "./permissions";
 import type { Permission } from "./permissions";
 import type { User } from "./userTypes";
-import { unauthorized, forbidden } from "@/lib/apiError";
+import { unauthorized, forbidden } from "./apiServerError";
 
 export interface SessionData {
   userId?: string;

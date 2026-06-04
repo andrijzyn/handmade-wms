@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { storage } from "@/lib/storage";
 import { requirePermission } from "@/lib/auth";
-import { withErrorHandling, badRequest } from "@/lib/apiError";
+import { withErrorHandling, badRequest } from "../../../lib/apiServerError";
 import { PERMISSIONS } from "@/lib/permissions";
 
 const auditLogQuerySchema = z.object({

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { storage } from "@/lib/storage";
-import { withErrorHandling, badRequest, notFound } from "@/lib/apiError";
+import { withErrorHandling, badRequest, notFound } from "../../../../lib/apiServerError";
 import { requirePermission } from "@/lib/auth";
 import { PERMISSIONS } from "@/lib/permissions";
 

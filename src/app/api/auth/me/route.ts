@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { withErrorHandling } from "@/lib/apiError";
+import { withErrorHandling } from "../../../../lib/apiServerError";
 import { requireAuth } from "@/lib/auth";
 import { toSafeUser } from "@/lib/storage";
 

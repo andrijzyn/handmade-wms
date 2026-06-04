@@ -3,7 +3,7 @@ import { z } from "zod";
 import { storage } from "@/lib/storage";
 import { insertUserSchema } from "@/lib/schema";
 import { getSession } from "@/lib/auth";
-import { withErrorHandling, badRequest, raiseApiError } from "@/lib/apiError";
+import { withErrorHandling, badRequest, raiseApiError } from "../../../../lib/apiServerError";
 
 // Схема для логіну: тільки username і password
 const loginSchema = insertUserSchema.pick({
