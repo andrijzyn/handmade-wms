@@ -98,9 +98,9 @@ export type UserUpdateDbPayload = Partial<{
 export type StorageContext = {
   db: () => ReturnType<typeof getSupabase>;
   audit: (actorUserId: string) => {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+     
     p_actorUserID: string;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+     
      cx: string;
   };
   hashPassword: (password: string) => Promise<string>;
