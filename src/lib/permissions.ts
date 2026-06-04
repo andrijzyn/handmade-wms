@@ -9,27 +9,10 @@ export const PERMISSIONS = {
   DELETE_LOCATIONS: "delete_locations",
   DELETE_USERS: "delete_users",
   READ_DEBUG: "read_debug",
+  READ_LOGS: "read_logs"
 } as const;
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
-
-export const PERMISSION_META: Record<
-  Permission,
-  { label: string; group: "Read" | "Write" | "Delete" }
-> = {
-  [PERMISSIONS.READ_PRODUCTS]: { label: "Products", group: "Read" },
-  [PERMISSIONS.READ_LOCATIONS]: { label: "Locations", group: "Read" },
-  [PERMISSIONS.READ_USERS]: { label: "Users", group: "Read" },
-  [PERMISSIONS.READ_DEBUG]: { label: "Debug", group: "Read" },
-
-  [PERMISSIONS.WRITE_PRODUCTS]: { label: "Products", group: "Write" },
-  [PERMISSIONS.WRITE_LOCATIONS]: { label: "Locations", group: "Write" },
-  [PERMISSIONS.WRITE_USERS]: { label: "Users", group: "Write" },
-
-  [PERMISSIONS.DELETE_PRODUCTS]: { label: "Products", group: "Delete" },
-  [PERMISSIONS.DELETE_LOCATIONS]: { label: "Locations", group: "Delete" },
-  [PERMISSIONS.DELETE_USERS]: { label: "Users", group: "Delete" },
-};
 
 export const hasPermission = (
   user: { permissions: Permission[] },

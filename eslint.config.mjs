@@ -1,18 +1,78 @@
+// eslint.config.mjs
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
-import nextTs from "eslint-config-next/typescript";
 
-const eslintConfig = defineConfig([
+export default defineConfig([
   ...nextVitals,
-  ...nextTs,
-  // Override default ignores of eslint-config-next.
   globalIgnores([
-    // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",
     "build/**",
-    "next-env.d.ts",
+    "coverage/**",
+    "src/lib/database.types.ts",
   ]),
-]);
+  {
+    files: ["**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/naming-convention": [
+        "error",
+        {
+          selector: "default",
+          format: ["camelCase"],
+          leadingUnderscore: "allow",
+        },
+        {
+          selector: "typeLike",
+          format: ["PascalCase"],
+        },
+        {
+          selector: "variable",
+          format: ["camelCase", "PascalCase", "UPPER_CASE"],
+          leadingUnderscore: "allow",
+        },
+        {
+          selector: "function",
+          format: ["camelCase", "PascalCase"],
+        },
+        {
+          selector: "parameter",
+          format: ["camelCase"],
+          leadingUnderscore: "allow",
+        },
+        {
+          selector: "import",
+          format: ["camelCase", "PascalCase"],
+        },
+        {
+          selector: "property",
+          format: null,
+        },
+        {
+          selector: "objectLiteralProperty",
+          format: null,
+        },
+      ],
 
-export default eslintConfig;
+      "@typescript-eslint/no-explicit-any": "warn",
+    },
+  },
+  {
+    files: ["src/app/**/route.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/naming-convention": "off",
+    },
+  },
+  {
+    files: ["src/components/ui/**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/naming-convention": "off",
+      "@typescript-eslint/ban-ts-comment": "off",
+    },
+  },
+  {
+    files: ["src/lib/**/*.{ts,tsx}", "src/app/api/**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "error",
+    },
+  },
+]);

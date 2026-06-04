@@ -13,7 +13,7 @@ export interface DbProduct {
   category: string;
   quantity: number;
   price: number;
-  low_stock_threshold: number;
+  lowStockThreshold: number;
   description: string | null;
 }
 
@@ -21,23 +21,23 @@ export interface DbUser {
   id: string;
   username: string;
   password: string;
-  full_name: string;
+  fullName: string;
   rank: string;
   unit: string;
-  call_sign: string | null;
-  clearance_level: string;
-  is_active: boolean;
-  created_at: string | null;
-  user_permissions?: { permissions: { key: string } }[];
-  session_version: string | null;
+  callsign: string | null;
+  clearanceLevel: string;
+  isActive: boolean;
+  createdAt: string | null;
+  userPermissions?: { permissions: { key: string } }[];
+  sessionVersion: string | null;
 }
 
 export interface DbProductLocationViewRow {
   id: string;
-  product_id: string;
-  location_id: string;
+  productID: string;
+  locationID: string;
   quantity: number;
-  updated_at: string;
+  updatedAt: string;
   locations: {
     label: string;
     row: number;
@@ -46,21 +46,19 @@ export interface DbProductLocationViewRow {
   }[] | null;
 }
 
-export type AuditAction = "INSERT" | "UPDATE" | "DELETE";
-
 export interface DbAuditLogRow {
   id: string;
-  table_name: string;
-  record_id: string | null;
+  tableName: string;
+  recordID: string | null;
   action: AuditAction;
-  actor_user_id: string | null;
-  correlation_id: string | null;
-  old_values: Record<string, unknown> | null;
-  new_values: Record<string, unknown> | null;
-  created_at: string;
+  actorUserID: string | null;
+  correlationID: string | null;
+  oldValues: Record<string, unknown> | null;
+  newValues: Record<string, unknown> | null;
+  createdAt: string;
   users?: {
     username: string;
-    full_name: string;
+    fullName: string;
   }[] | null;
 }
 
@@ -70,16 +68,16 @@ export type ProductUpdateDbPayload = Partial<{
   category: string;
   quantity: number;
   price: number;
-  low_stock_threshold: number;
+  lowStockThreshold: number;
   description: string | null;
 }>;
 
 export type UpdateUserInput = {
   username?: string;
-  full_name?: string;
+  fullName?: string;
   rank?: string;
   unit?: string;
-  call_sign?: string | null;
+  callsign?: string | null;
   clearanceLevel?: string;
   isActive?: boolean;
   password?: string;
@@ -88,49 +86,29 @@ export type UpdateUserInput = {
 
 export type UserUpdateDbPayload = Partial<{
   username: string;
-  full_name: string;
+  fullName: string;
   rank: string;
   unit: string;
-  call_sign: string | null;
-  clearance_level: string;
-  is_active: boolean;
+  callsign: string | null;
+  clearanceLevel: string;
+  isActive: boolean;
   password: string;
 }>;
-
-export type AuditLogFilters = {
-  q?: string;
-  tableName?: string;
-  action?: AuditAction | "all";
-  actorUserId?: string;
-  limit?: number;
-};
-
-export type AuditLogItem = {
-  id: string;
-  tableName: string;
-  recordId: string | null;
-  action: AuditAction;
-  actorUserId: string | null;
-  actorUsername: string | null;
-  actorFullName: string | null;
-  correlationId: string | null;
-  oldValues: Record<string, unknown> | null;
-  newValues: Record<string, unknown> | null;
-  createdAt: string;
-};
 
 export type StorageContext = {
   db: () => ReturnType<typeof getSupabase>;
   audit: (actorUserId: string) => {
-    p_actor_user_id: string;
-    p_correlation_id: string;
+     
+    p_actorUserID: string;
+     
+     cx: string;
   };
   hashPassword: (password: string) => Promise<string>;
 };
 
 export const USER_WITH_PERMISSIONS = `
   *,
-  user_permissions (
+  userPermissions (
     permissions ( key )
   )
 ` as const;
@@ -147,7 +125,7 @@ export function dbToProduct(row: DbProduct): Product {
     category: row.category,
     quantity: row.quantity,
     price: Number(row.price),
-    lowStockThreshold: row.low_stock_threshold,
+    lowStockThreshold: row.lowStockThreshold,
     description: row.description,
   };
 }
@@ -157,17 +135,17 @@ export function dbToUser(row: DbUser): User {
     id: row.id,
     username: row.username,
     password: row.password,
-    full_name: row.full_name,
+    fullName: row.fullName,
     rank: row.rank,
     unit: row.unit,
-    call_sign: row.call_sign,
-    clearanceLevel: row.clearance_level,
-    permissions: (row.user_permissions ?? []).map(
+    callsign: row.callsign,
+    clearanceLevel: row.clearanceLevel,
+    permissions: (row.userPermissions ?? []).map(
       (up) => up.permissions.key as Permission,
     ),
-    isActive: row.is_active,
-    createdAt: row.created_at ? new Date(row.created_at) : null,
-    sessionVersion: row.session_version ?? undefined,
+    isActive: row.isActive,
+    createdAt: row.createdAt ? new Date(row.createdAt) : null,
+    sessionVersion: row.sessionVersion ?? undefined,
   };
 }
 
@@ -183,10 +161,10 @@ export function dbToProductLocationView(
 
   return {
     id: row.id,
-    productId: row.product_id,
-    locationId: row.location_id,
+    productId: row.productID,
+    locationId: row.locationID,
     quantity: row.quantity,
-    updatedAt: row.updated_at,
+    updatedAt: row.updatedAt,
     locationLabel: location?.label ?? "",
     locationRow: location?.row ?? 0,
     locationCol: location?.col ?? 0,
@@ -194,20 +172,37 @@ export function dbToProductLocationView(
   };
 }
 
-export function dbToAuditLog(row: DbAuditLogRow): AuditLogItem {
-  const actor = row.users?.[0];
+export type AuditAction = "INSERT" | "UPDATE" | "DELETE";
 
-  return {
-    id: row.id,
-    tableName: row.table_name,
-    recordId: row.record_id,
-    action: row.action,
-    actorUserId: row.actor_user_id,
-    actorUsername: actor?.username ?? null,
-    actorFullName: actor?.full_name ?? null,
-    correlationId: row.correlation_id,
-    oldValues: row.old_values,
-    newValues: row.new_values,
-    createdAt: row.created_at,
-  };
+export interface AuditLogFilters {
+  action?: AuditAction | "all";
+  actorUserId?: string;
+  limit?: number;
+  q?: string;
+  tableName?: string;
+}
+
+export interface DbAuditLogRow {
+  id: string;
+  actorUserID: string | null;
+  action: AuditAction;
+  entityType: string;
+  entityID: string | null;
+  correlationID: string | null;
+  payload: Record<string, unknown> | null;
+  createdAt: string;
+}
+
+export interface AuditLogItem {
+  id: string;
+  tableName: string;
+  recordId: string | null;
+  action: AuditAction;
+  actorUserId: string | null;
+  actorUsername: string | null;
+  actorFullName: string | null;
+  correlationId: string | null;
+  oldValues: Record<string, unknown> | null;
+  newValues: Record<string, unknown> | null;
+  createdAt: string;
 }

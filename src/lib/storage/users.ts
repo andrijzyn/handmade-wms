@@ -22,15 +22,15 @@ async function buildUserUpdatePayload(
   const payload: UserUpdateDbPayload = {};
 
   if (updates.username !== undefined) payload.username = updates.username;
-  if (updates.full_name !== undefined) payload.full_name = updates.full_name;
+  if (updates.fullName !== undefined) payload.fullName = updates.fullName;
   if (updates.rank !== undefined) payload.rank = updates.rank;
   if (updates.unit !== undefined) payload.unit = updates.unit;
-  if (updates.call_sign !== undefined) payload.call_sign = updates.call_sign;
+  if (updates.callsign !== undefined) payload.callsign = updates.callsign;
   if (updates.clearanceLevel !== undefined) {
-    payload.clearance_level = updates.clearanceLevel;
+    payload.clearanceLevel = updates.clearanceLevel;
   }
   if (updates.isActive !== undefined) {
-    payload.is_active = updates.isActive;
+    payload.isActive = updates.isActive;
   }
 
   const normalizedPassword = updates.password?.trim();
@@ -47,7 +47,7 @@ export function createUsersStorage(ctx: StorageContext) {
       const { data, error } = await ctx.db()
         .from("users")
         .select(USER_WITH_PERMISSIONS)
-        .order("created_at");
+        .order("createdAt");
 
       if (error) throw error;
       return (data as DbUser[]).map(dbToUser).map(toSafeUser);
@@ -84,12 +84,12 @@ export function createUsersStorage(ctx: StorageContext) {
       const { data, error } = await ctx.db().rpc("create_user_with_audit", {
         p_username: insertUser.username,
         p_password: hashedPassword,
-        p_full_name: insertUser.full_name,
+        p_fullName: insertUser.fullName,
         p_rank: insertUser.rank,
         p_unit: insertUser.unit,
-        p_call_sign: insertUser.call_sign ?? null,
-        p_clearance_level: insertUser.clearanceLevel ?? "Без допуску",
-        p_is_active: insertUser.isActive ?? true,
+        p_callsign: insertUser.callsign ?? null,
+        p_clearanceLevel: insertUser.clearanceLevel ?? "Без допуску",
+        p_isActive: insertUser.isActive ?? true,
         ...ctx.audit(actorUserId),
       });
 
@@ -156,7 +156,7 @@ export function createUsersStorage(ctx: StorageContext) {
       actorUserId: string,
     ): Promise<void> {
       const { error } = await ctx.db().rpc(
-        "replace_user_permissions_with_audit",
+        "replace_userPermissions_with_audit",
         {
           p_user_id: userId,
           p_permission_keys: permissions,

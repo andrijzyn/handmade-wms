@@ -65,6 +65,7 @@ const PERMISSION_LABELS: Record<Permission, string> = {
   read_locations: "Locations",
   read_users: "Users",
   read_debug: "Debug",
+  read_logs: "Logs",
   write_products: "Products",
   write_locations: "Locations",
   write_users: "Users",
@@ -76,10 +77,10 @@ const PERMISSION_LABELS: Record<Permission, string> = {
 type UserFormValues = {
   username: string;
   password: string;
-  full_name: string;
+  fullName: string;
   rank: string;
   unit: string;
-  call_sign: string;
+  callsign: string;
   clearanceLevel: string;
   permissions: Permission[];
   isActive: boolean;
@@ -109,12 +110,12 @@ export default function UserForm(props: UserFormProps) {
     defaultValues: {
       username: props.defaultValues?.username ?? "",
       password: "",
-      full_name: props.defaultValues?.full_name ?? "",
+      fullName: props.defaultValues?.fullName ?? "",
       rank: props.defaultValues?.rank ?? "",
       unit: props.defaultValues?.unit ?? "",
-      call_sign:
-        typeof props.defaultValues?.call_sign === "string"
-          ? props.defaultValues.call_sign
+      callsign:
+        typeof props.defaultValues?.callsign === "string"
+          ? props.defaultValues.callsign
           : "",
       clearanceLevel: props.defaultValues?.clearanceLevel ?? "No clearance",
       permissions: props.defaultValues?.permissions ?? [],
@@ -126,10 +127,10 @@ function handleSubmit(data: UserFormValues) {
   const password = data.password?.trim();
   const basePayload = {
     username: data.username.trim(),
-    full_name: data.full_name.trim(),
+    fullName: data.fullName.trim(),
     rank: data.rank,
     unit: data.unit,
-    call_sign: data.call_sign?.trim() || null,
+    callsign: data.callsign?.trim() || null,
     clearanceLevel: data.clearanceLevel,
     permissions: data.permissions,
     isActive: data.isActive,
@@ -184,7 +185,7 @@ function handleSubmit(data: UserFormValues) {
 
         <FormField
           control={form.control}
-          name="full_name"
+          name="fullName"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Full name</FormLabel>
@@ -237,7 +238,7 @@ function handleSubmit(data: UserFormValues) {
 
         <FormField
           control={form.control}
-          name="call_sign"
+          name="callsign"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Call sign</FormLabel>

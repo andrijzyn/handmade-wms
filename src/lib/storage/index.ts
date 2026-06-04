@@ -6,7 +6,7 @@ import { createProductsStorage } from "./products";
 import { createUsersStorage } from "./users";
 import { createLocationsStorage } from "./locations";
 import { createProductLocationsStorage } from "./productLocations";
-import { createAuditStorage } from "./audit";
+import { createAuditStorage } from "./logs";
 
 const PASSWORD_ROUNDS = 10;
 
@@ -19,8 +19,8 @@ const ctx: StorageContext = {
     }
 
     return {
-      p_actor_user_id: actorUserId,
-      p_correlation_id: randomUUID(),
+      p_actorUserID: actorUserId,
+      p_correlationID: randomUUID(),
     };
   },
 

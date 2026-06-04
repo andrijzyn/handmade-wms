@@ -4,10 +4,10 @@ export interface User {
   id: string;
   username: string;
   password: string;
-  full_name: string;
+  fullName: string;
   rank: string;
   unit: string;
-  call_sign: string | null;
+  callsign: string | null;
   clearanceLevel: string;
   permissions: Permission[];
   isActive: boolean;

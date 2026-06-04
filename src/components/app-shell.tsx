@@ -11,16 +11,18 @@ import {
   LogOut,
   Shield,
   FolderTree,
+  Logs
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Dashboard from "@/components/pages/dashboard";
 import Products from "@/components/pages/products";
 import UsersPage from "@/components/pages/users";
-import Locations from "@/components/pages/locations";
+import LocationsPage from "@/components/pages/locations";
+import LogsPage from "@/components/pages/logs";
 import { Permission, PERMISSIONS } from "@/lib/permissions";
 
-type Page = "dashboard" | "products" | "users" | "locations";
+type Page = "dashboard" | "products" | "users" | "locations" | "logs";
 
 export default function AppShell() {
   const { user, logout } = useAuth();
@@ -52,6 +54,10 @@ export default function AppShell() {
     ...(hasPermission(PERMISSIONS.READ_USERS)
       ? [{ page: "users" as Page, label: "Users", icon: Users }]
       : []),
+
+    ...(hasPermission(PERMISSIONS.READ_LOGS)
+      ? [{ page: "logs" as Page, label: "Audit Logs", icon: Logs }]
+      : []),
   ];
 
   const renderPage = () => {
@@ -66,13 +72,19 @@ export default function AppShell() {
         );
       case "locations":
         return hasPermission(PERMISSIONS.READ_LOCATIONS) ? (
-          <Locations />
+          <LocationsPage />
         ) : (
           <Dashboard onNavigateAction={setCurrentPage} />
         );
       case "users":
         return hasPermission(PERMISSIONS.READ_USERS) ? (
           <UsersPage />
+        ) : (
+          <Dashboard onNavigateAction={setCurrentPage} />
+        );
+      case "logs":
+        return hasPermission(PERMISSIONS.READ_LOGS) ? (
+          <LogsPage />
         ) : (
           <Dashboard onNavigateAction={setCurrentPage} />
         );
@@ -167,7 +179,7 @@ export default function AppShell() {
                     className="text-xs font-medium truncate text-sidebar-foreground"
                     data-testid="text-current-user"
                   >
-                    {user.call_sign ? user.call_sign : user.full_name}
+                    {user.callsign ? user.callsign : user.fullName}
                   </p>
                   <p className="text-[10px] text-muted-foreground truncate">
                     {user.rank}
