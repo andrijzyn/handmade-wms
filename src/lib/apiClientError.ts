@@ -31,11 +31,40 @@ export function getErrorMessage(
   if (body.startsWith("{") && body.endsWith("}")) {
     try {
       const parsed = JSON.parse(body) as { message?: string };
-      if (parsed.message) return parsed.message;
+      if (typeof parsed.message === "string" && parsed.message.trim()) {
+        return parsed.message;
+      }
     } catch {
-      return body;
+      return body || fallback;
     }
   }
 
   return body || fallback;
+}
+
+export async function createApiClientErrorFromResponse(
+  res: Response,
+  fallbackMessage: string,
+): Promise<ApiClientError> {
+  let message = fallbackMessage;
+  const contentType = res.headers.get("content-type") || "";
+
+  if (contentType.includes("application/json")) {
+    const data = (await res.json().catch(() => null)) as
+      | { message?: unknown }
+      | null;
+
+    if (data && typeof data.message === "string" && data.message.trim()) {
+      message = data.message;
+    }
+  } else {
+    const text = await res.text().catch(() => "");
+    if (text.trim()) {
+      message = text.trim();
+    }
+  }
+
+  const error: ApiClientError = new Error(message);
+  error.status = res.status;
+  return error;
 }
