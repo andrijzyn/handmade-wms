@@ -33,6 +33,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { getErrorMessage, getErrorStatus, type ApiClientError } from "@/lib/apiClientError";
 import { Plus, Search, Pencil, Trash2, ArrowUpDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ProductForm from "@/components/pages/product-form";
@@ -40,60 +41,15 @@ import ProductForm from "@/components/pages/product-form";
 type SortKey = "name" | "sku" | "category" | "quantity" | "price";
 type SortDir = "asc" | "desc";
 
-type ApiClientError = Error & {
-  status?: number;
-};
-
-function getErrorStatus(error: unknown): number | undefined {
-  if (typeof error === "object" && error !== null && "status" in error) {
-    const status = (error as { status?: unknown }).status;
-    if (typeof status === "number") return status;
-  }
-
-  if (error instanceof Error) {
-    const match = error.message.match(/^(\d{3}):/);
-    if (match) return Number(match[1]);
-  }
-
-  return undefined;
-}
-
-function getErrorMessage(error: unknown, fallback = "Something went wrong") {
-  if (!(error instanceof Error)) return fallback;
-
-  const raw = error.message.trim();
-  if (!raw) return fallback;
-
-  const colonIndex = raw.indexOf(":");
-  const body = colonIndex >= 0 ? raw.slice(colonIndex + 1).trim() : raw;
-
-  if (body.startsWith("{") && body.endsWith("}")) {
-    try {
-      const parsed = JSON.parse(body) as { message?: string };
-      if (parsed.message) return parsed.message;
-    } catch {}
-  }
-
-  return body || fallback;
-}
-
 function getProductsErrorMessage(error: unknown) {
   const status = getErrorStatus(error);
-
-  if (status === 403) {
-    return "You do not have permission to view products.";
-  }
-
+  if (status === 403) return "You do not have permission to view products.";
   return getErrorMessage(error, "Failed to fetch products.");
 }
 
 function getDeleteProductErrorMessage(error: unknown) {
   const status = getErrorStatus(error);
-
-  if (status === 403) {
-    return "You do not have permission to delete products.";
-  }
-
+  if (status === 403) return "You do not have permission to delete products.";
   return getErrorMessage(error, "Failed to delete the product.");
 }
 
