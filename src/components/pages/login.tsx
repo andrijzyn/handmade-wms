@@ -16,11 +16,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Shield, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Shield, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const { login } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
   const [isPending, setIsPending] = useState(false);
 
   const form = useForm<LoginInput>({
