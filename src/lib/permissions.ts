@@ -9,7 +9,7 @@ export const PERMISSIONS = {
   DELETE_LOCATIONS: "delete_locations",
   DELETE_USERS: "delete_users",
   READ_DEBUG: "read_debug",
-  READ_LOGS: "read_logs"
+  READ_LOGS: "read_logs",
 } as const;
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

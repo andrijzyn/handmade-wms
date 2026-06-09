@@ -37,7 +37,8 @@ export function createAuditStorage(ctx: StorageContext) {
       let query = ctx
         .db()
         .from("logs")
-        .select(`
+        .select(
+          `
           id,
           table_name,
           record_id,
@@ -51,7 +52,8 @@ export function createAuditStorage(ctx: StorageContext) {
             username,
             full_name
           )
-        `)
+        `,
+        )
         .order("created_at", { ascending: false })
         .limit(filters?.limit ?? 100);
 

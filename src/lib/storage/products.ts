@@ -1,5 +1,9 @@
 import type { InsertProduct, Product } from "../schema";
-import type { StorageContext, ProductUpdateDbPayload, DbProduct } from "./shared";
+import type {
+  StorageContext,
+  ProductUpdateDbPayload,
+  DbProduct,
+} from "./shared";
 import { dbToProduct, hasKeys } from "./shared";
 
 function buildProductUpdatePayload(
@@ -25,7 +29,8 @@ function buildProductUpdatePayload(
 export function createProductsStorage(ctx: StorageContext) {
   const api = {
     async getProduct(id: string): Promise<Product | undefined> {
-      const { data, error } = await ctx.db()
+      const { data, error } = await ctx
+        .db()
         .from("products")
         .select("*")
         .eq("id", id)
@@ -36,7 +41,8 @@ export function createProductsStorage(ctx: StorageContext) {
     },
 
     async getProductBySku(sku: string): Promise<Product | undefined> {
-      const { data, error } = await ctx.db()
+      const { data, error } = await ctx
+        .db()
         .from("products")
         .select("*")
         .eq("sku", sku)
@@ -119,7 +125,10 @@ export function createProductsStorage(ctx: StorageContext) {
     },
 
     async getCategories(): Promise<string[]> {
-      const { data, error } = await ctx.db().from("products").select("category");
+      const { data, error } = await ctx
+        .db()
+        .from("products")
+        .select("category");
 
       if (error) throw error;
 

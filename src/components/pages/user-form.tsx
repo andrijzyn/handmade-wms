@@ -105,7 +105,7 @@ type UserFormProps = CreateUserFormProps | EditUserFormProps;
 export default function UserForm(props: UserFormProps) {
   const form = useForm<UserFormValues>({
     resolver: zodResolver(
-      props.isEdit ? updateUserSchema : insertUserSchema
+      props.isEdit ? updateUserSchema : insertUserSchema,
     ) as any,
     defaultValues: {
       username: props.defaultValues?.username ?? "",
@@ -123,32 +123,32 @@ export default function UserForm(props: UserFormProps) {
     },
   });
 
-function handleSubmit(data: UserFormValues) {
-  const password = data.password?.trim();
-  const basePayload = {
-    username: data.username.trim(),
-    full_name: data.full_name.trim(),
-    rank: data.rank,
-    unit: data.unit,
-    callsign: data.callsign?.trim() || null,
-    clearance_level: data.clearance_level,
-    permissions: data.permissions,
-    is_active: data.is_active,
-  };
+  function handleSubmit(data: UserFormValues) {
+    const password = data.password?.trim();
+    const basePayload = {
+      username: data.username.trim(),
+      full_name: data.full_name.trim(),
+      rank: data.rank,
+      unit: data.unit,
+      callsign: data.callsign?.trim() || null,
+      clearance_level: data.clearance_level,
+      permissions: data.permissions,
+      is_active: data.is_active,
+    };
 
-  if (props.isEdit) {
+    if (props.isEdit) {
+      props.onSubmit({
+        ...basePayload,
+        ...(password ? { password } : {}),
+      });
+      return;
+    }
+
     props.onSubmit({
       ...basePayload,
-      ...(password ? { password } : {}),
+      password: password ?? "",
     });
-    return;
   }
-
-  props.onSubmit({
-    ...basePayload,
-    password: password ?? "",
-  });
-}
 
   return (
     <Form {...form}>

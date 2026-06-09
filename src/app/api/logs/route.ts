@@ -10,7 +10,7 @@ const auditLogQuerySchema = z.object({
   actor_user_id: z.uuid("Invalid actor user id").optional(),
   limit: z.coerce.number().int().min(1).max(200).optional(),
   q: z.string().trim().max(100, "Search term too long").optional(),
-  table_name: z.string().trim().max(100).optional()
+  table_name: z.string().trim().max(100).optional(),
 });
 
 export const GET = withErrorHandling(
@@ -29,7 +29,10 @@ export const GET = withErrorHandling(
     });
 
     if (!parsed.success) {
-      return badRequest("Incorrect audit log query", z.treeifyError(parsed.error));
+      return badRequest(
+        "Incorrect audit log query",
+        z.treeifyError(parsed.error),
+      );
     }
 
     const logs = await storage.getAuditLogs(parsed.data);

@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { storage } from "@/lib/storage";
-import { withErrorHandling, badRequest, notFound } from "../../../../lib/apiServerError";
+import {
+  withErrorHandling,
+  badRequest,
+  notFound,
+} from "@/lib/apiServerError";
 import { requirePermission } from "@/lib/auth";
 import { PERMISSIONS } from "@/lib/permissions";
 
@@ -25,7 +29,11 @@ export const PATCH = withErrorHandling(
       return badRequest("Validation error", z.treeifyError(parsed.error));
     }
 
-    const entry = await storage.updateProductLocation(id, parsed.data.quantity, userOrResp.id);
+    const entry = await storage.updateProductLocation(
+      id,
+      parsed.data.quantity,
+      userOrResp.id,
+    );
     if (!entry) return notFound("Product location not found");
 
     return NextResponse.json(entry);

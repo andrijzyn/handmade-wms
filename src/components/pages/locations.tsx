@@ -29,12 +29,12 @@ type SortButtonProps = {
 };
 
 function SortButton({
-                      column,
-                      label,
-                      activeKey,
-                      activeDir,
-                      onToggle,
-                    }: SortButtonProps) {
+  column,
+  label,
+  activeKey,
+  activeDir,
+  onToggle,
+}: SortButtonProps) {
   const is_active = activeKey === column;
   const directionMark = is_active ? (activeDir === "asc" ? "↑" : "↓") : "";
 
@@ -70,7 +70,12 @@ export default function LocationsPage() {
   const [sortKey, setSortKey] = useState<SortKey>("label");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
-  const { data: products = [], isLoading, isError, error } = useQuery<Product[]>({
+  const {
+    data: products = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery<Product[]>({
     queryKey: ["products", { q: search }],
     queryFn: async ({ signal }) => {
       const params = new URLSearchParams();
@@ -80,7 +85,9 @@ export default function LocationsPage() {
       }
 
       const queryString = params.toString();
-      const url = queryString ? `/api/products?${queryString}` : "/api/products";
+      const url = queryString
+        ? `/api/products?${queryString}`
+        : "/api/products";
 
       const res = await fetch(url, { signal });
 

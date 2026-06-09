@@ -1,8 +1,5 @@
 import type { getSupabase } from "../supabase";
-import type {
-  Product,
-  ProductLocationView,
-} from "../schema";
+import type { Product, ProductLocationView } from "../schema";
 import type { Permission } from "../permissions";
 import type { User, SafeUser } from "../userTypes";
 
@@ -38,12 +35,14 @@ export interface DbProductLocationViewRow {
   location_id: string;
   quantity: number;
   updated_at: string;
-  locations: {
-    label: string;
-    row: number;
-    col: number;
-    level: number;
-  }[] | null;
+  locations:
+    | {
+        label: string;
+        row: number;
+        col: number;
+        level: number;
+      }[]
+    | null;
 }
 
 export interface DbAuditLogRow {
@@ -56,10 +55,12 @@ export interface DbAuditLogRow {
   old_values: Record<string, unknown> | null;
   new_values: Record<string, unknown> | null;
   created_at: string;
-  users?: {
-    username: string;
-    full_name: string;
-  }[] | null;
+  users?:
+    | {
+        username: string;
+        full_name: string;
+      }[]
+    | null;
 }
 
 export type ProductUpdateDbPayload = Partial<{

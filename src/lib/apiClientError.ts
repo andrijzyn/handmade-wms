@@ -50,9 +50,9 @@ export async function createApiClientErrorFromResponse(
   const contentType = res.headers.get("content-type") || "";
 
   if (contentType.includes("application/json")) {
-    const data = (await res.json().catch(() => null)) as
-      | { message?: unknown }
-      | null;
+    const data = (await res.json().catch(() => null)) as {
+      message?: unknown;
+    } | null;
 
     if (data && typeof data.message === "string" && data.message.trim()) {
       message = data.message;

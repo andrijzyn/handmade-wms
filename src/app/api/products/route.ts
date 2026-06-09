@@ -3,7 +3,11 @@ import { z } from "zod";
 import { storage } from "@/lib/storage";
 import { insertProductSchema } from "@/lib/schema";
 import { requirePermission } from "@/lib/auth";
-import { withErrorHandling, badRequest, conflict } from "../../../lib/apiServerError";
+import {
+  withErrorHandling,
+  badRequest,
+  conflict,
+} from "../../../lib/apiServerError";
 import { PERMISSIONS } from "@/lib/permissions";
 
 export const GET = withErrorHandling(

@@ -130,7 +130,7 @@ export const insertUserSchema = z.object({
 
 const optionalPasswordSchema = z.preprocess(
   (value) => (value === "" ? undefined : value),
-  z.string().min(6, { error: "Min 6 characters" }).optional()
+  z.string().min(6, { error: "Min 6 characters" }).optional(),
 );
 
 export const updateUserSchema = insertUserSchema

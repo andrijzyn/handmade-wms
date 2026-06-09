@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
-import type {InsertUser, UpdateUser} from "@/lib/schema";
+import type { InsertUser, UpdateUser } from "@/lib/schema";
 import type { SafeUser } from "@/lib/userTypes";
 import { PERMISSIONS } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
@@ -90,7 +90,6 @@ export default function UsersPage() {
       if (!payload.password) delete payload.password;
       const res = await apiRequest("PATCH", `/api/users/${id}`, payload);
       return await res.json();
-
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });

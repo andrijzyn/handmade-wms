@@ -4,7 +4,8 @@ import type { StorageContext } from "./shared";
 export function createLocationsStorage(ctx: StorageContext) {
   return {
     async getLocations(filters?: { q?: string }): Promise<Location[]> {
-      let query = ctx.db()
+      let query = ctx
+        .db()
         .from("locations")
         .select("*")
         .order("row", { ascending: true })

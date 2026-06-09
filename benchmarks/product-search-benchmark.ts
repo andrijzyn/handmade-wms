@@ -64,7 +64,7 @@ async function runBatch(batchSize: number) {
   for (let i = 0; i < batches; i++) {
     const size =
       i === batches - 1 ? TOTAL_REQUESTS - i * CONCURRENCY : CONCURRENCY;
-     
+
     await runBatch(size);
     process.stdout.write(
       `\rCompleted ${Math.min((i + 1) * CONCURRENCY, TOTAL_REQUESTS)} / ${TOTAL_REQUESTS}`,

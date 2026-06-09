@@ -8,12 +8,7 @@ import type {
   UserUpdateDbPayload,
   DbUser,
 } from "./shared";
-import {
-  USER_WITH_PERMISSIONS,
-  dbToUser,
-  hasKeys,
-  toSafeUser,
-} from "./shared";
+import { USER_WITH_PERMISSIONS, dbToUser, hasKeys, toSafeUser } from "./shared";
 
 async function buildUserUpdatePayload(
   ctx: StorageContext,
@@ -44,7 +39,8 @@ async function buildUserUpdatePayload(
 export function createUsersStorage(ctx: StorageContext) {
   const api = {
     async getUsers(): Promise<SafeUser[]> {
-      const { data, error } = await ctx.db()
+      const { data, error } = await ctx
+        .db()
         .from("users")
         .select(USER_WITH_PERMISSIONS)
         .order("created_at");
@@ -54,7 +50,8 @@ export function createUsersStorage(ctx: StorageContext) {
     },
 
     async getUser(id: string): Promise<User | undefined> {
-      const { data, error } = await ctx.db()
+      const { data, error } = await ctx
+        .db()
         .from("users")
         .select(USER_WITH_PERMISSIONS)
         .eq("id", id)
@@ -65,7 +62,8 @@ export function createUsersStorage(ctx: StorageContext) {
     },
 
     async getUserByUsername(username: string): Promise<User | undefined> {
-      const { data, error } = await ctx.db()
+      const { data, error } = await ctx
+        .db()
         .from("users")
         .select(USER_WITH_PERMISSIONS)
         .ilike("username", username)
@@ -155,14 +153,13 @@ export function createUsersStorage(ctx: StorageContext) {
       permissions: Permission[],
       actor_user_id: string,
     ): Promise<void> {
-      const { error } = await ctx.db().rpc(
-        "replace_user_permissions_with_audit",
-        {
+      const { error } = await ctx
+        .db()
+        .rpc("replace_user_permissions_with_audit", {
           p_user_id: user_id,
           p_permission_keys: permissions,
           ...ctx.audit(actor_user_id),
-        },
-      );
+        });
 
       if (error) throw error;
     },

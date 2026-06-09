@@ -5,7 +5,7 @@ import type { StorageContext } from "./shared";
 import { createProductsStorage } from "./products";
 import { createUsersStorage } from "./users";
 import { createLocationsStorage } from "./locations";
-import { createProductLocationsStorage } from "./productLocations";
+import { createProductLocationsStorage } from "./product-locations";
 import { createAuditStorage } from "./logs";
 
 const PASSWORD_ROUNDS = 10;

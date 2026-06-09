@@ -94,7 +94,9 @@ export default function LoginPage() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-medium">Password</FormLabel>
+                      <FormLabel className="text-xs font-medium">
+                        Password
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="password"

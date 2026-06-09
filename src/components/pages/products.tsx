@@ -85,7 +85,10 @@ async function fetchProducts(
   const res = await fetch(url);
 
   if (!res.ok) {
-    throw await createApiClientErrorFromResponse(res, "Failed to fetch products");
+    throw await createApiClientErrorFromResponse(
+      res,
+      "Failed to fetch products",
+    );
   }
 
   return (await res.json()) as Product[];
@@ -128,12 +131,12 @@ function getStockBadge(product: Product) {
 }
 
 function SortButton({
-                      column,
-                      label,
-                      sortKey,
-                      sortDir,
-                      onToggle,
-                    }: SortButtonProps) {
+  column,
+  label,
+  sortKey,
+  sortDir,
+  onToggle,
+}: SortButtonProps) {
   const is_active = sortKey === column;
 
   return (
@@ -210,7 +213,8 @@ export default function Products() {
 
       if (sortKey === "name") cmp = a.name.localeCompare(b.name);
       else if (sortKey === "sku") cmp = a.sku.localeCompare(b.sku);
-      else if (sortKey === "category") cmp = a.category.localeCompare(b.category);
+      else if (sortKey === "category")
+        cmp = a.category.localeCompare(b.category);
       else if (sortKey === "quantity") cmp = a.quantity - b.quantity;
       else if (sortKey === "price") cmp = a.price - b.price;
 
@@ -405,7 +409,10 @@ export default function Products() {
                     </TableCell>
 
                     <TableCell>
-                      <Badge variant="secondary" className="text-xs font-normal">
+                      <Badge
+                        variant="secondary"
+                        className="text-xs font-normal"
+                      >
                         {product.category}
                       </Badge>
                     </TableCell>
