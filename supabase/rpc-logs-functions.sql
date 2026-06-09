@@ -7,7 +7,7 @@ create extension if not exists "uuid-ossp";
 -- 1) Audit table
 create table if not exists public.logs (
                                               id uuid primary key default uuid_generate_v4(),
-  actor_user_id uuid,
+  actor_userID uuid,
   action text not null,
   entity_type text not null,
   entity_id uuid,
@@ -16,8 +16,8 @@ create table if not exists public.logs (
   created_at timestamptz not null default now()
   );
 
-create index if not exists idx_logs_actor_user_id
-  on public.logs (actor_user_id);
+create index if not exists idx_logs_actor_userID
+  on public.logs (actor_userID);
 
 create index if not exists idx_logs_entity
   on public.logs (entity_type, entity_id);
@@ -30,11 +30,11 @@ create index if not exists idx_logs_created_at
 
 -- 2) Common audit helper
 create or replace function public.logs_audit_event(
-  p_actor_user_id uuid,
+  p_actorUserID uuid,
   p_action text,
-  p_entity_type text,
-  p_entity_id uuid,
-  p_correlation_id uuid,
+  p_entityType text,
+  p_entityID uuid,
+  p_correlationID uuid,
   p_payload jsonb default '{}'::jsonb
 )
 returns void
@@ -42,7 +42,7 @@ language plpgsql
 as $$
 begin
 insert into public.logs (
-  actor_user_id,
+  actor_userID,
   action,
   entity_type,
   entity_id,
@@ -50,11 +50,11 @@ insert into public.logs (
   payload
 )
 values (
-         p_actor_user_id,
+         p_actorUserID,
          p_action,
-         p_entity_type,
-         p_entity_id,
-         p_correlation_id,
+         p_entityType,
+         p_entityID,
+         p_correlationID,
          coalesce(p_payload, '{}'::jsonb)
        );
 end;
@@ -70,10 +70,10 @@ create or replace function public.create_product_with_audit(
   p_category text,
   p_quantity integer,
   p_price numeric,
-  p_low_stock_threshold integer,
+  p_lowStockThreshold integer,
   p_description text,
-  p_actor_user_id uuid,
-  p_correlation_id uuid
+  p_actorUserID uuid,
+  p_correlationID uuid
 )
 returns public.products
 language plpgsql
@@ -87,7 +87,7 @@ insert into public.products (
   category,
   quantity,
   price,
-  low_stock_threshold,
+  lowStockThreshold,
   description
 )
 values (
@@ -96,24 +96,24 @@ values (
          p_category,
          p_quantity,
          p_price,
-         p_low_stock_threshold,
+         p_lowStockThreshold,
          p_description
        )
   returning * into v_product;
 
 perform public.logs_audit_event(
-    p_actor_user_id,
+    p_actorUserID,
     'create',
     'product',
     v_product.id,
-    p_correlation_id,
+    p_correlationID,
     jsonb_build_object(
       'name', v_product.name,
       'sku', v_product.sku,
       'category', v_product.category,
       'quantity', v_product.quantity,
       'price', v_product.price,
-      'low_stock_threshold', v_product.low_stock_threshold,
+      'lowStockThreshold', v_product.lowStockThreshold,
       'description', v_product.description
     )
   );
@@ -123,10 +123,10 @@ end;
 $$;
 
 create or replace function public.update_product_with_audit(
-  p_product_id uuid,
+  p_productID uuid,
   p_updates jsonb,
-  p_actor_user_id uuid,
-  p_correlation_id uuid
+  p_actorUserID uuid,
+  p_correlationID uuid
 )
 returns public.products
 language plpgsql
@@ -156,16 +156,16 @@ end,
       when p_updates ? 'price' then (p_updates->>'price')::numeric
       else price
 end,
-    low_stock_threshold = case
-      when p_updates ? 'low_stock_threshold'
-        then (p_updates->>'low_stock_threshold')::integer
-      else low_stock_threshold
+    lowStockThreshold = case
+      when p_updates ? 'lowStockThreshold'
+        then (p_updates->>'lowStockThreshold')::integer
+      else lowStockThreshold
 end,
     description = case
       when p_updates ? 'description' then p_updates->>'description'
       else description
 end
-where id = p_product_id
+where id = p_productID
   returning * into v_product;
 
   if v_product is null then
@@ -173,11 +173,11 @@ where id = p_product_id
 end if;
 
   perform public.logs_audit_event(
-    p_actor_user_id,
+    p_actorUserID,
     'update',
     'product',
     v_product.id,
-    p_correlation_id,
+    p_correlationID,
     coalesce(p_updates, '{}'::jsonb)
   );
 
@@ -186,9 +186,9 @@ end;
 $$;
 
 create or replace function public.delete_product_with_audit(
-  p_product_id uuid,
-  p_actor_user_id uuid,
-  p_correlation_id uuid
+  p_productID uuid,
+  p_actorUserID uuid,
+  p_correlationID uuid
 )
 returns boolean
 language plpgsql
@@ -197,7 +197,7 @@ declare
 v_product public.products;
 begin
 delete from public.products
-where id = p_product_id
+where id = p_productID
   returning * into v_product;
 
 if v_product is null then
@@ -205,18 +205,18 @@ if v_product is null then
 end if;
 
   perform public.logs_audit_event(
-    p_actor_user_id,
+    p_actorUserID,
     'delete',
     'product',
-    p_product_id,
-    p_correlation_id,
+    p_productID,
+    p_correlationID,
     jsonb_build_object(
       'name', v_product.name,
       'sku', v_product.sku,
       'category', v_product.category,
       'quantity', v_product.quantity,
       'price', v_product.price,
-      'low_stock_threshold', v_product.low_stock_threshold,
+      'lowStockThreshold', v_product.lowStockThreshold,
       'description', v_product.description
     )
   );
@@ -232,69 +232,69 @@ $$;
 create or replace function public.create_user_with_audit(
   p_username text,
   p_password text,
-  p_full_name text,
+  p_fullName text,
   p_rank text,
   p_unit text,
   p_callsign text,
-  p_clearance_level text,
-  p_is_active boolean,
-  p_actor_user_id uuid,
-  p_correlation_id uuid
+  p_clearanceLevel text,
+  p_isActive boolean,
+  p_actorUserID uuid,
+  p_correlationID uuid
 )
 returns uuid
 language plpgsql
 as $$
 declare
-v_user_id uuid;
+v_userID uuid;
 begin
 insert into public.users (
   username,
   password,
-  full_name,
+  fullName,
   rank,
   unit,
   callsign,
-  clearance_level,
-  is_active
+  clearanceLevel,
+  isActive
 )
 values (
          p_username,
          p_password,
-         p_full_name,
+         p_fullName,
          p_rank,
          p_unit,
          p_callsign,
-         p_clearance_level,
-         p_is_active
+         p_clearanceLevel,
+         p_isActive
        )
-  returning id into v_user_id;
+  returning id into v_userID;
 
 perform public.logs_audit_event(
-    p_actor_user_id,
+    p_actorUserID,
     'create',
     'user',
-    v_user_id,
-    p_correlation_id,
+    v_userID,
+    p_correlationID,
     jsonb_build_object(
       'username', p_username,
-      'full_name', p_full_name,
+      'fullName', p_fullName,
       'rank', p_rank,
       'unit', p_unit,
       'callsign', p_callsign,
-      'clearance_level', p_clearance_level,
-      'is_active', p_is_active
+      'clearanceLevel', p_clearanceLevel,
+      'isActive', p_isActive
     )
   );
 
-return v_user_id;
+return v_userID;
 end;
 $$;
 
 create or replace function public.update_user_with_audit(
-  p_user_id uuid,
+  p_userID uuid,
   p_updates jsonb,
-  p_actor_user_id uuid,
-  p_correlation_id uuid
+  p_actorUserID uuid,
+  p_correlationID uuid
 )
 returns boolean
 language plpgsql
@@ -312,9 +312,9 @@ set
                when p_updates ? 'password' then p_updates->>'password'
                else password
     end,
-  full_name = case
-                when p_updates ? 'full_name' then p_updates->>'full_name'
-                else full_name
+  fullName = case
+                when p_updates ? 'fullName' then p_updates->>'fullName'
+                else fullName
     end,
   rank = case
            when p_updates ? 'rank' then p_updates->>'rank'
@@ -328,15 +328,15 @@ set
                when p_updates ? 'callsign' then p_updates->>'callsign'
                else callsign
     end,
-  clearance_level = case
-                      when p_updates ? 'clearance_level' then p_updates->>'clearance_level'
-                      else clearance_level
+  clearanceLevel = case
+                      when p_updates ? 'clearanceLevel' then p_updates->>'clearanceLevel'
+                      else clearanceLevel
     end,
-  is_active = case
-                when p_updates ? 'is_active' then (p_updates->>'is_active')::boolean
-                else is_active
+  isActive = case
+                when p_updates ? 'isActive' then (p_updates->>'isActive')::boolean
+                else isActive
     end
-where id = p_user_id;
+where id = p_userID;
 
 get diagnostics v_updated = row_count;
 
@@ -345,11 +345,11 @@ if not v_updated then
 end if;
 
   perform public.logs_audit_event(
-    p_actor_user_id,
+    p_actorUserID,
     'update',
     'user',
-    p_user_id,
-    p_correlation_id,
+    p_userID,
+    p_correlationID,
     coalesce(p_updates, '{}'::jsonb)
   );
 
@@ -358,9 +358,9 @@ end;
 $$;
 
 create or replace function public.delete_user_with_audit(
-  p_user_id uuid,
-  p_actor_user_id uuid,
-  p_correlation_id uuid
+  p_userID uuid,
+  p_actorUserID uuid,
+  p_correlationID uuid
 )
 returns boolean
 language plpgsql
@@ -370,10 +370,10 @@ v_user public.users;
 begin
   -- optional cleanup if FK cascade is not configured
 delete from public.user_permissions
-where user_id = p_user_id;
+where userID = p_userID;
 
 delete from public.users
-where id = p_user_id
+where id = p_userID
   returning * into v_user;
 
 if v_user is null then
@@ -381,19 +381,19 @@ if v_user is null then
 end if;
 
   perform public.logs_audit_event(
-    p_actor_user_id,
+    p_actorUserID,
     'delete',
     'user',
-    p_user_id,
-    p_correlation_id,
+    p_userID,
+    p_correlationID,
     jsonb_build_object(
       'username', v_user.username,
-      'full_name', v_user.full_name,
+      'fullName', v_user.fullName,
       'rank', v_user.rank,
       'unit', v_user.unit,
       'callsign', v_user.callsign,
-      'clearance_level', v_user.clearance_level,
-      'is_active', v_user.is_active
+      'clearanceLevel', v_user.clearanceLevel,
+      'isActive', v_user.isActive
     )
   );
 
@@ -402,31 +402,31 @@ end;
 $$;
 
 create or replace function public.replace_user_permissions_with_audit(
-  p_user_id uuid,
+  p_userID uuid,
   p_permission_keys text[],
-  p_actor_user_id uuid,
-  p_correlation_id uuid
+  p_actorUserID uuid,
+  p_correlationID uuid
 )
 returns boolean
 language plpgsql
 as $$
 begin
 delete from public.user_permissions
-where user_id = p_user_id;
+where userID = p_userID;
 
-insert into public.user_permissions (user_id, permission_id)
+insert into public.user_permissions (userID, permission_id)
 select
-  p_user_id,
+  p_userID,
   p.id
 from public.permissions p
 where p.key = any(coalesce(p_permission_keys, array[]::text[]));
 
 perform public.logs_audit_event(
-    p_actor_user_id,
+    p_actorUserID,
     'replace_permissions',
     'user',
-    p_user_id,
-    p_correlation_id,
+    p_userID,
+    p_correlationID,
     jsonb_build_object(
       'permissions', coalesce(to_jsonb(p_permission_keys), '[]'::jsonb)
     )
@@ -441,11 +441,11 @@ $$;
 -- ============================================================
 
 create or replace function public.create_product_location_with_audit(
-  p_product_id uuid,
+  p_productID uuid,
   p_location_id uuid,
   p_quantity integer,
-  p_actor_user_id uuid,
-  p_correlation_id uuid
+  p_actorUserID uuid,
+  p_correlationID uuid
 )
 returns public.product_locations
 language plpgsql
@@ -454,25 +454,25 @@ declare
 v_row public.product_locations;
 begin
 insert into public.product_locations (
-  product_id,
+  productID,
   location_id,
   quantity
 )
 values (
-         p_product_id,
+         p_productID,
          p_location_id,
          p_quantity
        )
   returning * into v_row;
 
 perform public.logs_audit_event(
-    p_actor_user_id,
+    p_actorUserID,
     'create',
     'product_location',
     v_row.id,
-    p_correlation_id,
+    p_correlationID,
     jsonb_build_object(
-      'product_id', v_row.product_id,
+      'productID', v_row.productID,
       'location_id', v_row.location_id,
       'quantity', v_row.quantity
     )
@@ -485,8 +485,8 @@ $$;
 create or replace function public.update_product_location_with_audit(
   p_id uuid,
   p_quantity integer,
-  p_actor_user_id uuid,
-  p_correlation_id uuid
+  p_actorUserID uuid,
+  p_correlationID uuid
 )
 returns public.product_locations
 language plpgsql
@@ -506,13 +506,13 @@ if v_row is null then
 end if;
 
   perform public.logs_audit_event(
-    p_actor_user_id,
+    p_actorUserID,
     'update',
     'product_location',
     v_row.id,
-    p_correlation_id,
+    p_correlationID,
     jsonb_build_object(
-      'product_id', v_row.product_id,
+      'productID', v_row.productID,
       'location_id', v_row.location_id,
       'quantity', v_row.quantity
     )
@@ -524,8 +524,8 @@ $$;
 
 create or replace function public.delete_product_location_with_audit(
   p_id uuid,
-  p_actor_user_id uuid,
-  p_correlation_id uuid
+  p_actorUserID uuid,
+  p_correlationID uuid
 )
 returns boolean
 language plpgsql
@@ -542,13 +542,13 @@ if v_row is null then
 end if;
 
   perform public.logs_audit_event(
-    p_actor_user_id,
+    p_actorUserID,
     'delete',
     'product_location',
     v_row.id,
-    p_correlation_id,
+    p_correlationID,
     jsonb_build_object(
-      'product_id', v_row.product_id,
+      'productID', v_row.productID,
       'location_id', v_row.location_id,
       'quantity', v_row.quantity
     )

@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { Loader2, Search, RefreshCw, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,12 +10,12 @@ type AuditAction = "INSERT" | "UPDATE" | "DELETE";
 type AuditLogItem = {
   id: string;
   tableName: string;
-  recordId: string | null;
+  recordID: string | null;
   action: AuditAction;
-  actorUserId: string | null;
+  actorUserID: string | null;
   actorUsername: string | null;
   actorFullName: string | null;
-  correlationId: string | null;
+  correlationID: string | null;
   oldValues: Record<string, unknown> | null;
   newValues: Record<string, unknown> | null;
   createdAt: string;
@@ -36,10 +36,13 @@ export default function LogsPage() {
   const [selectedAction, setSelectedAction] = useState<AuditAction | "all">("all");
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
 
-  const fetchLogs = async (isRefresh = false) => {
+  const fetchLogs = useCallback(async (isRefresh = false) => {
     try {
-      if (isRefresh) setRefreshing(true);
-      else setLoading(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
 
       const params = new URLSearchParams();
       if (query.trim()) params.set("q", query.trim());
@@ -51,23 +54,25 @@ export default function LogsPage() {
       });
 
       if (!res.ok) {
-        throw new Error("Failed to fetch audit logs");
+        console.error("Failed to fetch audit logs:", res.status, res.statusText);
+        setLogs([]);
+        return;
       }
 
       const data = await res.json();
       setLogs(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error(error);
+      console.error("Failed to fetch audit logs:", error);
       setLogs([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [query, selectedTable, selectedAction]);
 
   useEffect(() => {
     fetchLogs();
-  }, []);
+  }, [fetchLogs]);
 
   const tableOptions = useMemo(() => {
     return Array.from(
@@ -94,10 +99,6 @@ export default function LogsPage() {
     setQuery("");
     setSelectedTable("all");
     setSelectedAction("all");
-
-    setTimeout(() => {
-      fetchLogs();
-    }, 0);
   };
 
   return (
@@ -223,7 +224,7 @@ export default function LogsPage() {
                       <td className="px-4 py-3">
                         <div className="font-medium">{log.tableName}</div>
                         <div className="text-xs text-muted-foreground break-all">
-                          {log.recordId ?? "No record ID"}
+                          {log.recordID ?? "No record ID"}
                         </div>
                       </td>
 
@@ -239,15 +240,15 @@ export default function LogsPage() {
 
                       <td className="px-4 py-3">
                         <div>{log.actorUsername ?? log.actorFullName ?? "System"}</div>
-                        {log.actorUserId && (
+                        {log.actorUserID && (
                           <div className="text-xs text-muted-foreground break-all">
-                            {log.actorUserId}
+                            {log.actorUserID}
                           </div>
                         )}
                       </td>
 
                       <td className="px-4 py-3 font-mono text-xs text-muted-foreground break-all">
-                        {log.correlationId ?? "—"}
+                        {log.correlationID ?? "—"}
                       </td>
 
                       <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">

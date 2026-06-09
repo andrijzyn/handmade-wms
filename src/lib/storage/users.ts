@@ -77,7 +77,7 @@ export function createUsersStorage(ctx: StorageContext) {
 
     async createUser(
       insertUser: InsertUser,
-      actorUserId: string,
+      actorUserID: string,
     ): Promise<SafeUser> {
       const hashedPassword = await ctx.hashPassword(insertUser.password);
 
@@ -90,7 +90,7 @@ export function createUsersStorage(ctx: StorageContext) {
         p_callsign: insertUser.callsign ?? null,
         p_clearanceLevel: insertUser.clearanceLevel ?? "Без допуску",
         p_isActive: insertUser.isActive ?? true,
-        ...ctx.audit(actorUserId),
+        ...ctx.audit(actorUserID),
       });
 
       if (error) throw error;
@@ -100,7 +100,7 @@ export function createUsersStorage(ctx: StorageContext) {
       await api.setUserPermissions(
         createdUserId,
         insertUser.permissions ?? [],
-        actorUserId,
+        actorUserID,
       );
 
       const user = await api.getUser(createdUserId);
@@ -114,7 +114,7 @@ export function createUsersStorage(ctx: StorageContext) {
     async updateUser(
       id: string,
       updates: UpdateUserInput,
-      actorUserId: string,
+      actorUserID: string,
     ): Promise<SafeUser | undefined> {
       const dbUpdates = await buildUserUpdatePayload(ctx, updates);
 
@@ -122,24 +122,24 @@ export function createUsersStorage(ctx: StorageContext) {
         const { error } = await ctx.db().rpc("update_user_with_audit", {
           p_user_id: id,
           p_updates: dbUpdates,
-          ...ctx.audit(actorUserId),
+          ...ctx.audit(actorUserID),
         });
 
         if (error) throw error;
       }
 
       if (updates.permissions !== undefined) {
-        await api.setUserPermissions(id, updates.permissions, actorUserId);
+        await api.setUserPermissions(id, updates.permissions, actorUserID);
       }
 
       const user = await api.getUser(id);
       return user ? toSafeUser(user) : undefined;
     },
 
-    async deleteUser(id: string, actorUserId: string): Promise<boolean> {
+    async deleteUser(id: string, actorUserID: string): Promise<boolean> {
       const { data, error } = await ctx.db().rpc("delete_user_with_audit", {
         p_user_id: id,
-        ...ctx.audit(actorUserId),
+        ...ctx.audit(actorUserID),
       });
 
       if (error) throw error;
@@ -153,14 +153,14 @@ export function createUsersStorage(ctx: StorageContext) {
     async setUserPermissions(
       userId: string,
       permissions: Permission[],
-      actorUserId: string,
+      actorUserID: string,
     ): Promise<void> {
       const { error } = await ctx.db().rpc(
         "replace_userPermissions_with_audit",
         {
           p_user_id: userId,
           p_permission_keys: permissions,
-          ...ctx.audit(actorUserId),
+          ...ctx.audit(actorUserID),
         },
       );
 

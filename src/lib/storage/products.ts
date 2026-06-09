@@ -58,7 +58,7 @@ export function createProductsStorage(ctx: StorageContext) {
 
     async createProduct(
       insertProduct: InsertProduct,
-      actorUserId: string,
+      actorUserID: string,
     ): Promise<Product> {
       const { data, error } = await ctx.db().rpc("create_product_with_audit", {
         p_name: insertProduct.name,
@@ -68,7 +68,7 @@ export function createProductsStorage(ctx: StorageContext) {
         p_price: insertProduct.price,
         p_lowStockThreshold: insertProduct.lowStockThreshold,
         p_description: insertProduct.description ?? null,
-        ...ctx.audit(actorUserId),
+        ...ctx.audit(actorUserID),
       });
 
       if (error) throw error;
@@ -78,7 +78,7 @@ export function createProductsStorage(ctx: StorageContext) {
     async updateProduct(
       id: string,
       updates: Partial<InsertProduct>,
-      actorUserId: string,
+      actorUserID: string,
     ): Promise<Product | undefined> {
       const dbUpdates = buildProductUpdatePayload(updates);
 
@@ -89,7 +89,7 @@ export function createProductsStorage(ctx: StorageContext) {
       const { data, error } = await ctx.db().rpc("update_product_with_audit", {
         p_productID: id,
         p_updates: dbUpdates,
-        ...ctx.audit(actorUserId),
+        ...ctx.audit(actorUserID),
       });
 
       if (error) throw error;
@@ -98,10 +98,10 @@ export function createProductsStorage(ctx: StorageContext) {
       return dbToProduct(data as DbProduct);
     },
 
-    async deleteProduct(id: string, actorUserId: string): Promise<boolean> {
+    async deleteProduct(id: string, actorUserID: string): Promise<boolean> {
       const { data, error } = await ctx.db().rpc("delete_product_with_audit", {
         p_productID: id,
-        ...ctx.audit(actorUserId),
+        ...ctx.audit(actorUserID),
       });
 
       if (error) throw error;

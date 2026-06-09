@@ -15,34 +15,17 @@ function attachActorsToLogs(
       ? userMap.get(row.actorUserID)
       : undefined;
 
-    const payload =
-      row.payload && typeof row.payload === "object" ? row.payload : null;
-
-    const oldValues =
-      payload && "oldValues" in payload
-        ? (payload.oldValues as Record<string, unknown> | null)
-        : payload && "oldValues" in payload
-          ? (payload.oldValues as Record<string, unknown> | null)
-          : null;
-
-    const newValues =
-      payload && "newValues" in payload
-        ? (payload.newValues as Record<string, unknown> | null)
-        : payload && "newValues" in payload
-          ? (payload.newValues as Record<string, unknown> | null)
-          : null;
-
     return {
       id: row.id,
-      tableName: row.entityType,
-      recordId: row.entityID,
+      tableName: row.tableName,
+      recordID: row.recordID,
       action: String(row.action).toUpperCase() as AuditLogItem["action"],
-      actorUserId: row.actorUserID,
-      actorUsername: actor?.username ?? null,
-      actorFullName: actor?.fullName ?? null,
-      correlationId: row.correlationID,
-      oldValues,
-      newValues,
+      actorUserID: row.actorUserID,
+      actorUsername: actor?.username ?? row.users?.[0]?.username ?? null,
+      actorFullName: actor?.fullName ?? row.users?.[0]?.fullName ?? null,
+      correlationID: row.correlationID,
+      oldValues: row.oldValues,
+      newValues: row.newValues,
       createdAt: row.createdAt,
     };
   });
@@ -56,33 +39,38 @@ export function createAuditStorage(ctx: StorageContext) {
         .from("logs")
         .select(`
           id,
-          actorUserID,
+          tableName,
+          recordID,
           action,
-          entityType,
-          entityID,
+          actorUserID,
           correlationID,
-          payload,
-          createdAt
+          oldValues,
+          newValues,
+          createdAt,
+          users (
+            username,
+            fullName
+          )
         `)
         .order("createdAt", { ascending: false })
         .limit(filters?.limit ?? 100);
 
       if (filters?.tableName && filters.tableName !== "all") {
-        query = query.eq("entityType", filters.tableName);
+        query = query.eq("tableName", filters.tableName);
       }
 
       if (filters?.action && filters.action !== "all") {
-        query = query.eq("action", String(filters.action).toLowerCase());
+        query = query.eq("action", String(filters.action).toUpperCase());
       }
 
-      if (filters?.actorUserId) {
-        query = query.eq("actorUserID", filters.actorUserId);
+      if (filters?.actorUserID) {
+        query = query.eq("actorUserID", filters.actorUserID);
       }
 
       if (filters?.q?.trim()) {
         const q = filters.q.trim();
         query = query.or(
-          `entityType.ilike.%${q}%,entityID::text.ilike.%${q}%,correlationID::text.ilike.%${q}%`
+          `tableName.ilike.%${q}%,recordID.ilike.%${q}%,correlationID.ilike.%${q}%`,
         );
       }
 
@@ -91,11 +79,13 @@ export function createAuditStorage(ctx: StorageContext) {
 
       const rows = (data ?? []) as DbAuditLogRow[];
 
-      const actorIds = [...new Set(
-        rows
-          .map((row) => row.actorUserID)
-          .filter((id): id is string => Boolean(id))
-      )];
+      const actorIds = [
+        ...new Set(
+          rows
+            .map((row) => row.actorUserID)
+            .filter((id): id is string => Boolean(id)),
+        ),
+      ];
 
       const userMap = await getUserDisplayMapByIds(ctx, actorIds);
 

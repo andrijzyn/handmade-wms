@@ -97,11 +97,9 @@ export type UserUpdateDbPayload = Partial<{
 
 export type StorageContext = {
   db: () => ReturnType<typeof getSupabase>;
-  audit: (actorUserId: string) => {
-     
+  audit: (actorUserID: string) => {
     p_actorUserID: string;
-     
-     cx: string;
+    p_correlationID: string;
   };
   hashPassword: (password: string) => Promise<string>;
 };
@@ -176,32 +174,21 @@ export type AuditAction = "INSERT" | "UPDATE" | "DELETE";
 
 export interface AuditLogFilters {
   action?: AuditAction | "all";
-  actorUserId?: string;
+  actorUserID?: string;
   limit?: number;
   q?: string;
   tableName?: string;
 }
 
-export interface DbAuditLogRow {
-  id: string;
-  actorUserID: string | null;
-  action: AuditAction;
-  entityType: string;
-  entityID: string | null;
-  correlationID: string | null;
-  payload: Record<string, unknown> | null;
-  createdAt: string;
-}
-
 export interface AuditLogItem {
   id: string;
   tableName: string;
-  recordId: string | null;
+  recordID: string | null;
   action: AuditAction;
-  actorUserId: string | null;
+  actorUserID: string | null;
   actorUsername: string | null;
   actorFullName: string | null;
-  correlationId: string | null;
+  correlationID: string | null;
   oldValues: Record<string, unknown> | null;
   newValues: Record<string, unknown> | null;
   createdAt: string;

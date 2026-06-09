@@ -52,7 +52,7 @@ export function createProductLocationsStorage(ctx: StorageContext) {
 
     async createProductLocation(
       input: InsertProductLocation,
-      actorUserId: string,
+      actorUserID: string,
     ): Promise<ProductLocation> {
       const { data, error } = await ctx.db().rpc(
         "create_product_location_with_audit",
@@ -60,7 +60,7 @@ export function createProductLocationsStorage(ctx: StorageContext) {
           p_productID: input.productId,
           p_locationID: input.locationId,
           p_quantity: input.quantity,
-          ...ctx.audit(actorUserId),
+          ...ctx.audit(actorUserID),
         },
       );
 
@@ -71,14 +71,14 @@ export function createProductLocationsStorage(ctx: StorageContext) {
     async updateProductLocation(
       id: string,
       quantity: number,
-      actorUserId: string,
+      actorUserID: string,
     ): Promise<ProductLocation | null> {
       const { data, error } = await ctx.db().rpc(
         "update_product_location_with_audit",
         {
           p_id: id,
           p_quantity: quantity,
-          ...ctx.audit(actorUserId),
+          ...ctx.audit(actorUserID),
         },
       );
 
@@ -88,13 +88,13 @@ export function createProductLocationsStorage(ctx: StorageContext) {
 
     async deleteProductLocation(
       id: string,
-      actorUserId: string,
+      actorUserID: string,
     ): Promise<boolean> {
       const { data, error } = await ctx.db().rpc(
         "delete_product_location_with_audit",
         {
           p_id: id,
-          ...ctx.audit(actorUserId),
+          ...ctx.audit(actorUserID),
         },
       );
 
