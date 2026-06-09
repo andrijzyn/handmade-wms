@@ -84,12 +84,12 @@ export function createUsersStorage(ctx: StorageContext) {
       const { data, error } = await ctx.db().rpc("create_user_with_audit", {
         p_username: insertUser.username,
         p_password: hashedPassword,
-        p_fullName: insertUser.fullName,
+        p_full_name: insertUser.fullName,
         p_rank: insertUser.rank,
         p_unit: insertUser.unit,
         p_callsign: insertUser.callsign ?? null,
-        p_clearanceLevel: insertUser.clearanceLevel ?? "Без допуску",
-        p_isActive: insertUser.isActive ?? true,
+        p_clearance_level: insertUser.clearanceLevel ?? "Без допуску",
+        p_is_active: insertUser.isActive ?? true,
         ...ctx.audit(actorUserID),
       });
 

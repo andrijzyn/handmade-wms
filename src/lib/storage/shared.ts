@@ -98,8 +98,8 @@ export type UserUpdateDbPayload = Partial<{
 export type StorageContext = {
   db: () => ReturnType<typeof getSupabase>;
   audit: (actorUserID: string) => {
-    p_actorUserID: string;
-    p_correlationID: string;
+    p_actor_user_id: string;
+    p_correlation_id: string;
   };
   hashPassword: (password: string) => Promise<string>;
 };

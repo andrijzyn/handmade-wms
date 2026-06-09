@@ -66,7 +66,7 @@ export function createProductsStorage(ctx: StorageContext) {
         p_category: insertProduct.category,
         p_quantity: insertProduct.quantity,
         p_price: insertProduct.price,
-        p_lowStockThreshold: insertProduct.lowStockThreshold,
+        p_low_stock_threshold: insertProduct.lowStockThreshold,
         p_description: insertProduct.description ?? null,
         ...ctx.audit(actorUserID),
       });
@@ -87,7 +87,7 @@ export function createProductsStorage(ctx: StorageContext) {
       }
 
       const { data, error } = await ctx.db().rpc("update_product_with_audit", {
-        p_productID: id,
+        p_product_id: id,
         p_updates: dbUpdates,
         ...ctx.audit(actorUserID),
       });
@@ -100,7 +100,7 @@ export function createProductsStorage(ctx: StorageContext) {
 
     async deleteProduct(id: string, actorUserID: string): Promise<boolean> {
       const { data, error } = await ctx.db().rpc("delete_product_with_audit", {
-        p_productID: id,
+        p_product_id: id,
         ...ctx.audit(actorUserID),
       });
 

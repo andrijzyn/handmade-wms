@@ -246,10 +246,10 @@ export type Database = {
     Functions: {
       create_product_location_with_audit: {
         Args: {
-          p_actorUserID: string
-          p_correlationID: string
+          p_actor_user_id: string
+          p_correlation_id: string
           p_locationID: string
-          p_productID: string
+          p_product_id: string
           p_quantity: number
         }
         Returns: {
@@ -268,11 +268,11 @@ export type Database = {
       }
       create_product_with_audit: {
         Args: {
-          p_actorUserID: string
+          p_actor_user_id: string
           p_category: string
-          p_correlationID: string
+          p_correlation_id: string
           p_description: string
-          p_lowStockThreshold: number
+          p_low_stock_threshold: number
           p_name: string
           p_price: number
           p_quantity: number
@@ -297,12 +297,12 @@ export type Database = {
       }
       create_user_with_audit: {
         Args: {
-          p_actorUserID: string
+          p_actor_user_id: string
           p_callsign: string
-          p_clearanceLevel: string
-          p_correlationID: string
-          p_fullName: string
-          p_isActive: boolean
+          p_clearance_level: string
+          p_correlation_id: string
+          p_full_name: string
+          p_is_active: boolean
           p_password: string
           p_rank: string
           p_unit: string
@@ -312,24 +312,24 @@ export type Database = {
       }
       delete_product_location_with_audit: {
         Args: {
-          p_actorUserID: string
-          p_correlationID: string
+          p_actor_user_id: string
+          p_correlation_id: string
           p_id: string
         }
         Returns: boolean
       }
       delete_product_with_audit: {
         Args: {
-          p_actorUserID: string
-          p_correlationID: string
-          p_productID: string
+          p_actor_user_id: string
+          p_correlation_id: string
+          p_product_id: string
         }
         Returns: boolean
       }
       delete_user_with_audit: {
         Args: {
-          p_actorUserID: string
-          p_correlationID: string
+          p_actor_user_id: string
+          p_correlation_id: string
           p_user_id: string
         }
         Returns: boolean
@@ -337,10 +337,10 @@ export type Database = {
       log_audit_event: {
         Args: {
           p_action: string
-          p_actorUserID: string
-          p_correlationID: string
-          p_entityID: string
-          p_entityType: string
+          p_actor_user_id: string
+          p_correlation_id: string
+          p_entity_id: string
+          p_entity_type: string
           p_payload?: Json
         }
         Returns: undefined
@@ -348,18 +348,18 @@ export type Database = {
       logs_audit_event: {
         Args: {
           p_action: string
-          p_actorUserID: string
-          p_correlationID: string
-          p_entityID: string
-          p_entityType: string
+          p_actor_user_id: string
+          p_correlation_id: string
+          p_entity_id: string
+          p_entity_type: string
           p_payload?: Json
         }
         Returns: undefined
       }
       replace_userPermissions_with_audit: {
         Args: {
-          p_actorUserID: string
-          p_correlationID: string
+          p_actor_user_id: string
+          p_correlation_id: string
           p_permission_keys: string[]
           p_user_id: string
         }
@@ -367,8 +367,8 @@ export type Database = {
       }
       update_product_location_with_audit: {
         Args: {
-          p_actorUserID: string
-          p_correlationID: string
+          p_actor_user_id: string
+          p_correlation_id: string
           p_id: string
           p_quantity: number
         }
@@ -388,9 +388,9 @@ export type Database = {
       }
       update_product_with_audit: {
         Args: {
-          p_actorUserID: string
-          p_correlationID: string
-          p_productID: string
+          p_actor_user_id: string
+          p_correlation_id: string
+          p_product_id: string
           p_updates: Json
         }
         Returns: {
@@ -412,8 +412,8 @@ export type Database = {
       }
       update_user_with_audit: {
         Args: {
-          p_actorUserID: string
-          p_correlationID: string
+          p_actor_user_id: string
+          p_correlation_id: string
           p_updates: Json
           p_user_id: string
         }

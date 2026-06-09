@@ -57,7 +57,7 @@ export function createProductLocationsStorage(ctx: StorageContext) {
       const { data, error } = await ctx.db().rpc(
         "create_product_location_with_audit",
         {
-          p_productID: input.productId,
+          p_product_id: input.productId,
           p_locationID: input.locationId,
           p_quantity: input.quantity,
           ...ctx.audit(actorUserID),
