@@ -13,13 +13,13 @@ const PASSWORD_ROUNDS = 10;
 const ctx: StorageContext = {
   db: () => getSupabase(),
 
-  audit(actorUserID: string) {
-    if (!actorUserID) {
-      throw new Error("Missing actorUserID for audited RPC call");
+  audit(actor_user_id: string) {
+    if (!actor_user_id) {
+      throw new Error("Missing actor_user_id for audited RPC call");
     }
 
     return {
-      p_actor_user_id: actorUserID,
+      p_actor_user_id: actor_user_id,
       p_correlation_id: randomUUID(),
     };
   },

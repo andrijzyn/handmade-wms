@@ -77,13 +77,13 @@ const PERMISSION_LABELS: Record<Permission, string> = {
 type UserFormValues = {
   username: string;
   password: string;
-  fullName: string;
+  full_name: string;
   rank: string;
   unit: string;
   callsign: string;
-  clearanceLevel: string;
+  clearance_level: string;
   permissions: Permission[];
-  isActive: boolean;
+  is_active: boolean;
 };
 
 type CreateUserFormProps = {
@@ -110,16 +110,16 @@ export default function UserForm(props: UserFormProps) {
     defaultValues: {
       username: props.defaultValues?.username ?? "",
       password: "",
-      fullName: props.defaultValues?.fullName ?? "",
+      full_name: props.defaultValues?.full_name ?? "",
       rank: props.defaultValues?.rank ?? "",
       unit: props.defaultValues?.unit ?? "",
       callsign:
         typeof props.defaultValues?.callsign === "string"
           ? props.defaultValues.callsign
           : "",
-      clearanceLevel: props.defaultValues?.clearanceLevel ?? "No clearance",
+      clearance_level: props.defaultValues?.clearance_level ?? "No clearance",
       permissions: props.defaultValues?.permissions ?? [],
-      isActive: props.defaultValues?.isActive ?? true,
+      is_active: props.defaultValues?.is_active ?? true,
     },
   });
 
@@ -127,13 +127,13 @@ function handleSubmit(data: UserFormValues) {
   const password = data.password?.trim();
   const basePayload = {
     username: data.username.trim(),
-    fullName: data.fullName.trim(),
+    full_name: data.full_name.trim(),
     rank: data.rank,
     unit: data.unit,
     callsign: data.callsign?.trim() || null,
-    clearanceLevel: data.clearanceLevel,
+    clearance_level: data.clearance_level,
     permissions: data.permissions,
-    isActive: data.isActive,
+    is_active: data.is_active,
   };
 
   if (props.isEdit) {
@@ -185,7 +185,7 @@ function handleSubmit(data: UserFormValues) {
 
         <FormField
           control={form.control}
-          name="fullName"
+          name="full_name"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Full name</FormLabel>
@@ -252,7 +252,7 @@ function handleSubmit(data: UserFormValues) {
 
         <FormField
           control={form.control}
-          name="clearanceLevel"
+          name="clearance_level"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Clearance level</FormLabel>
@@ -326,7 +326,7 @@ function handleSubmit(data: UserFormValues) {
 
         <FormField
           control={form.control}
-          name="isActive"
+          name="is_active"
           render={({ field }) => (
             <FormItem className="flex items-center justify-between rounded-md border p-3">
               <FormLabel className="mb-0">Active</FormLabel>

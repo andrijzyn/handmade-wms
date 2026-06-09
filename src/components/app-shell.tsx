@@ -147,13 +147,13 @@ export default function AppShell() {
         {/* Nav */}
         <nav className="flex-1 py-3 px-3 space-y-1">
           {navItems.map(({ page, label, icon: Icon }) => {
-            const isActive = currentPage === page;
+            const is_active = currentPage === page;
             return (
               <button
                 key={page}
                 onClick={() => setCurrentPage(page)}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
-                  isActive
+                  is_active
                     ? "bg-sidebar-accent text-sidebar-foreground"
                     : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
                 }`}
@@ -179,7 +179,7 @@ export default function AppShell() {
                     className="text-xs font-medium truncate text-sidebar-foreground"
                     data-testid="text-current-user"
                   >
-                    {user.callsign ? user.callsign : user.fullName}
+                    {user.callsign ? user.callsign : user.full_name}
                   </p>
                   <p className="text-[10px] text-muted-foreground truncate">
                     {user.rank}
@@ -190,7 +190,7 @@ export default function AppShell() {
                 variant="outline"
                 className="text-[10px] px-1.5 py-0 h-4 font-normal"
               >
-                {user.clearanceLevel}
+                {user.clearance_level}
               </Badge>
             </div>
           )}

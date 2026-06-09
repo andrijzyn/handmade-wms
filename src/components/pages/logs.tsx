@@ -9,16 +9,16 @@ type AuditAction = "INSERT" | "UPDATE" | "DELETE";
 
 type AuditLogItem = {
   id: string;
-  tableName: string;
-  recordID: string | null;
+  table_name: string;
+  record_id: string | null;
   action: AuditAction;
-  actorUserID: string | null;
+  actor_user_id: string | null;
   actorUsername: string | null;
   actorFullName: string | null;
-  correlationID: string | null;
-  oldValues: Record<string, unknown> | null;
-  newValues: Record<string, unknown> | null;
-  createdAt: string;
+  correlation_id: string | null;
+  old_values: Record<string, unknown> | null;
+  new_values: Record<string, unknown> | null;
+  created_at: string;
 };
 
 const actionStyles: Record<AuditAction, string> = {
@@ -46,7 +46,7 @@ export default function LogsPage() {
 
       const params = new URLSearchParams();
       if (query.trim()) params.set("q", query.trim());
-      if (selectedTable !== "all") params.set("tableName", selectedTable);
+      if (selectedTable !== "all") params.set("table_name", selectedTable);
       if (selectedAction !== "all") params.set("action", selectedAction);
 
       const res = await fetch(`/api/logs${params.toString() ? `?${params.toString()}` : ""}`, {
@@ -78,7 +78,7 @@ export default function LogsPage() {
     return Array.from(
       new Set(
         logs
-          .map((log) => log.tableName)
+          .map((log) => log.table_name)
           .filter((value): value is string => Boolean(value?.trim()))
       )
     ).sort();
@@ -144,9 +144,9 @@ export default function LogsPage() {
           >
             <option value="all">All tables</option>
 
-            {tableOptions.map((tableName, index) => (
-              <option key={`table-${tableName}-${index}`} value={tableName}>
-                {tableName}
+            {tableOptions.map((table_name, index) => (
+              <option key={`table-${table_name}-${index}`} value={table_name}>
+                {table_name}
               </option>
             ))}
           </select>
@@ -222,9 +222,9 @@ export default function LogsPage() {
                       </td>
 
                       <td className="px-4 py-3">
-                        <div className="font-medium">{log.tableName}</div>
+                        <div className="font-medium">{log.table_name}</div>
                         <div className="text-xs text-muted-foreground break-all">
-                          {log.recordID ?? "No record ID"}
+                          {log.record_id ?? "No record ID"}
                         </div>
                       </td>
 
@@ -240,19 +240,19 @@ export default function LogsPage() {
 
                       <td className="px-4 py-3">
                         <div>{log.actorUsername ?? log.actorFullName ?? "System"}</div>
-                        {log.actorUserID && (
+                        {log.actor_user_id && (
                           <div className="text-xs text-muted-foreground break-all">
-                            {log.actorUserID}
+                            {log.actor_user_id}
                           </div>
                         )}
                       </td>
 
                       <td className="px-4 py-3 font-mono text-xs text-muted-foreground break-all">
-                        {log.correlationID ?? "—"}
+                        {log.correlation_id ?? "—"}
                       </td>
 
                       <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">
-                        {new Date(log.createdAt).toLocaleString()}
+                        {new Date(log.created_at).toLocaleString()}
                       </td>
                     </tr>
 
@@ -263,14 +263,14 @@ export default function LogsPage() {
                             <div className="space-y-2">
                               <h3 className="text-sm font-medium">Old values</h3>
                               <pre className="rounded-md border bg-background p-3 text-xs overflow-x-auto">
-                    {JSON.stringify(log.oldValues, null, 2) ?? "null"}
+                    {JSON.stringify(log.old_values, null, 2) ?? "null"}
                   </pre>
                             </div>
 
                             <div className="space-y-2">
                               <h3 className="text-sm font-medium">New values</h3>
                               <pre className="rounded-md border bg-background p-3 text-xs overflow-x-auto">
-                    {JSON.stringify(log.newValues, null, 2) ?? "null"}
+                    {JSON.stringify(log.new_values, null, 2) ?? "null"}
                   </pre>
                             </div>
                           </div>

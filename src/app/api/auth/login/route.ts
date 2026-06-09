@@ -27,7 +27,7 @@ export const POST = withErrorHandling(
       raiseApiError("Invalid username or password", 401);
     }
 
-    if (!user.isActive) {
+    if (!user.is_active) {
       raiseApiError("Account is deactivated", 401);
     }
 
@@ -41,8 +41,8 @@ export const POST = withErrorHandling(
 
     // Створюємо сесію
     const session = await getSession();
-    session.userId = user.id;
-    session.sessionVersion = user.sessionVersion ?? undefined;
+    session.user_id = user.id;
+    session.session_version = user.session_version ?? undefined;
     await session.save();
 
     return NextResponse.json(safeUser);

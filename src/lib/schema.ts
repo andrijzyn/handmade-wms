@@ -18,7 +18,7 @@ export interface Product {
   category: string;
   quantity: number;
   price: number;
-  lowStockThreshold: number;
+  low_stock_threshold: number;
   description: string | null;
 }
 
@@ -28,7 +28,7 @@ export const insertProductSchema = z.object({
   category: z.string().min(1, "Category is required"),
   quantity: z.number().int().min(0).default(0),
   price: z.number().min(0).default(0),
-  lowStockThreshold: z.number().int().min(0).default(10),
+  low_stock_threshold: z.number().int().min(0).default(10),
   description: z.string().nullable().optional(),
 });
 
@@ -60,22 +60,22 @@ export type InsertLocation = z.infer<typeof insertLocationSchema>;
 
 export interface ProductLocation {
   id: string;
-  productId: string;
-  locationId: string;
+  product_id: string;
+  location_id: string;
   quantity: number;
-  updatedAt: string;
+  updated_at: string;
 }
 
 export interface ProductLocationView extends ProductLocation {
-  locationLabel: string;
-  locationRow: number;
-  locationCol: number;
-  locationLevel: number;
+  location_label: string;
+  location_row: number;
+  location_col: number;
+  location_level: number;
 }
 
 export const insertProductLocationSchema = z.object({
-  productId: z.uuid({ error: "Invalid product ID" }),
-  locationId: z.uuid({ error: "Invalid location ID" }),
+  product_id: z.uuid({ error: "Invalid product ID" }),
+  location_id: z.uuid({ error: "Invalid location ID" }),
   quantity: z.number().int().min(0, { error: "Quantity must be 0 or more" }),
 });
 
@@ -119,13 +119,13 @@ export const CLEARANCE_LEVELS = [
 export const insertUserSchema = z.object({
   username: z.string().min(3, { error: "Min 3 characters" }).max(50),
   password: z.string().min(6, { error: "Min 6 characters" }),
-  fullName: z.string().min(1, { error: "Required" }),
+  full_name: z.string().min(1, { error: "Required" }),
   rank: z.string().min(1, { error: "Required" }),
   unit: z.string().min(1, { error: "Required" }),
   callsign: z.string().nullable().optional(),
-  clearanceLevel: z.string().default("No clearance"),
+  clearance_level: z.string().default("No clearance"),
   permissions: z.array(permissionSchema).default([]),
-  isActive: z.boolean().default(true),
+  is_active: z.boolean().default(true),
 });
 
 const optionalPasswordSchema = z.preprocess(

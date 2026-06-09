@@ -35,8 +35,8 @@ function SortButton({
                       activeDir,
                       onToggle,
                     }: SortButtonProps) {
-  const isActive = activeKey === column;
-  const directionMark = isActive ? (activeDir === "asc" ? "↑" : "↓") : "";
+  const is_active = activeKey === column;
+  const directionMark = is_active ? (activeDir === "asc" ? "↑" : "↓") : "";
 
   return (
     <button

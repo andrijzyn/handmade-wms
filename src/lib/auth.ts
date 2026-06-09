@@ -8,8 +8,8 @@ import type { User } from "./userTypes";
 import { unauthorized, forbidden } from "./apiServerError";
 
 export interface SessionData {
-  userId?: string;
-  sessionVersion?: string;
+  user_id?: string;
+  session_version?: string;
 }
 
 // ── Session config ────────────────────────────────────
@@ -35,13 +35,13 @@ export async function getSession() {
 export async function getCurrentUser(): Promise<User | null> {
   const session = await getSession();
 
-  if (!session.userId) return null;
+  if (!session.user_id) return null;
 
-  const user = await storage.getUser(session.userId);
-  if (!user || !user.isActive) return null;
+  const user = await storage.getUser(session.user_id);
+  if (!user || !user.is_active) return null;
 
   // Check invalidation
-  if (session.sessionVersion !== user.sessionVersion) return null;
+  if (session.session_version !== user.session_version) return null;
 
   return user;
 }

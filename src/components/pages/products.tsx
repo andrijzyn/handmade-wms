@@ -104,7 +104,7 @@ function getStockBadge(product: Product) {
     );
   }
 
-  if (product.quantity <= product.lowStockThreshold) {
+  if (product.quantity <= product.low_stock_threshold) {
     return (
       <Badge
         variant="outline"
@@ -134,7 +134,7 @@ function SortButton({
                       sortDir,
                       onToggle,
                     }: SortButtonProps) {
-  const isActive = sortKey === column;
+  const is_active = sortKey === column;
 
   return (
     <button
@@ -145,7 +145,7 @@ function SortButton({
     >
       <span>{label}</span>
       <ArrowUpDown className="h-3 w-3 opacity-50" />
-      {isActive ? (
+      {is_active ? (
         <span className="text-xs text-muted-foreground">
           {sortDir === "asc" ? "↑" : "↓"}
         </span>

@@ -41,8 +41,8 @@ export type Database = {
       logs: {
         Row: {
           action: string
-          actorUserID: string | null
-          correlationID: string
+          actor_user_id: string | null
+          correlation_id: string
           creationTime: string
           entityID: string | null
           entityType: string
@@ -51,8 +51,8 @@ export type Database = {
         }
         Insert: {
           action: string
-          actorUserID?: string | null
-          correlationID: string
+          actor_user_id?: string | null
+          correlation_id: string
           creationTime?: string
           entityID?: string | null
           entityType: string
@@ -61,8 +61,8 @@ export type Database = {
         }
         Update: {
           action?: string
-          actorUserID?: string | null
-          correlationID?: string
+          actor_user_id?: string | null
+          correlation_id?: string
           creationTime?: string
           entityID?: string | null
           entityType?: string
@@ -92,36 +92,36 @@ export type Database = {
       product_locations: {
         Row: {
           id: string
-          locationID: string
-          productID: string
+          location_id: string
+          product_id: string
           quantity: number
-          updatedAt: string | null
+          updated_at: string | null
         }
         Insert: {
           id?: string
-          locationID: string
-          productID: string
+          location_id: string
+          product_id: string
           quantity?: number
-          updatedAt?: string | null
+          updated_at?: string | null
         }
         Update: {
           id?: string
-          locationID?: string
-          productID?: string
+          location_id?: string
+          product_id?: string
           quantity?: number
-          updatedAt?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "product_locations_locationID_fkey"
-            columns: ["locationID"]
+            foreignKeyName: "product_locations_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
             referencedRelation: "locations"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "product_locations_productID_fkey"
-            columns: ["productID"]
+            foreignKeyName: "product_locations_product_id_fkey"
+            columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
@@ -133,7 +133,7 @@ export type Database = {
           category: string
           description: string | null
           id: string
-          lowStockThreshold: number
+          low_stock_threshold: number
           name: string
           price: number
           quantity: number
@@ -143,7 +143,7 @@ export type Database = {
           category: string
           description?: string | null
           id?: string
-          lowStockThreshold?: number
+          low_stock_threshold?: number
           name: string
           price?: number
           quantity?: number
@@ -153,7 +153,7 @@ export type Database = {
           category?: string
           description?: string | null
           id?: string
-          lowStockThreshold?: number
+          low_stock_threshold?: number
           name?: string
           price?: number
           quantity?: number
@@ -161,7 +161,7 @@ export type Database = {
         }
         Relationships: []
       }
-      userPermissions: {
+      user_permissions: {
         Row: {
           granted_at: string
           id: string
@@ -182,14 +182,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "userPermissions_permission_id_fkey"
+            foreignKeyName: "user_permissions_permission_id_fkey"
             columns: ["permission_id"]
             isOneToOne: false
             referencedRelation: "permissions"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "userPermissions_user_id_fkey"
+            foreignKeyName: "user_permissions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
@@ -200,40 +200,40 @@ export type Database = {
       users: {
         Row: {
           callsign: string | null
-          clearanceLevel: string
+          clearance_level: string
           creationTime: string | null
-          fullName: string
+          full_name: string
           id: string
-          isActive: boolean
+          is_active: boolean
           password: string
           rank: string
-          sessionVersion: string | null
+          session_version: string | null
           unit: string
           username: string
         }
         Insert: {
           callsign?: string | null
-          clearanceLevel?: string
+          clearance_level?: string
           creationTime?: string | null
-          fullName: string
+          full_name: string
           id?: string
-          isActive?: boolean
+          is_active?: boolean
           password: string
           rank: string
-          sessionVersion?: string | null
+          session_version?: string | null
           unit: string
           username: string
         }
         Update: {
           callsign?: string | null
-          clearanceLevel?: string
+          clearance_level?: string
           creationTime?: string | null
-          fullName?: string
+          full_name?: string
           id?: string
-          isActive?: boolean
+          is_active?: boolean
           password?: string
           rank?: string
-          sessionVersion?: string | null
+          session_version?: string | null
           unit?: string
           username?: string
         }
@@ -248,16 +248,16 @@ export type Database = {
         Args: {
           p_actor_user_id: string
           p_correlation_id: string
-          p_locationID: string
+          p_location_id: string
           p_product_id: string
           p_quantity: number
         }
         Returns: {
           id: string
-          locationID: string
-          productID: string
+          location_id: string
+          product_id: string
           quantity: number
-          updatedAt: string | null
+          updated_at: string | null
         }
         SetofOptions: {
           from: "*"
@@ -282,7 +282,7 @@ export type Database = {
           category: string
           description: string | null
           id: string
-          lowStockThreshold: number
+          low_stock_threshold: number
           name: string
           price: number
           quantity: number
@@ -356,7 +356,7 @@ export type Database = {
         }
         Returns: undefined
       }
-      replace_userPermissions_with_audit: {
+      replace_user_permissions_with_audit: {
         Args: {
           p_actor_user_id: string
           p_correlation_id: string
@@ -374,10 +374,10 @@ export type Database = {
         }
         Returns: {
           id: string
-          locationID: string
-          productID: string
+          location_id: string
+          product_id: string
           quantity: number
-          updatedAt: string | null
+          updated_at: string | null
         }
         SetofOptions: {
           from: "*"
@@ -397,7 +397,7 @@ export type Database = {
           category: string
           description: string | null
           id: string
-          lowStockThreshold: number
+          low_stock_threshold: number
           name: string
           price: number
           quantity: number

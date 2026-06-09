@@ -50,7 +50,7 @@ export const POST = withErrorHandling(
 
     const parsed = insertProductLocationSchema.safeParse({
       ...body,
-      productId: id,
+      product_id: id,
     });
     if (!parsed.success) {
       return badRequest("Помилка валідації", z.treeifyError(parsed.error));
@@ -58,7 +58,7 @@ export const POST = withErrorHandling(
 
     const existing = await storage.getProductLocation(
       id,
-      parsed.data.locationId,
+      parsed.data.location_id,
     );
     if (existing) {
       return conflict("This location is already assigned to the product");

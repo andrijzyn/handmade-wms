@@ -8,16 +8,16 @@ import { dbToProductLocationView } from "./shared";
 
 export function createProductLocationsStorage(ctx: StorageContext) {
   return {
-    async getProductLocations(productId: string): Promise<ProductLocationView[]> {
+    async getProductLocations(product_id: string): Promise<ProductLocationView[]> {
       const { data, error } = await ctx.db()
         .from("product_locations")
         .select(
           `
           id,
-          productID,
-          locationID,
+          product_id,
+          location_id,
           quantity,
-          updatedAt,
+          updated_at,
           locations (
             label,
             row,
@@ -26,7 +26,7 @@ export function createProductLocationsStorage(ctx: StorageContext) {
           )
         `,
         )
-        .eq("productID", productId);
+        .eq("product_id", product_id);
 
       if (error) throw error;
 
@@ -36,14 +36,14 @@ export function createProductLocationsStorage(ctx: StorageContext) {
     },
 
     async getProductLocation(
-      productId: string,
-      locationId: string,
+      product_id: string,
+      location_id: string,
     ): Promise<ProductLocation | null> {
       const { data, error } = await ctx.db()
         .from("product_locations")
         .select("*")
-        .eq("productID", productId)
-        .eq("locationID", locationId)
+        .eq("product_id", product_id)
+        .eq("location_id", location_id)
         .single();
 
       if (error) return null;
@@ -52,15 +52,15 @@ export function createProductLocationsStorage(ctx: StorageContext) {
 
     async createProductLocation(
       input: InsertProductLocation,
-      actorUserID: string,
+      actor_user_id: string,
     ): Promise<ProductLocation> {
       const { data, error } = await ctx.db().rpc(
         "create_product_location_with_audit",
         {
-          p_product_id: input.productId,
-          p_locationID: input.locationId,
+          p_product_id: input.product_id,
+          p_location_id: input.location_id,
           p_quantity: input.quantity,
-          ...ctx.audit(actorUserID),
+          ...ctx.audit(actor_user_id),
         },
       );
 
@@ -71,14 +71,14 @@ export function createProductLocationsStorage(ctx: StorageContext) {
     async updateProductLocation(
       id: string,
       quantity: number,
-      actorUserID: string,
+      actor_user_id: string,
     ): Promise<ProductLocation | null> {
       const { data, error } = await ctx.db().rpc(
         "update_product_location_with_audit",
         {
           p_id: id,
           p_quantity: quantity,
-          ...ctx.audit(actorUserID),
+          ...ctx.audit(actor_user_id),
         },
       );
 
@@ -88,13 +88,13 @@ export function createProductLocationsStorage(ctx: StorageContext) {
 
     async deleteProductLocation(
       id: string,
-      actorUserID: string,
+      actor_user_id: string,
     ): Promise<boolean> {
       const { data, error } = await ctx.db().rpc(
         "delete_product_location_with_audit",
         {
           p_id: id,
-          ...ctx.audit(actorUserID),
+          ...ctx.audit(actor_user_id),
         },
       );
 

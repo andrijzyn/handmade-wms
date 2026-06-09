@@ -124,7 +124,7 @@ export default function UsersPage() {
     },
   });
 
-  const activeCount = users.filter((u) => u.isActive).length;
+  const activeCount = users.filter((u) => u.is_active).length;
 
   return (
     <div className="space-y-5" data-testid="users-page">
@@ -190,7 +190,7 @@ export default function UsersPage() {
                 {users.map((u) => (
                   <TableRow key={u.id} data-testid={`row-user-${u.id}`}>
                     <TableCell>
-                      <p className="text-sm font-medium">{u.fullName}</p>
+                      <p className="text-sm font-medium">{u.full_name}</p>
                       <p className="text-xs text-muted-foreground">
                         @{u.username}
                       </p>
@@ -201,8 +201,8 @@ export default function UsersPage() {
                       {u.callsign || "—"}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={clearanceBadgeVariant(u.clearanceLevel)}>
-                        {u.clearanceLevel}
+                      <Badge variant={clearanceBadgeVariant(u.clearance_level)}>
+                        {u.clearance_level}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -212,8 +212,8 @@ export default function UsersPage() {
                       </span>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={u.isActive ? "default" : "secondary"}>
-                        {u.isActive ? "Active" : "Inactive"}
+                      <Badge variant={u.is_active ? "default" : "secondary"}>
+                        {u.is_active ? "Active" : "Inactive"}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -267,7 +267,7 @@ export default function UsersPage() {
       >
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit: {editUser?.fullName}</DialogTitle>
+            <DialogTitle>Edit: {editUser?.full_name}</DialogTitle>
             <DialogDescription>Update user account details</DialogDescription>
           </DialogHeader>
           {editUser && (
@@ -276,13 +276,13 @@ export default function UsersPage() {
               defaultValues={{
                 username: editUser.username,
                 password: "",
-                fullName: editUser.fullName,
+                full_name: editUser.full_name,
                 rank: editUser.rank,
                 unit: editUser.unit,
                 callsign: editUser.callsign ?? "",
-                clearanceLevel: editUser.clearanceLevel,
+                clearance_level: editUser.clearance_level,
                 permissions: editUser.permissions,
-                isActive: editUser.isActive,
+                is_active: editUser.is_active,
               }}
               onSubmit={(data) =>
                 updateMutation.mutate({
@@ -304,7 +304,7 @@ export default function UsersPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete user?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {deleteTarget?.fullName} (@
+              Are you sure you want to delete {deleteTarget?.full_name} (@
               {deleteTarget?.username})? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

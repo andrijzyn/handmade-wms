@@ -13,7 +13,7 @@ export interface DbProduct {
   category: string;
   quantity: number;
   price: number;
-  lowStockThreshold: number;
+  low_stock_threshold: number;
   description: string | null;
 }
 
@@ -21,23 +21,23 @@ export interface DbUser {
   id: string;
   username: string;
   password: string;
-  fullName: string;
+  full_name: string;
   rank: string;
   unit: string;
   callsign: string | null;
-  clearanceLevel: string;
-  isActive: boolean;
-  createdAt: string | null;
-  userPermissions?: { permissions: { key: string } }[];
-  sessionVersion: string | null;
+  clearance_level: string;
+  is_active: boolean;
+  created_at: string | null;
+  user_permissions?: { permissions: { key: string } }[];
+  session_version: string | null;
 }
 
 export interface DbProductLocationViewRow {
   id: string;
-  productID: string;
-  locationID: string;
+  product_id: string;
+  location_id: string;
   quantity: number;
-  updatedAt: string;
+  updated_at: string;
   locations: {
     label: string;
     row: number;
@@ -48,17 +48,17 @@ export interface DbProductLocationViewRow {
 
 export interface DbAuditLogRow {
   id: string;
-  tableName: string;
-  recordID: string | null;
+  table_name: string;
+  record_id: string | null;
   action: AuditAction;
-  actorUserID: string | null;
-  correlationID: string | null;
-  oldValues: Record<string, unknown> | null;
-  newValues: Record<string, unknown> | null;
-  createdAt: string;
+  actor_user_id: string | null;
+  correlation_id: string | null;
+  old_values: Record<string, unknown> | null;
+  new_values: Record<string, unknown> | null;
+  created_at: string;
   users?: {
     username: string;
-    fullName: string;
+    full_name: string;
   }[] | null;
 }
 
@@ -68,36 +68,36 @@ export type ProductUpdateDbPayload = Partial<{
   category: string;
   quantity: number;
   price: number;
-  lowStockThreshold: number;
+  low_stock_threshold: number;
   description: string | null;
 }>;
 
 export type UpdateUserInput = {
   username?: string;
-  fullName?: string;
+  full_name?: string;
   rank?: string;
   unit?: string;
   callsign?: string | null;
-  clearanceLevel?: string;
-  isActive?: boolean;
+  clearance_level?: string;
+  is_active?: boolean;
   password?: string;
   permissions?: Permission[];
 };
 
 export type UserUpdateDbPayload = Partial<{
   username: string;
-  fullName: string;
+  full_name: string;
   rank: string;
   unit: string;
   callsign: string | null;
-  clearanceLevel: string;
-  isActive: boolean;
+  clearance_level: string;
+  is_active: boolean;
   password: string;
 }>;
 
 export type StorageContext = {
   db: () => ReturnType<typeof getSupabase>;
-  audit: (actorUserID: string) => {
+  audit: (actor_user_id: string) => {
     p_actor_user_id: string;
     p_correlation_id: string;
   };
@@ -106,7 +106,7 @@ export type StorageContext = {
 
 export const USER_WITH_PERMISSIONS = `
   *,
-  userPermissions (
+  user_permissions (
     permissions ( key )
   )
 ` as const;
@@ -123,7 +123,7 @@ export function dbToProduct(row: DbProduct): Product {
     category: row.category,
     quantity: row.quantity,
     price: Number(row.price),
-    lowStockThreshold: row.lowStockThreshold,
+    low_stock_threshold: row.low_stock_threshold,
     description: row.description,
   };
 }
@@ -133,17 +133,17 @@ export function dbToUser(row: DbUser): User {
     id: row.id,
     username: row.username,
     password: row.password,
-    fullName: row.fullName,
+    full_name: row.full_name,
     rank: row.rank,
     unit: row.unit,
     callsign: row.callsign,
-    clearanceLevel: row.clearanceLevel,
-    permissions: (row.userPermissions ?? []).map(
+    clearance_level: row.clearance_level,
+    permissions: (row.user_permissions ?? []).map(
       (up) => up.permissions.key as Permission,
     ),
-    isActive: row.isActive,
-    createdAt: row.createdAt ? new Date(row.createdAt) : null,
-    sessionVersion: row.sessionVersion ?? undefined,
+    is_active: row.is_active,
+    created_at: row.created_at ? new Date(row.created_at) : null,
+    session_version: row.session_version ?? undefined,
   };
 }
 
@@ -159,14 +159,14 @@ export function dbToProductLocationView(
 
   return {
     id: row.id,
-    productId: row.productID,
-    locationId: row.locationID,
+    product_id: row.product_id,
+    location_id: row.location_id,
     quantity: row.quantity,
-    updatedAt: row.updatedAt,
-    locationLabel: location?.label ?? "",
-    locationRow: location?.row ?? 0,
-    locationCol: location?.col ?? 0,
-    locationLevel: location?.level ?? 0,
+    updated_at: row.updated_at,
+    location_label: location?.label ?? "",
+    location_row: location?.row ?? 0,
+    location_col: location?.col ?? 0,
+    location_level: location?.level ?? 0,
   };
 }
 
@@ -174,22 +174,22 @@ export type AuditAction = "INSERT" | "UPDATE" | "DELETE";
 
 export interface AuditLogFilters {
   action?: AuditAction | "all";
-  actorUserID?: string;
+  actor_user_id?: string;
   limit?: number;
   q?: string;
-  tableName?: string;
+  table_name?: string;
 }
 
 export interface AuditLogItem {
   id: string;
-  tableName: string;
-  recordID: string | null;
+  table_name: string;
+  record_id: string | null;
   action: AuditAction;
-  actorUserID: string | null;
+  actor_user_id: string | null;
   actorUsername: string | null;
   actorFullName: string | null;
-  correlationID: string | null;
-  oldValues: Record<string, unknown> | null;
-  newValues: Record<string, unknown> | null;
-  createdAt: string;
+  correlation_id: string | null;
+  old_values: Record<string, unknown> | null;
+  new_values: Record<string, unknown> | null;
+  created_at: string;
 }

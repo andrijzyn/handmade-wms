@@ -2,7 +2,7 @@ import type { StorageContext } from "./shared";
 
 export type UserDisplayInfo = {
   username: string | null;
-  fullName: string | null;
+  full_name: string | null;
 };
 
 export async function getUserDisplayMapByIds(
@@ -18,7 +18,7 @@ export async function getUserDisplayMapByIds(
   const { data, error } = await ctx
     .db()
     .from("users")
-    .select("id, username, fullName")
+    .select("id, username, full_name")
     .in("id", uniqueIds);
 
   if (error) throw error;
@@ -28,7 +28,7 @@ export async function getUserDisplayMapByIds(
       user.id,
       {
         username: user.username ?? null,
-        fullName: user.fullName ?? null,
+        full_name: user.full_name ?? null,
       },
     ]),
   );

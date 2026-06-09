@@ -49,7 +49,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
       category: product?.category ?? "",
       quantity: product?.quantity ?? 0,
       price: product?.price ?? 0,
-      lowStockThreshold: product?.lowStockThreshold ?? 10,
+      low_stock_threshold: product?.low_stock_threshold ?? 10,
       description: product?.description ?? "",
     },
   });
@@ -225,7 +225,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
 
                 <FormField
                   control={form.control}
-                  name="lowStockThreshold"
+                  name="low_stock_threshold"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Low Stock Alert</FormLabel>
