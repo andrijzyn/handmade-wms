@@ -63,9 +63,6 @@ interface ProductLocationsFormProps {
   onClose: () => void;
 }
 
-type ApiClientError = Error & {
-  status?: number;
-};
 
 function getErrorStatus(error: unknown): number | undefined {
   if (typeof error === "object" && error !== null && "status" in error) {
@@ -336,7 +333,7 @@ export default function LocationForm({
               <TableHeader>
                 <TableRow>
                   <TableHead>Location</TableHead>
-                  <TableHead>Row / Column / Level</TableHead>
+                  {/*<TableHead>Row / Column / Level</TableHead>*/}
                   <TableHead className="text-right">Quantity</TableHead>
                   <TableHead className="w-[90px] text-right">Actions</TableHead>
                 </TableRow>
@@ -349,14 +346,17 @@ export default function LocationForm({
                     data-testid={`row-location-${entry.id}`}
                   >
                     <TableCell className="font-mono text-sm font-medium">
-                      {entry.location_label}
+                      {entry.location_label || "—"}
                     </TableCell>
 
-                    <TableCell className="text-sm text-muted-foreground">
-                      R{String(entry.location_row).padStart(3, "0")} / C
-                      {String(entry.location_col).padStart(3, "0")} / L
-                      {entry.location_level}
-                    </TableCell>
+                    {/*<TableCell className="text-sm text-muted-foreground">*/}
+                    {/*  {entry.location_row != null &&*/}
+                    {/*  entry.location_col != null &&*/}
+                    {/*  entry.location_level != null &&*/}
+                    {/*  !(entry.location_row === 0 && entry.location_col === 0 && entry.location_level === 0)*/}
+                    {/*    ? `R${String(entry.location_row).padStart(3, "0")} / C${String(entry.location_col).padStart(3, "0")} / L${entry.location_level}`*/}
+                    {/*    : "—"}*/}
+                    {/*</TableCell>*/}
 
                     <TableCell className="text-right font-mono text-sm">
                       {editingEntry?.id === entry.id ? (

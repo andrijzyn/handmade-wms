@@ -4,7 +4,6 @@ import type {
   ProductLocationView,
 } from "../schema";
 import type { StorageContext, DbProductLocationViewRow } from "./shared";
-import { dbToProductLocationView } from "./shared";
 
 export function createProductLocationsStorage(ctx: StorageContext) {
   return {
@@ -16,26 +15,27 @@ export function createProductLocationsStorage(ctx: StorageContext) {
         .from("product_locations")
         .select(
           `
-          id,
-          product_id,
-          location_id,
-          quantity,
-          updated_at,
-          locations (
-            label,
-            row,
-            col,
-            level
-          )
+        id,
+        product_id,
+        location_id,
+        quantity,
+        updated_at,
+        locations (label)
         `,
         )
         .eq("product_id", product_id);
 
       if (error) throw error;
 
-      return ((data ?? []) as DbProductLocationViewRow[]).map(
-        dbToProductLocationView,
-      );
+
+      return (data ?? []).map((row: any) => ({
+        id: row.id,
+        product_id: row.product_id,
+        location_id: row.location_id,
+        quantity: row.quantity,
+        updated_at: row.updated_at,
+        location_label: row.locations.label,
+      }));
     },
 
     async getProductLocation(

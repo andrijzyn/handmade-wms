@@ -35,14 +35,10 @@ export interface DbProductLocationViewRow {
   location_id: string;
   quantity: number;
   updated_at: string;
-  locations:
-    | {
-        label: string;
-        row: number;
-        col: number;
-        level: number;
-      }[]
-    | null;
+  locations: {
+    label: string;
+  }[]
+  | null;
 }
 
 export interface DbAuditLogRow {
@@ -153,23 +149,20 @@ export function toSafeUser(user: User): SafeUser {
   return safe;
 }
 
-export function dbToProductLocationView(
-  row: DbProductLocationViewRow,
-): ProductLocationView {
-  const location = row.locations?.[0];
-
-  return {
-    id: row.id,
-    product_id: row.product_id,
-    location_id: row.location_id,
-    quantity: row.quantity,
-    updated_at: row.updated_at,
-    location_label: location?.label ?? "",
-    location_row: location?.row ?? 0,
-    location_col: location?.col ?? 0,
-    location_level: location?.level ?? 0,
-  };
-}
+// export function dbToProductLocationView(
+//   row: DbProductLocationViewRow,
+// ): ProductLocationView {
+//   const location = row.locations?.[0];
+//
+//   return {
+//     id: row.id,
+//     product_id: row.product_id,
+//     location_id: row.location_id,
+//     quantity: row.quantity,
+//     updated_at: row.updated_at,
+//     location_label: location?.label ?? "",
+//   };
+// }
 
 export type AuditAction = "INSERT" | "UPDATE" | "DELETE";
 

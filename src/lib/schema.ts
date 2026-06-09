@@ -68,9 +68,6 @@ export interface ProductLocation {
 
 export interface ProductLocationView extends ProductLocation {
   location_label: string;
-  location_row: number;
-  location_col: number;
-  location_level: number;
 }
 
 export const insertProductLocationSchema = z.object({
