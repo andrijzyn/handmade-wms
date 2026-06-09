@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 import { requirePermission } from "@/lib/auth";
-import { withErrorHandling } from "../../../lib/apiServerError";
+import { withErrorHandling } from "@/lib/apiServerError";
 import { PERMISSIONS } from "@/lib/permissions";
 
 /**

@@ -7,7 +7,7 @@ import {
   withErrorHandling,
   badRequest,
   conflict,
-} from "../../../lib/apiServerError";
+} from "@/lib/apiServerError";
 import { PERMISSIONS } from "@/lib/permissions";
 
 export const GET = withErrorHandling(

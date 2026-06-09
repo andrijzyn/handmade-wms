@@ -5,7 +5,7 @@ import {
   withErrorHandling,
   badRequest,
   conflict,
-} from "../../../lib/apiServerError";
+} from "@/lib/apiServerError";
 import { requirePermission } from "@/lib/auth";
 import { PERMISSIONS } from "@/lib/permissions";
 import { insertUserSchema } from "@/lib/schema";

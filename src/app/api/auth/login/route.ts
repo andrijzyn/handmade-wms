@@ -7,7 +7,7 @@ import {
   withErrorHandling,
   badRequest,
   raiseApiError,
-} from "../../../../lib/apiServerError";
+} from "@/lib/apiServerError";
 
 // Схема для логіну: тільки username і password
 const loginSchema = insertUserSchema.pick({
