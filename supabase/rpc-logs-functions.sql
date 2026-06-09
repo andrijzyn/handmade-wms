@@ -151,7 +151,7 @@ insert into public.products (
   category,
   quantity,
   price,
-  lowStockThreshold,
+  low_stock_threshold,
   description
 )
 values (
@@ -179,7 +179,7 @@ perform public.logs_audit_event(
             'category', v_product.category,
             'quantity', v_product.quantity,
             'price', v_product.price,
-            'lowStockThreshold', v_product.lowStockThreshold,
+            'low_stock_threshold', v_product.low_stock_threshold,
             'description', v_product.description
         ),
         'products',
@@ -220,9 +220,9 @@ set
   category = case when p_updates ? 'category' then p_updates->>'category' else category end,
   quantity = case when p_updates ? 'quantity' then (p_updates->>'quantity')::integer else quantity end,
         price = case when p_updates ? 'price' then (p_updates->>'price')::numeric else price end,
-        lowStockThreshold = case
-            when p_updates ? 'lowStockThreshold' then (p_updates->>'lowStockThreshold')::integer
-            else lowStockThreshold
+        low_stock_threshold = case
+            when p_updates ? 'low_stock_threshold' then (p_updates->>'low_stock_threshold')::integer
+            else low_stock_threshold
 end,
         description = case when p_updates ? 'description' then p_updates->>'description' else description end
     where id = p_product_id
@@ -245,7 +245,7 @@ end if;
             'category', v_old_product.category,
             'quantity', v_old_product.quantity,
             'price', v_old_product.price,
-            'lowStockThreshold', v_old_product.lowStockThreshold,
+            'low_stock_threshold', v_old_product.low_stock_threshold,
             'description', v_old_product.description
         ),
         jsonb_build_object(
@@ -255,7 +255,7 @@ end if;
             'category', v_product.category,
             'quantity', v_product.quantity,
             'price', v_product.price,
-            'lowStockThreshold', v_product.lowStockThreshold,
+            'low_stock_threshold', v_product.low_stock_threshold,
             'description', v_product.description
         ),
         'products',
@@ -298,7 +298,7 @@ end if;
             'category', v_product.category,
             'quantity', v_product.quantity,
             'price', v_product.price,
-            'lowStockThreshold', v_product.lowStockThreshold,
+            'low_stock_threshold', v_product.low_stock_threshold,
             'description', v_product.description
         ),
         null,
@@ -335,12 +335,12 @@ begin
 insert into public.users (
   username,
   password,
-  fullName,
+  full_name,
   rank,
   unit,
   callsign,
-  clearanceLevel,
-  isActive
+  clearance_level,
+  is_active
 )
 values (
          p_username,
@@ -364,12 +364,12 @@ perform public.logs_audit_event(
         jsonb_build_object(
             'id', v_user.id,
             'username', v_user.username,
-            'fullName', v_user.fullName,
+            'full_name', v_user.full_name,
             'rank', v_user.rank,
             'unit', v_user.unit,
             'callsign', v_user.callsign,
-            'clearanceLevel', v_user.clearanceLevel,
-            'isActive', v_user.isActive
+            'clearance_level', v_user.clearance_level,
+            'is_active', v_user.is_active
         ),
         'users',
         v_user.id::text
@@ -406,12 +406,12 @@ update public.users
 set
   username = case when p_updates ? 'username' then p_updates->>'username' else username end,
   password = case when p_updates ? 'password' then p_updates->>'password' else password end,
-  fullName = case when p_updates ? 'fullName' then p_updates->>'fullName' else fullName end,
+  full_name = case when p_updates ? 'full_name' then p_updates->>'full_name' else full_name end,
   rank = case when p_updates ? 'rank' then p_updates->>'rank' else rank end,
   unit = case when p_updates ? 'unit' then p_updates->>'unit' else unit end,
   callsign = case when p_updates ? 'callsign' then p_updates->>'callsign' else callsign end,
-  clearanceLevel = case when p_updates ? 'clearanceLevel' then p_updates->>'clearanceLevel' else clearanceLevel end,
-  isActive = case when p_updates ? 'isActive' then (p_updates->>'isActive')::boolean else isActive end
+  clearance_level = case when p_updates ? 'clearance_level' then p_updates->>'clearance_level' else clearance_level end,
+  is_active = case when p_updates ? 'is_active' then (p_updates->>'is_active')::boolean else is_active end
 where id = p_user_id
   returning * into v_user;
 
@@ -428,22 +428,22 @@ end if;
         jsonb_build_object(
             'id', v_old_user.id,
             'username', v_old_user.username,
-            'fullName', v_old_user.fullName,
+            'full_name', v_old_user.full_name,
             'rank', v_old_user.rank,
             'unit', v_old_user.unit,
             'callsign', v_old_user.callsign,
-            'clearanceLevel', v_old_user.clearanceLevel,
-            'isActive', v_old_user.isActive
+            'clearance_level', v_old_user.clearance_level,
+            'is_active', v_old_user.is_active
         ),
         jsonb_build_object(
             'id', v_user.id,
             'username', v_user.username,
-            'fullName', v_user.fullName,
+            'full_name', v_user.full_name,
             'rank', v_user.rank,
             'unit', v_user.unit,
             'callsign', v_user.callsign,
-            'clearanceLevel', v_user.clearanceLevel,
-            'isActive', v_user.isActive
+            'clearance_level', v_user.clearance_level,
+            'is_active', v_user.is_active
         ),
         'users',
         p_user_id::text
@@ -489,12 +489,12 @@ perform public.logs_audit_event(
         jsonb_build_object(
             'id', v_user.id,
             'username', v_user.username,
-            'fullName', v_user.fullName,
+            'full_name', v_user.full_name,
             'rank', v_user.rank,
             'unit', v_user.unit,
             'callsign', v_user.callsign,
-            'clearanceLevel', v_user.clearanceLevel,
-            'isActive', v_user.isActive
+            'clearance_level', v_user.clearance_level,
+            'is_active', v_user.is_active
         ),
         null,
         'users',
@@ -574,7 +574,7 @@ declare
 v_row public.product_locations;
 begin
 insert into public.product_locations (
-  productID,
+  product_id,
   location_id,
   quantity
 )
@@ -594,7 +594,7 @@ perform public.logs_audit_event(
         null,
         jsonb_build_object(
             'id', v_row.id,
-            'productID', v_row.productID,
+            'product_id', v_row.product_id,
             'location_id', v_row.location_id,
             'quantity', v_row.quantity
         ),
@@ -648,13 +648,13 @@ end if;
         p_correlation_id,
         jsonb_build_object(
             'id', v_old_row.id,
-            'productID', v_old_row.productID,
+            'product_id', v_old_row.product_id,
             'location_id', v_old_row.location_id,
             'quantity', v_old_row.quantity
         ),
         jsonb_build_object(
             'id', v_row.id,
-            'productID', v_row.productID,
+            'product_id', v_row.product_id,
             'location_id', v_row.location_id,
             'quantity', v_row.quantity
         ),
@@ -693,7 +693,7 @@ end if;
         p_correlation_id,
         jsonb_build_object(
             'id', v_row.id,
-            'productID', v_row.productID,
+            'product_id', v_row.product_id,
             'location_id', v_row.location_id,
             'quantity', v_row.quantity
         ),
