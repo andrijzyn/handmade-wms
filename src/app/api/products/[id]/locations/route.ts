@@ -53,7 +53,7 @@ export const POST = withErrorHandling(
       product_id: id,
     });
     if (!parsed.success) {
-      return badRequest("Помилка валідації", z.treeifyError(parsed.error));
+      return badRequest("Validation error", z.treeifyError(parsed.error));
     }
 
     const existing = await storage.getProductLocation(
