@@ -475,7 +475,7 @@ if v_user is null then
 end if;
 
 delete from public.user_permissions
-where userID = p_user_id;
+where user_id = p_user_id;
 
 delete from public.users
 where id = p_user_id;
@@ -522,16 +522,16 @@ select coalesce(jsonb_agg(p.key order by p.key), '[]'::jsonb)
 into v_old_permissions
 from public.user_permissions up
        join public.permissions p on p.id = up.permission_id
-where up.userID = p_user_id;
+where up.user_id = p_user_id;
 
 delete from public.user_permissions
-where userID = p_user_id;
+where user_id = p_user_id;
 
-insert into public.user_permissions (userID, permission_id)
+insert into public.user_permissions (user_id, permission_id)
 select
   p_user_id,
   p.id
-from public.permissions p
+from public.permissions p 
 where p.key = any(coalesce(p_permission_keys, array[]::text[]));
 
 v_new_permissions := coalesce(to_jsonb(p_permission_keys), '[]'::jsonb);
