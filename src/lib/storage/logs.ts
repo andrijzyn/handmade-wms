@@ -8,42 +8,25 @@ import { getUserDisplayMapByIds } from "./users-helpers";
 
 function attachActorsToLogs(
   rows: DbAuditLogRow[],
-  userMap: Map<string, { username: string | null; fullName: string | null }>,
+  userMap: Map<string, { username: string | null; full_name: string | null }>,
 ): AuditLogItem[] {
   return rows.map((row) => {
-    const actor = row.actorUserID
-      ? userMap.get(row.actorUserID)
+    const actor = row.actor_user_id
+      ? userMap.get(row.actor_user_id)
       : undefined;
-
-    const payload =
-      row.payload && typeof row.payload === "object" ? row.payload : null;
-
-    const oldValues =
-      payload && "oldValues" in payload
-        ? (payload.oldValues as Record<string, unknown> | null)
-        : payload && "oldValues" in payload
-          ? (payload.oldValues as Record<string, unknown> | null)
-          : null;
-
-    const newValues =
-      payload && "newValues" in payload
-        ? (payload.newValues as Record<string, unknown> | null)
-        : payload && "newValues" in payload
-          ? (payload.newValues as Record<string, unknown> | null)
-          : null;
 
     return {
       id: row.id,
-      tableName: row.entityType,
-      recordId: row.entityID,
+      table_name: row.table_name,
+      record_id: row.record_id,
       action: String(row.action).toUpperCase() as AuditLogItem["action"],
-      actorUserId: row.actorUserID,
-      actorUsername: actor?.username ?? null,
-      actorFullName: actor?.fullName ?? null,
-      correlationId: row.correlationID,
-      oldValues,
-      newValues,
-      createdAt: row.createdAt,
+      actor_user_id: row.actor_user_id,
+      actorUsername: actor?.username ?? row.users?.[0]?.username ?? null,
+      actorFullName: actor?.full_name ?? row.users?.[0]?.full_name ?? null,
+      correlation_id: row.correlation_id,
+      old_values: row.old_values,
+      new_values: row.new_values,
+      created_at: row.created_at,
     };
   });
 }
@@ -54,35 +37,42 @@ export function createAuditStorage(ctx: StorageContext) {
       let query = ctx
         .db()
         .from("logs")
-        .select(`
+        .select(
+          `
           id,
-          actorUserID,
+          table_name,
+          record_id,
           action,
-          entityType,
-          entityID,
-          correlationID,
-          payload,
-          createdAt
-        `)
-        .order("createdAt", { ascending: false })
+          actor_user_id,
+          correlation_id,
+          old_values,
+          new_values,
+          created_at,
+          users (
+            username,
+            full_name
+          )
+        `,
+        )
+        .order("created_at", { ascending: false })
         .limit(filters?.limit ?? 100);
 
-      if (filters?.tableName && filters.tableName !== "all") {
-        query = query.eq("entityType", filters.tableName);
+      if (filters?.table_name && filters.table_name !== "all") {
+        query = query.eq("table_name", filters.table_name);
       }
 
       if (filters?.action && filters.action !== "all") {
-        query = query.eq("action", String(filters.action).toLowerCase());
+        query = query.eq("action", String(filters.action).toUpperCase());
       }
 
-      if (filters?.actorUserId) {
-        query = query.eq("actorUserID", filters.actorUserId);
+      if (filters?.actor_user_id) {
+        query = query.eq("actor_user_id", filters.actor_user_id);
       }
 
       if (filters?.q?.trim()) {
         const q = filters.q.trim();
         query = query.or(
-          `entityType.ilike.%${q}%,entityID::text.ilike.%${q}%,correlationID::text.ilike.%${q}%`
+          `table_name.ilike.%${q}%,record_id.ilike.%${q}%,correlation_id.ilike.%${q}%`,
         );
       }
 
@@ -91,13 +81,15 @@ export function createAuditStorage(ctx: StorageContext) {
 
       const rows = (data ?? []) as DbAuditLogRow[];
 
-      const actorIds = [...new Set(
-        rows
-          .map((row) => row.actorUserID)
-          .filter((id): id is string => Boolean(id))
-      )];
+      const actor_ids = [
+        ...new Set(
+          rows
+            .map((row) => row.actor_user_id)
+            .filter((id): id is string => Boolean(id)),
+        ),
+      ];
 
-      const userMap = await getUserDisplayMapByIds(ctx, actorIds);
+      const userMap = await getUserDisplayMapByIds(ctx, actor_ids);
 
       return attachActorsToLogs(rows, userMap);
     },

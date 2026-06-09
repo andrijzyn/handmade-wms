@@ -7,7 +7,7 @@ import {
   badRequest,
   notFound,
   conflict,
-} from "@/lib/apiError";
+} from "@/lib/apiServerError";
 import { requirePermission } from "@/lib/auth";
 import { PERMISSIONS } from "@/lib/permissions";
 
@@ -50,21 +50,24 @@ export const POST = withErrorHandling(
 
     const parsed = insertProductLocationSchema.safeParse({
       ...body,
-      productId: id,
+      product_id: id,
     });
     if (!parsed.success) {
-      return badRequest("Помилка валідації", z.treeifyError(parsed.error));
+      return badRequest("Validation error", z.treeifyError(parsed.error));
     }
 
     const existing = await storage.getProductLocation(
       id,
-      parsed.data.locationId,
+      parsed.data.location_id,
     );
     if (existing) {
       return conflict("This location is already assigned to the product");
     }
 
-    const entry = await storage.createProductLocation(parsed.data, userOrResp.id);
+    const entry = await storage.createProductLocation(
+      parsed.data,
+      userOrResp.id,
+    );
     return NextResponse.json(entry, { status: 201 });
   },
 );

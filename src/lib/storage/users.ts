@@ -8,12 +8,7 @@ import type {
   UserUpdateDbPayload,
   DbUser,
 } from "./shared";
-import {
-  USER_WITH_PERMISSIONS,
-  dbToUser,
-  hasKeys,
-  toSafeUser,
-} from "./shared";
+import { USER_WITH_PERMISSIONS, dbToUser, hasKeys, toSafeUser } from "./shared";
 
 async function buildUserUpdatePayload(
   ctx: StorageContext,
@@ -22,15 +17,15 @@ async function buildUserUpdatePayload(
   const payload: UserUpdateDbPayload = {};
 
   if (updates.username !== undefined) payload.username = updates.username;
-  if (updates.fullName !== undefined) payload.fullName = updates.fullName;
+  if (updates.full_name !== undefined) payload.full_name = updates.full_name;
   if (updates.rank !== undefined) payload.rank = updates.rank;
   if (updates.unit !== undefined) payload.unit = updates.unit;
   if (updates.callsign !== undefined) payload.callsign = updates.callsign;
-  if (updates.clearanceLevel !== undefined) {
-    payload.clearanceLevel = updates.clearanceLevel;
+  if (updates.clearance_level !== undefined) {
+    payload.clearance_level = updates.clearance_level;
   }
-  if (updates.isActive !== undefined) {
-    payload.isActive = updates.isActive;
+  if (updates.is_active !== undefined) {
+    payload.is_active = updates.is_active;
   }
 
   const normalizedPassword = updates.password?.trim();
@@ -44,17 +39,19 @@ async function buildUserUpdatePayload(
 export function createUsersStorage(ctx: StorageContext) {
   const api = {
     async getUsers(): Promise<SafeUser[]> {
-      const { data, error } = await ctx.db()
+      const { data, error } = await ctx
+        .db()
         .from("users")
         .select(USER_WITH_PERMISSIONS)
-        .order("createdAt");
+        .order("created_at");
 
       if (error) throw error;
       return (data as DbUser[]).map(dbToUser).map(toSafeUser);
     },
 
     async getUser(id: string): Promise<User | undefined> {
-      const { data, error } = await ctx.db()
+      const { data, error } = await ctx
+        .db()
         .from("users")
         .select(USER_WITH_PERMISSIONS)
         .eq("id", id)
@@ -65,7 +62,8 @@ export function createUsersStorage(ctx: StorageContext) {
     },
 
     async getUserByUsername(username: string): Promise<User | undefined> {
-      const { data, error } = await ctx.db()
+      const { data, error } = await ctx
+        .db()
         .from("users")
         .select(USER_WITH_PERMISSIONS)
         .ilike("username", username)
@@ -77,33 +75,33 @@ export function createUsersStorage(ctx: StorageContext) {
 
     async createUser(
       insertUser: InsertUser,
-      actorUserId: string,
+      actor_user_id: string,
     ): Promise<SafeUser> {
       const hashedPassword = await ctx.hashPassword(insertUser.password);
 
       const { data, error } = await ctx.db().rpc("create_user_with_audit", {
         p_username: insertUser.username,
         p_password: hashedPassword,
-        p_fullName: insertUser.fullName,
+        p_full_name: insertUser.full_name,
         p_rank: insertUser.rank,
         p_unit: insertUser.unit,
         p_callsign: insertUser.callsign ?? null,
-        p_clearanceLevel: insertUser.clearanceLevel ?? "Без допуску",
-        p_isActive: insertUser.isActive ?? true,
-        ...ctx.audit(actorUserId),
+        p_clearance_level: insertUser.clearance_level ?? "Без допуску",
+        p_is_active: insertUser.is_active ?? true,
+        ...ctx.audit(actor_user_id),
       });
 
       if (error) throw error;
 
-      const createdUserId = data as string;
+      const created_user_id = data as string;
 
       await api.setUserPermissions(
-        createdUserId,
+        created_user_id,
         insertUser.permissions ?? [],
-        actorUserId,
+        actor_user_id,
       );
 
-      const user = await api.getUser(createdUserId);
+      const user = await api.getUser(created_user_id);
       if (!user) {
         throw new Error("Failed to fetch created user");
       }
@@ -114,7 +112,7 @@ export function createUsersStorage(ctx: StorageContext) {
     async updateUser(
       id: string,
       updates: UpdateUserInput,
-      actorUserId: string,
+      actor_user_id: string,
     ): Promise<SafeUser | undefined> {
       const dbUpdates = await buildUserUpdatePayload(ctx, updates);
 
@@ -122,24 +120,24 @@ export function createUsersStorage(ctx: StorageContext) {
         const { error } = await ctx.db().rpc("update_user_with_audit", {
           p_user_id: id,
           p_updates: dbUpdates,
-          ...ctx.audit(actorUserId),
+          ...ctx.audit(actor_user_id),
         });
 
         if (error) throw error;
       }
 
       if (updates.permissions !== undefined) {
-        await api.setUserPermissions(id, updates.permissions, actorUserId);
+        await api.setUserPermissions(id, updates.permissions, actor_user_id);
       }
 
       const user = await api.getUser(id);
       return user ? toSafeUser(user) : undefined;
     },
 
-    async deleteUser(id: string, actorUserId: string): Promise<boolean> {
+    async deleteUser(id: string, actor_user_id: string): Promise<boolean> {
       const { data, error } = await ctx.db().rpc("delete_user_with_audit", {
         p_user_id: id,
-        ...ctx.audit(actorUserId),
+        ...ctx.audit(actor_user_id),
       });
 
       if (error) throw error;
@@ -151,18 +149,17 @@ export function createUsersStorage(ctx: StorageContext) {
     },
 
     async setUserPermissions(
-      userId: string,
+      user_id: string,
       permissions: Permission[],
-      actorUserId: string,
+      actor_user_id: string,
     ): Promise<void> {
-      const { error } = await ctx.db().rpc(
-        "replace_userPermissions_with_audit",
-        {
-          p_user_id: userId,
+      const { error } = await ctx
+        .db()
+        .rpc("replace_user_permissions_with_audit", {
+          p_user_id: user_id,
           p_permission_keys: permissions,
-          ...ctx.audit(actorUserId),
-        },
-      );
+          ...ctx.audit(actor_user_id),
+        });
 
       if (error) throw error;
     },

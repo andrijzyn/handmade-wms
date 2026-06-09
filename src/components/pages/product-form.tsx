@@ -14,6 +14,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  getErrorMessage,
+  getErrorStatus,
+  type ApiClientError,
+} from "@/lib/apiClientError";
+import {
   Form,
   FormControl,
   FormField,
@@ -29,54 +34,10 @@ interface ProductFormProps {
   onClose: () => void;
 }
 
-type ApiClientError = Error & {
-  status?: number;
-};
-
-function getErrorStatus(error: unknown): number | undefined {
-  if (typeof error === "object" && error !== null && "status" in error) {
-    const status = (error as { status?: unknown }).status;
-    if (typeof status === "number") return status;
-  }
-
-  if (error instanceof Error) {
-    const match = error.message.match(/^(\d{3}):/);
-    if (match) return Number(match[1]);
-  }
-
-  return undefined;
-}
-
-function getErrorMessage(error: unknown, fallback = "Something went wrong") {
-  if (!(error instanceof Error)) return fallback;
-
-  const raw = error.message.trim();
-  if (!raw) return fallback;
-
-  const colonIndex = raw.indexOf(":");
-  const body = colonIndex >= 0 ? raw.slice(colonIndex + 1).trim() : raw;
-
-  if (body.startsWith("{") && body.endsWith("}")) {
-    try {
-      const parsed = JSON.parse(body) as { message?: string };
-      if (parsed.message) return parsed.message;
-    } catch {}
-  }
-
-  return body || fallback;
-}
-
 function getProductMutationMessage(error: unknown) {
   const status = getErrorStatus(error);
-
-  if (status === 403) {
-    return "You do not have permission to manage products.";
-  }
-
-  if (status === 409) {
-    return "A product with this SKU already exists.";
-  }
-
+  if (status === 403) return "You do not have permission to manage products.";
+  if (status === 409) return "A product with this SKU already exists.";
   return getErrorMessage(error);
 }
 
@@ -92,7 +53,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
       category: product?.category ?? "",
       quantity: product?.quantity ?? 0,
       price: product?.price ?? 0,
-      lowStockThreshold: product?.lowStockThreshold ?? 10,
+      low_stock_threshold: product?.low_stock_threshold ?? 10,
       description: product?.description ?? "",
     },
   });
@@ -268,7 +229,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
 
                 <FormField
                   control={form.control}
-                  name="lowStockThreshold"
+                  name="low_stock_threshold"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Low Stock Alert</FormLabel>

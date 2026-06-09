@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 interface LocationSearchProps {
   value: string;
-  onChange: (locationId: string) => void;
+  onChange: (location_id: string) => void;
   excludeIds?: string[];
   initialLabel?: string;
 }
