@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { storage } from "@/lib/storage";
-import { withErrorHandling, badRequest, conflict } from "@/lib/apiError";
+import {
+  withErrorHandling,
+  badRequest,
+  conflict,
+} from "@/lib/apiServerError";
 import { requirePermission } from "@/lib/auth";
 import { PERMISSIONS } from "@/lib/permissions";
 import { insertUserSchema } from "@/lib/schema";
@@ -31,7 +35,7 @@ export const POST = withErrorHandling(
       return conflict("This user already exists");
     }
 
-    const created = await storage.createUser(parsed.data);
+    const created = await storage.createUser(parsed.data, userOrResp.id);
     return NextResponse.json(created, { status: 201 });
   },
 );

@@ -38,7 +38,7 @@ export default function Dashboard({
 
   const lowStockProducts =
     products?.filter(
-      (p) => p.quantity > 0 && p.quantity <= p.lowStockThreshold,
+      (p) => p.quantity > 0 && p.quantity <= p.low_stock_threshold,
     ) ?? [];
   const outOfStockProducts = products?.filter((p) => p.quantity === 0) ?? [];
 

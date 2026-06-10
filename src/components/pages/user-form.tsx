@@ -65,6 +65,7 @@ const PERMISSION_LABELS: Record<Permission, string> = {
   read_locations: "Locations",
   read_users: "Users",
   read_debug: "Debug",
+  read_logs: "Logs",
   write_products: "Products",
   write_locations: "Locations",
   write_users: "Users",
@@ -80,9 +81,9 @@ type UserFormValues = {
   rank: string;
   unit: string;
   callsign: string;
-  clearanceLevel: string;
+  clearance_level: string;
   permissions: Permission[];
-  isActive: boolean;
+  is_active: boolean;
 };
 
 type CreateUserFormProps = {
@@ -104,7 +105,7 @@ type UserFormProps = CreateUserFormProps | EditUserFormProps;
 export default function UserForm(props: UserFormProps) {
   const form = useForm<UserFormValues>({
     resolver: zodResolver(
-      props.isEdit ? updateUserSchema : insertUserSchema
+      props.isEdit ? updateUserSchema : insertUserSchema,
     ) as any,
     defaultValues: {
       username: props.defaultValues?.username ?? "",
@@ -116,45 +117,37 @@ export default function UserForm(props: UserFormProps) {
         typeof props.defaultValues?.callsign === "string"
           ? props.defaultValues.callsign
           : "",
-      clearanceLevel: props.defaultValues?.clearanceLevel ?? "No clearance",
+      clearance_level: props.defaultValues?.clearance_level ?? "No clearance",
       permissions: props.defaultValues?.permissions ?? [],
-      isActive: props.defaultValues?.isActive ?? true,
+      is_active: props.defaultValues?.is_active ?? true,
     },
   });
 
   function handleSubmit(data: UserFormValues) {
-    const normalizedCallsign = data.callsign.trim() ? data.callsign.trim() : null;
+    const password = data.password?.trim();
+    const basePayload = {
+      username: data.username.trim(),
+      full_name: data.full_name.trim(),
+      rank: data.rank,
+      unit: data.unit,
+      callsign: data.callsign?.trim() || null,
+      clearance_level: data.clearance_level,
+      permissions: data.permissions,
+      is_active: data.is_active,
+    };
 
     if (props.isEdit) {
-      const payload: UpdateUser = {
-        username: data.username,
-        full_name: data.full_name,
-        rank: data.rank,
-        unit: data.unit,
-        callsign: normalizedCallsign,
-        clearanceLevel: data.clearanceLevel,
-        permissions: data.permissions,
-        isActive: data.isActive,
-        ...(data.password.trim() ? { password: data.password } : {}),
-      };
-
-      props.onSubmit(payload);
+      props.onSubmit({
+        ...basePayload,
+        ...(password ? { password } : {}),
+      });
       return;
     }
 
-    const payload: InsertUser = {
-      username: data.username,
-      password: data.password,
-      full_name: data.full_name,
-      rank: data.rank,
-      unit: data.unit,
-      callsign: normalizedCallsign,
-      clearanceLevel: data.clearanceLevel,
-      permissions: data.permissions,
-      isActive: data.isActive,
-    };
-
-    props.onSubmit(payload);
+    props.onSubmit({
+      ...basePayload,
+      password: password ?? "",
+    });
   }
 
   return (
@@ -248,7 +241,7 @@ export default function UserForm(props: UserFormProps) {
           name="callsign"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Callsign</FormLabel>
+              <FormLabel>Call sign</FormLabel>
               <FormControl>
                 <Input {...field} value={field.value ?? ""} />
               </FormControl>
@@ -259,7 +252,7 @@ export default function UserForm(props: UserFormProps) {
 
         <FormField
           control={form.control}
-          name="clearanceLevel"
+          name="clearance_level"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Clearance level</FormLabel>
@@ -333,7 +326,7 @@ export default function UserForm(props: UserFormProps) {
 
         <FormField
           control={form.control}
-          name="isActive"
+          name="is_active"
           render={({ field }) => (
             <FormItem className="flex items-center justify-between rounded-md border p-3">
               <FormLabel className="mb-0">Active</FormLabel>

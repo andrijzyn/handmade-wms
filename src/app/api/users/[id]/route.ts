@@ -7,7 +7,7 @@ import {
   badRequest,
   conflict,
   notFound,
-} from "@/lib/apiError";
+} from "@/lib/apiServerError";
 import { requirePermission } from "@/lib/auth";
 import { PERMISSIONS } from "@/lib/permissions";
 
@@ -34,7 +34,7 @@ export const PATCH = withErrorHandling(
       }
     }
 
-    const updated = await storage.updateUser(id, partial.data);
+    const updated = await storage.updateUser(id, partial.data, userOrResp.id);
     if (!updated) return notFound("No user found");
 
     return NextResponse.json(updated);
@@ -52,12 +52,12 @@ export const DELETE = withErrorHandling(
 
     const { id } = await params;
 
-    // Забороняємо видаляти себе
+    // Do not allow to remove yourself
     if (currentUser.id === id) {
       return badRequest("You can't delete your own account");
     }
 
-    const deleted = await storage.deleteUser(id);
+    const deleted = await storage.deleteUser(id, userOrResp.id);
     if (!deleted) return notFound("No user found");
 
     return NextResponse.json({ message: "User has been deleted" });

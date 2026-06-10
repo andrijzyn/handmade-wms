@@ -8,11 +8,11 @@ export interface User {
   rank: string;
   unit: string;
   callsign: string | null;
-  clearanceLevel: string;
+  clearance_level: string;
   permissions: Permission[];
-  isActive: boolean;
-  createdAt: Date | null;
-  sessionVersion?: string;
+  is_active: boolean;
+  created_at: Date | null;
+  session_version?: string;
 }
 
 export type SafeUser = Omit<User, "password">;

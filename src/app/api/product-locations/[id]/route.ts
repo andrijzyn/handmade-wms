@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { storage } from "@/lib/storage";
-import { withErrorHandling, badRequest, notFound } from "@/lib/apiError";
+import {
+  withErrorHandling,
+  badRequest,
+  notFound,
+} from "@/lib/apiServerError";
 import { requirePermission } from "@/lib/auth";
 import { PERMISSIONS } from "@/lib/permissions";
 
@@ -25,7 +29,11 @@ export const PATCH = withErrorHandling(
       return badRequest("Validation error", z.treeifyError(parsed.error));
     }
 
-    const entry = await storage.updateProductLocation(id, parsed.data.quantity);
+    const entry = await storage.updateProductLocation(
+      id,
+      parsed.data.quantity,
+      userOrResp.id,
+    );
     if (!entry) return notFound("Product location not found");
 
     return NextResponse.json(entry);
@@ -41,7 +49,7 @@ export const DELETE = withErrorHandling(
     if (userOrResp instanceof NextResponse) return userOrResp;
 
     const { id } = await params;
-    const deleted = await storage.deleteProductLocation(id);
+    const deleted = await storage.deleteProductLocation(id, userOrResp.id);
     if (!deleted) return notFound("Product location not found");
 
     return NextResponse.json({ message: "Product location deleted" });

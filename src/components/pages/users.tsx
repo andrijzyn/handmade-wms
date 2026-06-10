@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
-import type {InsertUser, UpdateUser} from "@/lib/schema";
+import type { InsertUser, UpdateUser } from "@/lib/schema";
 import type { SafeUser } from "@/lib/userTypes";
 import { PERMISSIONS } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
@@ -90,7 +90,6 @@ export default function UsersPage() {
       if (!payload.password) delete payload.password;
       const res = await apiRequest("PATCH", `/api/users/${id}`, payload);
       return await res.json();
-
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
@@ -124,7 +123,7 @@ export default function UsersPage() {
     },
   });
 
-  const activeCount = users.filter((u) => u.isActive).length;
+  const activeCount = users.filter((u) => u.is_active).length;
 
   return (
     <div className="space-y-5" data-testid="users-page">
@@ -201,8 +200,8 @@ export default function UsersPage() {
                       {u.callsign || "—"}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={clearanceBadgeVariant(u.clearanceLevel)}>
-                        {u.clearanceLevel}
+                      <Badge variant={clearanceBadgeVariant(u.clearance_level)}>
+                        {u.clearance_level}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -212,8 +211,8 @@ export default function UsersPage() {
                       </span>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={u.isActive ? "default" : "secondary"}>
-                        {u.isActive ? "Active" : "Inactive"}
+                      <Badge variant={u.is_active ? "default" : "secondary"}>
+                        {u.is_active ? "Active" : "Inactive"}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -280,9 +279,9 @@ export default function UsersPage() {
                 rank: editUser.rank,
                 unit: editUser.unit,
                 callsign: editUser.callsign ?? "",
-                clearanceLevel: editUser.clearanceLevel,
+                clearance_level: editUser.clearance_level,
                 permissions: editUser.permissions,
-                isActive: editUser.isActive,
+                is_active: editUser.is_active,
               }}
               onSubmit={(data) =>
                 updateMutation.mutate({

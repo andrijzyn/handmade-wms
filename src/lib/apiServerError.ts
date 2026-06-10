@@ -6,7 +6,7 @@ import { ZodError, z } from "zod";
  * It carries an HTTP status code and optional details that will be
  * serialised into the JSON body.
  */
-export class ApiError extends Error {
+export class ApiServerError extends Error {
   status: number;
   details?: unknown;
 
@@ -19,27 +19,27 @@ export class ApiError extends Error {
 }
 
 /**
- * Convert an {@link ApiError} into a NextResponse JSON payload.
+ * Convert an {@link ApiServerError} into a NextResponse JSON payload.
  */
-export function errorResponse(error: ApiError): NextResponse {
+export function errorResponse(error: ApiServerError): NextResponse {
   const payload: Record<string, unknown> = { message: error.message };
   if (error.details !== undefined) payload.details = error.details;
   return NextResponse.json(payload, { status: error.status });
 }
 
 /**
- * Helper to create and throw an {@link ApiError}.
+ * Helper to create and throw an {@link ApiServerError}.
  */
 export function raiseApiError(
   message: string,
   status: number,
   details?: unknown,
 ): never {
-  throw new ApiError(message, status, details);
+  throw new ApiServerError(message, status, details);
 }
 
 /**
- * Common shortcuts – they throw an {@link ApiError} which will be caught by the
+ * Common shortcuts – they throw an {@link ApiServerError} which will be caught by the
  * wrapper.
  */
 export const unauthorized = () => raiseApiError("Authorization required", 401);
@@ -53,7 +53,7 @@ export const notFound = (msg: string, details?: unknown) =>
   raiseApiError(msg, 404, details);
 
 /**
- * Higher‑order wrapper that catches both {@link ApiError} and unexpected
+ * Higher‑order wrapper that catches both {@link ApiServerError} and unexpected
  * exceptions, turning them into a uniform JSON response.
  */
 export function withErrorHandling<TArgs extends any[]>(
@@ -63,14 +63,14 @@ export function withErrorHandling<TArgs extends any[]>(
     try {
       return await handler(...args);
     } catch (err: any) {
-      if (err instanceof ApiError) {
+      if (err instanceof ApiServerError) {
         return errorResponse(err);
       }
       // Zod validation errors expose a `flatten` method.
       if (err instanceof ZodError) {
         const details = z.treeifyError(err);
         return errorResponse(
-          new ApiError("Validation error", 400, { errors: details }),
+          new ApiServerError("Validation error", 400, { errors: details }),
         );
       }
       console.error(err);

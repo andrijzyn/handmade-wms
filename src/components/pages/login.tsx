@@ -16,11 +16,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Shield, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Shield, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const { login } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
   const [isPending, setIsPending] = useState(false);
 
   const form = useForm<LoginInput>({
@@ -98,31 +97,15 @@ export default function LoginPage() {
                       <FormLabel className="text-xs font-medium">
                         Password
                       </FormLabel>
-                      <div className="relative">
-                        <FormControl>
-                          <Input
-                            type={showPassword ? "text" : "password"}
-                            placeholder="Enter password"
-                            autoComplete="current-password"
-                            className="pr-10"
-                            data-testid="input-password"
-                            {...field}
-                          />
-                        </FormControl>
-                        <button
-                          type="button"
-                          className="absolute right-0 top-0 h-full px-3 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-                          onClick={() => setShowPassword(!showPassword)}
-                          tabIndex={-1}
-                          data-testid="button-toggle-password"
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="Enter password"
+                          autoComplete="current-password"
+                          data-testid="input-password"
+                          {...field}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

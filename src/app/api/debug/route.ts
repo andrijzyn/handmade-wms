@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 import { requirePermission } from "@/lib/auth";
-import { withErrorHandling } from "@/lib/apiError";
+import { withErrorHandling } from "@/lib/apiServerError";
 import { PERMISSIONS } from "@/lib/permissions";
 
 /**
@@ -56,7 +56,7 @@ export const GET = withErrorHandling(async (req) => {
       const usersWithPermissions = (data ?? []).map((row: any) => ({
         id: row.id,
         username: row.username,
-        isActive: row.is_active,
+        is_active: row.is_active,
         permissions: (row.user_permissions ?? []).map(
           (up: any) => up.permissions.key,
         ),
