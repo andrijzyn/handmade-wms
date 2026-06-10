@@ -50,6 +50,7 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 - [x] Per-product location breakdown with quantity tracking
 - [x] Separate functions by permissions
 - [x] Create module for permission assignment
+- [x] Create module for logging changes with displaying differences
 
 ***
 
@@ -81,20 +82,20 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 > - [x] Join audit records with `users` to resolve readable actor information
 > - [x] Add backend filtering by action, entity type, actor, and search query
 > - [x] Sort audit records by newest first and limit large result sets
-> - [ ] Create `GET /api/audit-logs` API route
-> - [ ] Add permission to access the audit log
-> - [ ] Create Audit Log page
-> - [ ] Build audit table with `User`, `Action`, `Object`, and `Time` columns
-> - [ ] Add human-readable action formatter
-> - [ ] Add badges for `INSERT`, `UPDATE`, and `DELETE`
-> - [ ] Display timestamps in a readable format
-> - [ ] Add search by user, table, and record ID
-> - [ ] Add filters by operation type and entity type
-> - [ ] Add modal or drawer for record details
-> - [ ] Show `old_values` and `new_values` in the details view
-> - [ ] Show field-level changes in a `before -> after` format
-> - [ ] Add loading state for the audit table
-> - [ ] Add empty state when no audit records exist
+> - [x] Create `GET /api/audit-logs` API route
+> - [x] Add permission to access the audit log
+> - [x] Create Audit Log page
+> - [x] Build audit table with `User`, `Action`, `Object`, and `Time` columns
+> - [x] Add human-readable action formatter
+> - [x] Add badges for `INSERT`, `UPDATE`, and `DELETE`
+> - [x] Display timestamps in a readable format
+> - [x] Add search by user, table, and record ID
+> - [x] Add filters by operation type and entity type
+> - [x] Add modal or drawer for record details
+> - [x] Show `old_values` and `new_values` in the details view
+> - [x] Show field-level changes in a `before -> after` format
+> - [x] Add loading state for the audit table
+> - [x] Add empty state when no audit records exist
 > - [ ] Export audit log to CSV / PDF for reporting
 > - [ ] Add stock movement dashboard with time-based charts
 
