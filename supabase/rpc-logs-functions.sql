@@ -1,5 +1,5 @@
 -- ============================================================
--- StockPulse — RPC + Audit bundle (refactored)
+-- StockPulse — RPC + Audit bundle (refactored + diff)
 -- ============================================================
 
 create extension if not exists "uuid-ossp";
@@ -70,6 +70,50 @@ select
         || case when p_data ? 'secret' then jsonb_build_object('secret', '***') else '{}'::jsonb end
         || case when p_data ? 'api_key' then jsonb_build_object('api_key', '***') else '{}'::jsonb end
     end;
+$$;
+
+create or replace function public.jsonb_diff(
+    p_old jsonb,
+    p_new jsonb
+)
+returns jsonb
+language plpgsql
+immutable
+as $$
+declare
+v_key text;
+    v_old_val jsonb;
+    v_new_val jsonb;
+    v_result jsonb := '{}'::jsonb;
+begin
+    if p_old is null and p_new is null then
+        return '{}'::jsonb;
+end if;
+
+for v_key in
+select key
+from (
+  select jsonb_object_keys(coalesce(p_old, '{}'::jsonb)) as key
+  union
+  select jsonb_object_keys(coalesce(p_new, '{}'::jsonb)) as key
+  ) s
+  loop
+  v_old_val := coalesce(p_old -> v_key, 'null'::jsonb);
+v_new_val := coalesce(p_new -> v_key, 'null'::jsonb);
+
+        if v_old_val is distinct from v_new_val then
+            v_result := v_result || jsonb_build_object(
+                v_key,
+                jsonb_build_object(
+                    'old', v_old_val,
+                    'new', v_new_val
+                )
+            );
+end if;
+end loop;
+
+return v_result;
+end;
 $$;
 
 create or replace function public.logs_audit_event(
@@ -172,16 +216,7 @@ perform public.logs_audit_event(
         v_product.id,
         p_correlation_id,
         null,
-        jsonb_build_object(
-            'id', v_product.id,
-            'name', v_product.name,
-            'sku', v_product.sku,
-            'category', v_product.category,
-            'quantity', v_product.quantity,
-            'price', v_product.price,
-            'low_stock_threshold', v_product.low_stock_threshold,
-            'description', v_product.description
-        ),
+        to_jsonb(v_product),
         'products',
         v_product.id::text
     );
@@ -202,6 +237,9 @@ as $$
 declare
 v_old_product public.products;
     v_product public.products;
+    v_old_json jsonb;
+    v_new_json jsonb;
+    v_diff jsonb;
 begin
 select *
 into v_old_product
@@ -232,32 +270,22 @@ end,
         return null;
 end if;
 
+    v_old_json := to_jsonb(v_old_product);
+    v_new_json := to_jsonb(v_product);
+    v_diff := public.jsonb_diff(v_old_json, v_new_json);
+
+    if v_diff = '{}'::jsonb then
+        return v_product;
+end if;
+
     perform public.logs_audit_event(
         p_actor_user_id,
         'UPDATE',
         'product',
         v_product.id,
         p_correlation_id,
-        jsonb_build_object(
-            'id', v_old_product.id,
-            'name', v_old_product.name,
-            'sku', v_old_product.sku,
-            'category', v_old_product.category,
-            'quantity', v_old_product.quantity,
-            'price', v_old_product.price,
-            'low_stock_threshold', v_old_product.low_stock_threshold,
-            'description', v_old_product.description
-        ),
-        jsonb_build_object(
-            'id', v_product.id,
-            'name', v_product.name,
-            'sku', v_product.sku,
-            'category', v_product.category,
-            'quantity', v_product.quantity,
-            'price', v_product.price,
-            'low_stock_threshold', v_product.low_stock_threshold,
-            'description', v_product.description
-        ),
+        v_old_json,
+        jsonb_build_object('diff', v_diff, 'after', v_new_json),
         'products',
         v_product.id::text
     );
@@ -291,16 +319,7 @@ end if;
         'product',
         p_product_id,
         p_correlation_id,
-        jsonb_build_object(
-            'id', v_product.id,
-            'name', v_product.name,
-            'sku', v_product.sku,
-            'category', v_product.category,
-            'quantity', v_product.quantity,
-            'price', v_product.price,
-            'low_stock_threshold', v_product.low_stock_threshold,
-            'description', v_product.description
-        ),
+        to_jsonb(v_product),
         null,
         'products',
         p_product_id::text
@@ -361,16 +380,7 @@ perform public.logs_audit_event(
         v_user.id,
         p_correlation_id,
         null,
-        jsonb_build_object(
-            'id', v_user.id,
-            'username', v_user.username,
-            'full_name', v_user.full_name,
-            'rank', v_user.rank,
-            'unit', v_user.unit,
-            'callsign', v_user.callsign,
-            'clearance_level', v_user.clearance_level,
-            'is_active', v_user.is_active
-        ),
+        public.mask_sensitive_json(to_jsonb(v_user)),
         'users',
         v_user.id::text
     );
@@ -391,6 +401,9 @@ as $$
 declare
 v_old_user public.users;
     v_user public.users;
+    v_old_json jsonb;
+    v_new_json jsonb;
+    v_diff jsonb;
 begin
 select *
 into v_old_user
@@ -419,32 +432,22 @@ if v_user is null then
         return false;
 end if;
 
+    v_old_json := public.mask_sensitive_json(to_jsonb(v_old_user));
+    v_new_json := public.mask_sensitive_json(to_jsonb(v_user));
+    v_diff := public.jsonb_diff(v_old_json, v_new_json);
+
+    if v_diff = '{}'::jsonb then
+        return true;
+end if;
+
     perform public.logs_audit_event(
         p_actor_user_id,
         'UPDATE',
         'user',
         p_user_id,
         p_correlation_id,
-        jsonb_build_object(
-            'id', v_old_user.id,
-            'username', v_old_user.username,
-            'full_name', v_old_user.full_name,
-            'rank', v_old_user.rank,
-            'unit', v_old_user.unit,
-            'callsign', v_old_user.callsign,
-            'clearance_level', v_old_user.clearance_level,
-            'is_active', v_old_user.is_active
-        ),
-        jsonb_build_object(
-            'id', v_user.id,
-            'username', v_user.username,
-            'full_name', v_user.full_name,
-            'rank', v_user.rank,
-            'unit', v_user.unit,
-            'callsign', v_user.callsign,
-            'clearance_level', v_user.clearance_level,
-            'is_active', v_user.is_active
-        ),
+        v_old_json,
+        jsonb_build_object('diff', v_diff, 'after', v_new_json),
         'users',
         p_user_id::text
     );
@@ -486,16 +489,7 @@ perform public.logs_audit_event(
         'user',
         p_user_id,
         p_correlation_id,
-        jsonb_build_object(
-            'id', v_user.id,
-            'username', v_user.username,
-            'full_name', v_user.full_name,
-            'rank', v_user.rank,
-            'unit', v_user.unit,
-            'callsign', v_user.callsign,
-            'clearance_level', v_user.clearance_level,
-            'is_active', v_user.is_active
-        ),
+        public.mask_sensitive_json(to_jsonb(v_user)),
         null,
         'users',
         p_user_id::text
@@ -517,6 +511,7 @@ as $$
 declare
 v_old_permissions jsonb;
     v_new_permissions jsonb;
+    v_diff jsonb;
 begin
 select coalesce(jsonb_agg(p.key order by p.key), '[]'::jsonb)
 into v_old_permissions
@@ -531,10 +526,18 @@ insert into public.user_permissions (user_id, permission_id)
 select
   p_user_id,
   p.id
-from public.permissions p 
+from public.permissions p
 where p.key = any(coalesce(p_permission_keys, array[]::text[]));
 
 v_new_permissions := coalesce(to_jsonb(p_permission_keys), '[]'::jsonb);
+    v_diff := public.jsonb_diff(
+        jsonb_build_object('permissions', coalesce(v_old_permissions, '[]'::jsonb)),
+        jsonb_build_object('permissions', v_new_permissions)
+    );
+
+    if v_diff = '{}'::jsonb then
+        return true;
+end if;
 
     perform public.logs_audit_event(
         p_actor_user_id,
@@ -546,7 +549,8 @@ v_new_permissions := coalesce(to_jsonb(p_permission_keys), '[]'::jsonb);
             'permissions', coalesce(v_old_permissions, '[]'::jsonb)
         ),
         jsonb_build_object(
-            'permissions', v_new_permissions
+            'diff', v_diff,
+            'after', jsonb_build_object('permissions', v_new_permissions)
         ),
         'user_permissions',
         p_user_id::text
@@ -592,12 +596,7 @@ perform public.logs_audit_event(
         v_row.id,
         p_correlation_id,
         null,
-        jsonb_build_object(
-            'id', v_row.id,
-            'product_id', v_row.product_id,
-            'location_id', v_row.location_id,
-            'quantity', v_row.quantity
-        ),
+        to_jsonb(v_row),
         'product_locations',
         v_row.id::text
     );
@@ -618,6 +617,9 @@ as $$
 declare
 v_old_row public.product_locations;
     v_row public.product_locations;
+    v_old_json jsonb;
+    v_new_json jsonb;
+    v_diff jsonb;
 begin
 select *
 into v_old_row
@@ -640,24 +642,22 @@ if v_row is null then
         return null;
 end if;
 
+    v_old_json := to_jsonb(v_old_row) - 'updated_at';
+    v_new_json := to_jsonb(v_row) - 'updated_at';
+    v_diff := public.jsonb_diff(v_old_json, v_new_json);
+
+    if v_diff = '{}'::jsonb then
+        return v_row;
+end if;
+
     perform public.logs_audit_event(
         p_actor_user_id,
         'UPDATE',
         'product_location',
         v_row.id,
         p_correlation_id,
-        jsonb_build_object(
-            'id', v_old_row.id,
-            'product_id', v_old_row.product_id,
-            'location_id', v_old_row.location_id,
-            'quantity', v_old_row.quantity
-        ),
-        jsonb_build_object(
-            'id', v_row.id,
-            'product_id', v_row.product_id,
-            'location_id', v_row.location_id,
-            'quantity', v_row.quantity
-        ),
+        v_old_json,
+        jsonb_build_object('diff', v_diff, 'after', v_new_json),
         'product_locations',
         v_row.id::text
     );
@@ -691,12 +691,7 @@ end if;
         'product_location',
         v_row.id,
         p_correlation_id,
-        jsonb_build_object(
-            'id', v_row.id,
-            'product_id', v_row.product_id,
-            'location_id', v_row.location_id,
-            'quantity', v_row.quantity
-        ),
+        to_jsonb(v_row) - 'updated_at',
         null,
         'product_locations',
         v_row.id::text

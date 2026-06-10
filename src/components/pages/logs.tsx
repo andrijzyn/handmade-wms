@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-type AuditAction = "INSERT" | "UPDATE" | "DELETE";
+type AuditAction = "INSERT" | "UPDATE" | "DELETE" | "REPLACE_PERMISSIONS";
 
 type AuditLogItem = {
   id: string;
@@ -32,7 +32,10 @@ const actionStyles: Record<AuditAction, string> = {
     "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20",
   UPDATE:
     "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
-  DELETE: "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20",
+  DELETE:
+    "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20",
+  REPLACE_PERMISSIONS:
+    "bg-black-500/10 text-rose-700 dark:text-red-400 border-rose-500/20",
 };
 
 export default function LogsPage() {
@@ -120,6 +123,100 @@ export default function LogsPage() {
     setSelectedTable("all");
     setSelectedAction("all");
   };
+
+  function renderAuditNewValue(newValues: any) {
+    const diff = newValues?.diff;
+
+    if (diff && typeof diff === "object" && !Array.isArray(diff)) {
+      const entries = Object.entries(diff);
+
+      if (entries.length === 0) {
+        return <span className="text-muted-foreground">No changes</span>;
+      }
+
+      return (
+        <div className="space-y-2">
+          {entries.map(([field, change]) => {
+            const typedChange = change as { old?: unknown; new?: unknown };
+
+            return (
+              <div
+                key={field}
+                // className="rounded-md border p-2 text-sm"
+              >
+                <div className="font-medium">{field}</div>
+                <div className="mt-1 grid grid-cols-[80px_1fr] gap-x-2 gap-y-1">
+                  <span className="text-muted-foreground">Old</span>
+                  <code>{JSON.stringify(typedChange.old)}</code>
+
+                  <span className="text-muted-foreground">New</span>
+                  <code>{JSON.stringify(typedChange.new)}</code>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    return <pre className="text-xs">{JSON.stringify(newValues, null, 2)}</pre>;
+  }
+
+  function renderOldValues(oldValues: Record<string, unknown> | null | undefined) {
+    if (!oldValues || Object.keys(oldValues).length === 0) {
+      return <span className="text-muted-foreground">No previous values</span>;
+    }
+
+    return (
+      <div className="space-y-1.5">
+        {Object.entries(oldValues).map(([key, value]) => (
+          <div
+            key={key}
+            className="flex items-start justify-between gap-4 rounded-md border px-3 py-2"
+          >
+          <span className="min-w-[140px] font-mono text-xs text-muted-foreground">
+            {key}
+          </span>
+
+            <code className="text-right font-mono text-sm whitespace-pre-wrap break-all">
+              {formatAuditValue(value)}
+            </code>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  function formatAuditValue(value: unknown): string {
+    if (value === null || value === undefined) return "null";
+    if (typeof value === "string") return value;
+    if (typeof value === "number" || typeof value === "boolean") return String(value);
+    return JSON.stringify(value);
+  }
+
+  function AuditObjectView({
+                             value,
+                             emptyLabel = "No data",
+                           }: {
+    value: Record<string, unknown> | null | undefined;
+    emptyLabel?: string;
+  }) {
+    if (!value || Object.keys(value).length === 0) {
+      return <span className="text-muted-foreground">{emptyLabel}</span>;
+    }
+
+    return (
+      <div className="space-y-2">
+        {Object.entries(value).map(([key, fieldValue]) => (
+          <div
+            key={key}>
+            <div className="font-mono text-xs text-muted-foreground">{key}</div>
+            {formatAuditValue(fieldValue)}
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <section className="space-y-6" data-testid="logs-page">
@@ -233,16 +330,12 @@ export default function LogsPage() {
 
                   return (
                     <Fragment key={log.id}>
-                      <tr className="border-b align-top hover:bg-muted/20 transition-colors">
+                      <tr className="border-b align-top transition-colors hover:bg-muted/20">
                         <td className="px-4 py-3">
                           <button
                             onClick={() => toggleRow(log.id)}
                             className="inline-flex h-7 w-7 items-center justify-center rounded-md border hover:bg-muted"
-                            aria-label={
-                              expanded
-                                ? "Collapse log details"
-                                : "Expand log details"
-                            }
+                            aria-label={expanded ? "Collapse log details" : "Expand log details"}
                           >
                             {expanded ? (
                               <ChevronDown className="h-4 w-4" />
@@ -254,7 +347,7 @@ export default function LogsPage() {
 
                         <td className="px-4 py-3">
                           <div className="font-medium">{log.table_name}</div>
-                          <div className="text-xs text-muted-foreground break-all">
+                          <div className="break-all text-xs text-muted-foreground">
                             {log.record_id ?? "No record ID"}
                           </div>
                         </td>
@@ -270,21 +363,19 @@ export default function LogsPage() {
                         </td>
 
                         <td className="px-4 py-3">
-                          <div>
-                            {log.actorUsername ?? log.actorFullName ?? "System"}
-                          </div>
+                          <div>{log.actorUsername ?? log.actorFullName ?? "System"}</div>
                           {log.actor_user_id && (
-                            <div className="text-xs text-muted-foreground break-all">
+                            <div className="break-all text-xs text-muted-foreground">
                               {log.actor_user_id}
                             </div>
                           )}
                         </td>
 
-                        <td className="px-4 py-3 font-mono text-xs text-muted-foreground break-all">
+                        <td className="break-all px-4 py-3 font-mono text-xs text-muted-foreground">
                           {log.correlation_id ?? "—"}
                         </td>
 
-                        <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">
+                        <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
                           {new Date(log.created_at).toLocaleString()}
                         </td>
                       </tr>
@@ -292,26 +383,27 @@ export default function LogsPage() {
                       {expanded && (
                         <tr className="border-b bg-muted/10">
                           <td colSpan={6} className="px-4 py-4">
-                            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                              <div className="space-y-2">
-                                <h3 className="text-sm font-medium">
-                                  Old values
-                                </h3>
-                                <pre className="rounded-md border bg-background p-3 text-xs overflow-x-auto">
-                                  {JSON.stringify(log.old_values, null, 2) ??
-                                    "null"}
-                                </pre>
-                              </div>
+                            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+                              <section className="space-y-2">
+                                <h3 className="text-sm font-medium">Old values</h3>
+                                <div className="rounded-md border bg-background p-3">
+                                  <AuditObjectView
+                                    value={log.old_values}
+                                    emptyLabel="No previous values"
+                                  />
+                                </div>
+                              </section>
 
-                              <div className="space-y-2">
+                              <section className="space-y-2">
                                 <h3 className="text-sm font-medium">
-                                  New values
+                                  {log.action === "UPDATE" || log.action === "REPLACE_PERMISSIONS"
+                                    ? "Changes"
+                                    : "New values"}
                                 </h3>
-                                <pre className="rounded-md border bg-background p-3 text-xs overflow-x-auto">
-                                  {JSON.stringify(log.new_values, null, 2) ??
-                                    "null"}
-                                </pre>
-                              </div>
+                                <div className="rounded-md border bg-background p-3">
+                                  {renderAuditNewValue(log.new_values)}
+                                </div>
+                              </section>
                             </div>
                           </td>
                         </tr>
