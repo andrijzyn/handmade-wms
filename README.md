@@ -51,6 +51,7 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 - [x] Separate functions by permissions
 - [x] Create module for permission assignment
 - [x] Create module for logging changes with displaying differences
+- [x] Mobile-optimised layout
 
 ***
 
@@ -103,7 +104,6 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 
 ## UX
 
-- [ ] Mobile-optimised layout — склад не завжди має ПК
 - [ ] PWA support — встановити як застосунок на телефон без апстору
 - [ ] Barcode / QR scan — замість ручного вводу SKU на складі
 - [ ] Unify Windows by example of "User-form"
