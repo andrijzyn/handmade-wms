@@ -62,43 +62,22 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 
 ***
 
-## Operational management (InBound / OutBound)
-
-- [ ] Create InBound / OutBound module — форми надходження і видачі з часом, відповідальним і підписом
-- [ ] Automatic/manual loading into field stores — автоматична/ручна алокація по складах при InBound
-- [ ] Set enclosure for adding/editing products without OrderID — додати продукти безпосередньо через продуктовий модуль
-- [ ] Build Order Management module (Creating, Picking, Checking, Dispatching), which should connect warehouse workers with (products & locations)
-- [ ] System for Disposing of Damaged Products
+> [!IMPORTANT]
+> **Current priority**
+> ## Operational management (InBound / OutBound)
+> 
+> - [ ] Create InBound / OutBound module — форми надходження і видачі з часом, відповідальним і підписом
+> - [ ] Automatic/manual loading into field stores — автоматична/ручна алокація по складах при InBound
+> - [ ] Set enclosure for adding/editing products without OrderID — додати продукти безпосередньо через продуктовий модуль
+> - [ ] Build Order Management module (Creating, Picking, Checking, Dispatching), which should connect warehouse workers with (products & locations)
+> - [ ] System for Disposing of Damaged Products
 
 ***
 
-> [!IMPORTANT]
-> **Current priority**
->
-> ## Logging
->
-> - [x] Create `audit_logs` table structure for append-only activity tracking
-> - [x] Add core audit fields: `actor_user_id`, `action`, `table_name`, `record_id`, `old_values`, `new_values`, `created_at`, `correlation_id`
-> - [x] Add audit log lookup with `getAuditLogs()` in storage
-> - [x] Join audit records with `users` to resolve readable actor information
-> - [x] Add backend filtering by action, entity type, actor, and search query
-> - [x] Sort audit records by newest first and limit large result sets
-> - [x] Create `GET /api/audit-logs` API route
-> - [x] Add permission to access the audit log
-> - [x] Create Audit Log page
-> - [x] Build audit table with `User`, `Action`, `Object`, and `Time` columns
-> - [x] Add human-readable action formatter
-> - [x] Add badges for `INSERT`, `UPDATE`, and `DELETE`
-> - [x] Display timestamps in a readable format
-> - [x] Add search by user, table, and record ID
-> - [x] Add filters by operation type and entity type
-> - [x] Add modal or drawer for record details
-> - [x] Show `old_values` and `new_values` in the details view
-> - [x] Show field-level changes in a `before -> after` format
-> - [x] Add loading state for the audit table
-> - [x] Add empty state when no audit records exist
-> - [ ] Export audit log to CSV / PDF for reporting
-> - [ ] Add stock movement dashboard with time-based charts
+## Logging
+
+- [ ] Export audit log to CSV / PDF for reporting
+- [ ] Add stock movement dashboard with time-based charts
 
 ***
 
