@@ -28,13 +28,13 @@ export function createProductLocationsStorage(ctx: StorageContext) {
       if (error) throw error;
 
 
-      return (data ?? []).map((row: any) => ({
+      return ((data ?? []) as unknown as DbProductLocationViewRow[]).map((row) => ({
         id: row.id,
         product_id: row.product_id,
         location_id: row.location_id,
         quantity: row.quantity,
         updated_at: row.updated_at,
-        location_label: row.locations.label,
+        location_label: row.locations?.label ?? "",
       }));
     },
 

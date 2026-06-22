@@ -8,7 +8,7 @@ import {
   insertProductLocationSchema,
   type InsertProductLocation,
 } from "@/lib/schema";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -143,7 +143,7 @@ export default function LocationForm({
   );
 
   const form = useForm<InsertProductLocation>({
-    resolver: zodResolver(insertProductLocationSchema) as any,
+    resolver: zodResolver(insertProductLocationSchema) as Resolver<InsertProductLocation>,
     defaultValues: {
       product_id: product.id,
       location_id: "",

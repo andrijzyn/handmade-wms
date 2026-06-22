@@ -40,13 +40,16 @@ export const POST = withErrorHandling(
       raiseApiError("Invalid username or password", 401);
     }
 
+    // Bump session_version to invalidate any existing sessions
+    const newVersion = await storage.bumpSessionVersion(user.id);
+
     // Готуємо безпечного юзера для відповіді
     const { password: _pw, ...safeUser } = user;
 
     // Створюємо сесію
     const session = await getSession();
     session.user_id = user.id;
-    session.session_version = user.session_version ?? undefined;
+    session.session_version = newVersion;
     await session.save();
 
     return NextResponse.json(safeUser);

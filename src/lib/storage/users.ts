@@ -148,6 +148,17 @@ export function createUsersStorage(ctx: StorageContext) {
       return bcrypt.compare(password, user.password);
     },
 
+    async bumpSessionVersion(id: string): Promise<string> {
+      const newVersion = crypto.randomUUID();
+      const { error } = await ctx
+        .db()
+        .from("users")
+        .update({ session_version: newVersion })
+        .eq("id", id);
+      if (error) throw error;
+      return newVersion;
+    },
+
     async setUserPermissions(
       user_id: string,
       permissions: Permission[],

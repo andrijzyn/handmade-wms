@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   insertProductSchema,
@@ -46,7 +46,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
   const isEditing = !!product;
 
   const form = useForm<InsertProduct>({
-    resolver: zodResolver(insertProductSchema) as any,
+    resolver: zodResolver(insertProductSchema) as Resolver<InsertProduct>,
     defaultValues: {
       name: product?.name ?? "",
       sku: product?.sku ?? "",
