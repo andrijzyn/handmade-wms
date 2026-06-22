@@ -3,8 +3,7 @@
 -- Виконай ПІСЛЯ schema.sql у Supabase Dashboard → SQL Editor
 -- ============================================================
 
--- Пароль "admin123" захешований bcryptjs ($2a$10$...)
--- Згенеровано: bcrypt.hashSync("admin123", 10)
+-- Default admin account — change the password immediately after first login
 insert into users (username, password, full_name, rank, unit, callsign, clearance_level, role, is_active)
 values (
   'admin',

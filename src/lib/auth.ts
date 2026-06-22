@@ -15,9 +15,12 @@ export interface SessionData {
 // ── Session config ────────────────────────────────────
 export const sessionOptions: SessionOptions = {
   cookieName: "stockpulse_session",
-  password:
-    process.env.SESSION_SECRET ||
-    "stockpulse-dev-secret-must-be-at-least-32-chars",
+  password: (() => {
+    if (!process.env.SESSION_SECRET) {
+      throw new Error("SESSION_SECRET environment variable is required");
+    }
+    return process.env.SESSION_SECRET;
+  })(),
   cookieOptions: {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
