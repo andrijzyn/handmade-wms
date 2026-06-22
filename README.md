@@ -62,6 +62,7 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 
 ***
 
+<<<<<<< Updated upstream
 > [!IMPORTANT]
 > **Current priority**
 > ## Operational management (InBound / OutBound)
@@ -71,6 +72,56 @@ Authentication is implemented with a custom session layer (iron-session + bcrypt
 > - [ ] Set enclosure for adding/editing products without OrderID — додати продукти безпосередньо через продуктовий модуль
 > - [ ] Build Order Management module (Creating, Picking, Checking, Dispatching), which should connect warehouse workers with (products & locations)
 > - [ ] System for Disposing of Damaged Products
+=======
+## Security Findings
+
+### Vuln 1: Hardcoded Fallback Session Secret — `src/lib/auth.ts:19`
+
+* **Severity:** High
+* **Category:** `weak_cryptography` / `authentication_bypass`
+* **Confidence:** 9/10
+* **Description:** The `iron-session` password (used as the HMAC key to sign and encrypt all session cookies) falls back to the hardcoded literal `"stockpulse-dev-secret-must-be-at-least-32-chars"` when `SESSION_SECRET` is not set in the environment. This string is publicly visible in the repository.
+* **Exploit Scenario:** An attacker who has read the repository clones it, reads the fallback string, and uses the `iron-session` library to seal a crafted session object `{ user_id: "<target-id>" }` with the known key. If any deployment (staging, CI, a rushed production push) is missing `SESSION_SECRET`, the server accepts the forged cookie as a fully authenticated session, granting access to any user account without knowing the password.
+* **Recommendation:** Remove the fallback entirely. Throw a hard startup error if `SESSION_SECRET` is absent:
+  ```ts
+  if (!process.env.SESSION_SECRET) {
+    throw new Error("SESSION_SECRET environment variable is required");
+  }
+  password: process.env.SESSION_SECRET,
+  ```
+
+---
+
+### Vuln 2: Debug Endpoint Left in Production Code — `src/app/api/debug/route.ts`
+
+* **Severity:** Medium
+* **Category:** `information_disclosure`
+* **Confidence:** 9/10
+* **Description:** A `/api/debug` endpoint exists in the production source tree. The file contains the developer comment `// ВИДАЛИТИ ПЕРЕД ПРОДАКШЕНОМ!` — confirming it was never removed. The endpoint is gated by `read_debug` permission, but that permission is a standard, freely-assignable entry in the user management UI alongside `read_products` and `read_users`. When called, it returns: up to 10 user records with `id`, `username`, `is_active`, and full permission sets; product count; and whether `SUPABASE_SERVICE_ROLE_KEY` and `SESSION_SECRET` are configured.
+* **Exploit Scenario:** An attacker who compromises or social-engineers a `read_debug`-granted account calls `GET /api/debug`. They receive a complete map of all user accounts and their exact permission sets, identifying which accounts hold `write_users`, `delete_products`, etc. Combined with the session secret fallback (Vuln 1), they also learn whether the weak-key configuration is active — confirming whether cookie forgery will work.
+* **Recommendation:** Delete the file entirely before any deployment. If a diagnostic endpoint is genuinely needed, restrict it to a hard-coded internal role (not a UI-assignable permission) and return only non-sensitive system health data.
+
+---
+
+### Vuln 3: Default `admin/admin123` Credential in Seed File — `supabase/seed.sql:6`
+
+* **Severity:** Medium
+* **Category:** `default_credentials`
+* **Confidence:** 8/10
+* **Description:** The database seed file creates an `admin` account (highest role, fully privileged) with a publicly documented password. Line 6 of the file reads `-- Пароль "admin123"` and the inserted bcrypt hash is a real hash of that password. Any deployment that ran `seed.sql` without a subsequent password rotation is directly vulnerable.
+* **Exploit Scenario:** `POST /api/auth/login` with `{"username":"admin","password":"admin123"}` yields an authenticated admin session on any instance where the seed was applied and the password was not changed.
+* **Recommendation:** Remove the plaintext password comment from the seed file. Replace the hardcoded hash with one generated from a randomly generated password printed once at seed time, or require the initial admin password to be supplied via an environment variable during setup. Force a password change on first login for any seeded admin account.
+
+***
+
+## Operational management (InBound / OutBound)
+
+- [ ] Create InBound / OutBound module — форми надходження і видачі з часом, відповідальним і підписом
+- [ ] Automatic/manual loading into field stores — автоматична/ручна алокація по складах при InBound
+- [ ] Set enclosure for adding/editing products without OrderID — додати продукти безпосередньо через продуктовий модуль
+- [ ] Build Order Management module (Creating, Picking, Checking, Dispatching), which should connect warehouse workers with (products & locations)
+- [ ] System for Disposing of Damaged Products
+>>>>>>> Stashed changes
 
 ***
 
