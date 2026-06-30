@@ -1,3 +1,4 @@
+import { Info } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -60,6 +61,22 @@ function accessLevel(
   }
   if (permissions.includes(resource.read)) return "read";
   return "none";
+}
+
+export function PermissionDotsHint() {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Info
+          className="h-3.5 w-3.5 cursor-help text-muted-foreground"
+          data-testid="permission-dots-hint"
+        />
+      </TooltipTrigger>
+      <TooltipContent>
+        Dot order: {RESOURCES.map((r) => r.label).join(", ")}
+      </TooltipContent>
+    </Tooltip>
+  );
 }
 
 export function PermissionDots({ permissions }: { permissions: Permission[] }) {
