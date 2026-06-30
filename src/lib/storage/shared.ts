@@ -35,10 +35,7 @@ export interface DbProductLocationViewRow {
   location_id: string;
   quantity: number;
   updated_at: string;
-  locations: {
-    label: string;
-  }[]
-  | null;
+  locations: { label: string } | null;
 }
 
 export interface DbAuditLogRow {

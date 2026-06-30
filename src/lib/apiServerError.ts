@@ -73,9 +73,10 @@ export function withErrorHandling<TArgs extends any[]>(
           new ApiServerError("Validation error", 400, { errors: details }),
         );
       }
-      console.error(err);
+      const requestId = crypto.randomUUID();
+      console.error(`[${requestId}]`, err);
       return NextResponse.json(
-        { message: "Internal server error" },
+        { message: "Internal server error", requestId },
         { status: 500 },
       );
     }

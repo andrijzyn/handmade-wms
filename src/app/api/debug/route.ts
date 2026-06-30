@@ -53,13 +53,17 @@ export const GET = withErrorHandling(async (req) => {
         hint: error.hint,
       };
     } else {
-      const usersWithPermissions = (data ?? []).map((row: any) => ({
+      type DebugUserRow = {
+        id: string;
+        username: string;
+        is_active: boolean;
+        user_permissions: { permissions: { key: string } }[];
+      };
+      const usersWithPermissions = ((data ?? []) as unknown as DebugUserRow[]).map((row) => ({
         id: row.id,
         username: row.username,
         is_active: row.is_active,
-        permissions: (row.user_permissions ?? []).map(
-          (up: any) => up.permissions.key,
-        ),
+        permissions: (row.user_permissions ?? []).map((up) => up.permissions.key),
       }));
 
       result.users = {

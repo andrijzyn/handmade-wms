@@ -28,8 +28,166 @@ import UsersPage from "@/components/pages/users";
 import LocationsPage from "@/components/pages/locations";
 import LogsPage from "@/components/pages/logs";
 import { Permission, PERMISSIONS } from "@/lib/permissions";
+import type { SafeUser } from "@/lib/userTypes";
 
 type Page = "dashboard" | "products" | "users" | "locations" | "logs";
+
+interface NavItem {
+  page: Page;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+interface SidebarContentProps {
+  navItems: NavItem[];
+  currentPage: Page;
+  onNavigate: (page: Page) => void;
+  user: SafeUser | null;
+  dark: boolean;
+  onToggleDark: () => void;
+  onLogout: () => void;
+}
+
+function SidebarContent({
+  navItems,
+  currentPage,
+  onNavigate,
+  user,
+  dark,
+  onToggleDark,
+  onLogout,
+}: SidebarContentProps) {
+  return (
+    <div className="flex h-full flex-col bg-sidebar">
+      {/* Logo */}
+      <div className="flex h-14 items-center border-b border-sidebar-border px-5">
+        <div className="flex items-center gap-2.5">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-label="StockPulse logo"
+          >
+            <rect
+              x="2"
+              y="6"
+              width="6"
+              height="12"
+              rx="1.5"
+              fill="currentColor"
+              className="text-primary"
+            />
+            <rect
+              x="9"
+              y="3"
+              width="6"
+              height="18"
+              rx="1.5"
+              fill="currentColor"
+              className="text-primary/70"
+            />
+            <rect
+              x="16"
+              y="9"
+              width="6"
+              height="9"
+              rx="1.5"
+              fill="currentColor"
+              className="text-primary/40"
+            />
+          </svg>
+          <span className="text-sm font-semibold tracking-tight text-sidebar-foreground">
+            StockPulse
+          </span>
+        </div>
+      </div>
+
+      {/* Nav */}
+      <nav className="flex-1 space-y-1 px-3 py-3">
+        {navItems.map(({ page, label, icon: Icon }) => {
+          const isActive = currentPage === page;
+
+          return (
+            <button
+              key={page}
+              onClick={() => onNavigate(page)}
+              className={`flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm font-medium transition-colors ${
+                isActive
+                  ? "bg-sidebar-accent text-sidebar-foreground"
+                  : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+              }`}
+              data-testid={`link-${label.toLowerCase()}`}
+            >
+              <Icon className="h-4 w-4 shrink-0" />
+              <span className="truncate">{label}</span>
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Bottom section */}
+      <div className="border-t border-sidebar-border">
+        {user && (
+          <div className="space-y-1.5 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-primary/10">
+                <Shield className="h-4 w-4 text-primary" />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <p
+                  className="truncate text-xs font-medium text-sidebar-foreground"
+                  data-testid="text-current-user"
+                >
+                  {user.callsign ? user.callsign : user.full_name}
+                </p>
+                <p className="truncate text-[10px] text-muted-foreground">
+                  {user.rank}
+                </p>
+              </div>
+            </div>
+
+            <Badge
+              variant="outline"
+              className="h-5 px-1.5 py-0 text-[10px] font-normal"
+            >
+              {user.clearance_level}
+            </Badge>
+          </div>
+        )}
+
+        <div className="space-y-1.5 px-3 pb-5">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-9 w-full justify-start gap-2 text-xs text-muted-foreground"
+            onClick={onToggleDark}
+            data-testid="button-theme-toggle"
+          >
+            {dark ? (
+              <Sun className="h-3.5 w-3.5" />
+            ) : (
+              <Moon className="h-3.5 w-3.5" />
+            )}
+            {dark ? "Light theme" : "Dark theme"}
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-9 w-full justify-start gap-2 text-xs text-destructive/80 hover:bg-destructive/10 hover:text-destructive"
+            onClick={onLogout}
+            data-testid="button-logout"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            Logout
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function AppShell() {
   const { user, logout } = useAuth();
@@ -106,148 +264,30 @@ export default function AppShell() {
     }
   };
 
-  const SidebarContent = ({ mobile = false }: { mobile?: boolean }) => (
-    <div className="flex h-full flex-col bg-sidebar">
-      {/* Logo */}
-      <div className="flex h-14 items-center border-b border-sidebar-border px-5">
-        <div className="flex items-center gap-2.5">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-label="StockPulse logo"
-          >
-            <rect
-              x="2"
-              y="6"
-              width="6"
-              height="12"
-              rx="1.5"
-              fill="currentColor"
-              className="text-primary"
-            />
-            <rect
-              x="9"
-              y="3"
-              width="6"
-              height="18"
-              rx="1.5"
-              fill="currentColor"
-              className="text-primary/70"
-            />
-            <rect
-              x="16"
-              y="9"
-              width="6"
-              height="9"
-              rx="1.5"
-              fill="currentColor"
-              className="text-primary/40"
-            />
-          </svg>
-          <span className="text-sm font-semibold tracking-tight text-sidebar-foreground">
-            StockPulse
-          </span>
-        </div>
-      </div>
-
-      {/* Nav */}
-      <nav className="flex-1 space-y-1 px-3 py-3">
-        {navItems.map(({ page, label, icon: Icon }) => {
-          const isActive = currentPage === page;
-
-          return (
-            <button
-              key={page}
-              onClick={() => handleNavigate(page)}
-              className={`flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-sidebar-accent text-sidebar-foreground"
-                  : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-              }`}
-              data-testid={`link-${label.toLowerCase()}`}
-            >
-              <Icon className="h-4 w-4 shrink-0" />
-              <span className="truncate">{label}</span>
-            </button>
-          );
-        })}
-      </nav>
-
-      {/* Bottom section */}
-      <div className="border-t border-sidebar-border">
-        {user && (
-          <div className="space-y-1.5 px-4 py-3">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-primary/10">
-                <Shield className="h-4 w-4 text-primary" />
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <p
-                  className="truncate text-xs font-medium text-sidebar-foreground"
-                  data-testid="text-current-user"
-                >
-                  {user.callsign ? user.callsign : user.full_name}
-                </p>
-                <p className="truncate text-[10px] text-muted-foreground">
-                  {user.rank}
-                </p>
-              </div>
-            </div>
-
-            <Badge
-              variant="outline"
-              className="h-5 px-1.5 py-0 text-[10px] font-normal"
-            >
-              {user.clearance_level}
-            </Badge>
-          </div>
-        )}
-
-        <div className="space-y-1.5 px-3 pb-5">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-9 w-full justify-start gap-2 text-xs text-muted-foreground"
-            onClick={() => setDark(!dark)}
-            data-testid="button-theme-toggle"
-          >
-            {dark ? (
-              <Sun className="h-3.5 w-3.5" />
-            ) : (
-              <Moon className="h-3.5 w-3.5" />
-            )}
-            {dark ? "Light theme" : "Dark theme"}
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-9 w-full justify-start gap-2 text-xs text-destructive/80 hover:bg-destructive/10 hover:text-destructive"
-            onClick={() => {
-              setSidebarOpen(false);
-              logout();
-            }}
-            data-testid="button-logout"
-          >
-            <LogOut className="h-3.5 w-3.5" />
-            Logout
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
+  const sidebarProps: SidebarContentProps = {
+    navItems,
+    currentPage,
+    onNavigate: handleNavigate,
+    user,
+    dark,
+    onToggleDark: () => setDark(!dark),
+    onLogout: () => {
+      setSidebarOpen(false);
+      logout();
+    },
+  };
 
   return (
-    <div className="flex min-h-screen bg-background" data-testid="app-layout">
+    <div
+      className="flex h-dvh overflow-hidden bg-background"
+      data-testid="app-layout"
+    >
       {/* Desktop sidebar */}
       <aside
-        className="hidden w-[220px] shrink-0 border-r border-sidebar-border bg-sidebar md:flex md:flex-col"
+        className="hidden w-[220px] shrink-0 overflow-y-auto border-r border-sidebar-border bg-sidebar md:flex md:flex-col"
         data-testid="sidebar"
       >
-        <SidebarContent />
+        <SidebarContent {...sidebarProps} />
       </aside>
 
       {/* Mobile sidebar */}
@@ -256,7 +296,7 @@ export default function AppShell() {
           <SheetHeader className="sr-only">
             <SheetTitle>Navigation menu</SheetTitle>
           </SheetHeader>
-          <SidebarContent mobile />
+          <SidebarContent {...sidebarProps} />
         </SheetContent>
       </Sheet>
 

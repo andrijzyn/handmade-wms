@@ -1,4 +1,4 @@
-import type { StorageContext } from "./shared";
+import type { StorageContext, DbUser } from "./shared";
 
 export type UserDisplayInfo = {
   username: string | null;
@@ -23,8 +23,9 @@ export async function getUserDisplayMapByIds(
 
   if (error) throw error;
 
+  type UserRow = Pick<DbUser, "id" | "username" | "full_name">;
   return new Map(
-    (data ?? []).map((user: any) => [
+    (data as UserRow[]).map((user) => [
       user.id,
       {
         username: user.username ?? null,

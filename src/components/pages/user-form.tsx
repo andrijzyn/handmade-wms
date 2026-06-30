@@ -9,7 +9,7 @@ import {
 } from "@/lib/schema";
 import { PERMISSIONS } from "@/lib/permissions";
 import type { Permission } from "@/lib/permissions";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -106,7 +106,7 @@ export default function UserForm(props: UserFormProps) {
   const form = useForm<UserFormValues>({
     resolver: zodResolver(
       props.isEdit ? updateUserSchema : insertUserSchema,
-    ) as any,
+    ) as Resolver<UserFormValues>,
     defaultValues: {
       username: props.defaultValues?.username ?? "",
       password: "",
