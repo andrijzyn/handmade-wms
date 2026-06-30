@@ -1,5 +1,10 @@
 import { Info } from "lucide-react";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -65,17 +70,21 @@ function accessLevel(
 
 export function PermissionDotsHint() {
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Info
-          className="h-3.5 w-3.5 cursor-help text-muted-foreground"
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="inline-flex cursor-help text-muted-foreground"
+          aria-label="Explain permission dot order"
           data-testid="permission-dots-hint"
-        />
-      </TooltipTrigger>
-      <TooltipContent>
+        >
+          <Info className="h-3.5 w-3.5" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-2 text-xs" sideOffset={4}>
         Dot order: {RESOURCES.map((r) => r.label).join(", ")}
-      </TooltipContent>
-    </Tooltip>
+      </PopoverContent>
+    </Popover>
   );
 }
 
