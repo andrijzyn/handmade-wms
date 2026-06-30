@@ -96,11 +96,7 @@ function AuditNewValues({
     );
   }
 
-  return (
-    <pre className="whitespace-pre-wrap break-all text-xs">
-      {JSON.stringify(newValues, null, 2)}
-    </pre>
-  );
+  return <AuditObjectView value={newValues} emptyLabel="No new values" />;
 }
 
 interface LogsTableProps {
