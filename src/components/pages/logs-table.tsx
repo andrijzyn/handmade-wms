@@ -49,9 +49,9 @@ function AuditObjectView({
   return (
     <div className="space-y-2">
       {Object.entries(value).map(([key, fieldValue]) => (
-        <div key={key}>
+        <div key={key} className="min-w-0">
           <div className="font-mono text-xs text-muted-foreground">{key}</div>
-          {formatAuditValue(fieldValue)}
+          <div className="break-all">{formatAuditValue(fieldValue)}</div>
         </div>
       ))}
     </div>
@@ -77,13 +77,17 @@ function AuditNewValues({
         {entries.map(([field, change]) => {
           const typedChange = change as { old?: unknown; new?: unknown };
           return (
-            <div key={field}>
+            <div key={field} className="min-w-0">
               <div className="font-medium">{field}</div>
-              <div className="mt-1 grid grid-cols-[80px_1fr] gap-x-2 gap-y-1">
+              <div className="mt-1 grid grid-cols-[80px_minmax(0,1fr)] gap-x-2 gap-y-1">
                 <span className="text-muted-foreground">Old</span>
-                <code>{JSON.stringify(typedChange.old)}</code>
+                <code className="break-all">
+                  {JSON.stringify(typedChange.old)}
+                </code>
                 <span className="text-muted-foreground">New</span>
-                <code>{JSON.stringify(typedChange.new)}</code>
+                <code className="break-all">
+                  {JSON.stringify(typedChange.new)}
+                </code>
               </div>
             </div>
           );
@@ -92,7 +96,7 @@ function AuditNewValues({
     );
   }
 
-  return <pre className="text-xs">{JSON.stringify(newValues, null, 2)}</pre>;
+  return <AuditObjectView value={newValues} emptyLabel="No new values" />;
 }
 
 interface LogsTableProps {
