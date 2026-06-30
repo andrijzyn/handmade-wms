@@ -278,10 +278,13 @@ export default function AppShell() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background" data-testid="app-layout">
+    <div
+      className="flex h-dvh overflow-hidden bg-background"
+      data-testid="app-layout"
+    >
       {/* Desktop sidebar */}
       <aside
-        className="hidden w-[220px] shrink-0 border-r border-sidebar-border bg-sidebar md:flex md:flex-col"
+        className="hidden w-[220px] shrink-0 overflow-y-auto border-r border-sidebar-border bg-sidebar md:flex md:flex-col"
         data-testid="sidebar"
       >
         <SidebarContent {...sidebarProps} />
