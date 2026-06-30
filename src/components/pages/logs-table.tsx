@@ -1,6 +1,20 @@
 import { Fragment } from "react";
 import { Loader2, ChevronDown, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import {
+  PermissionDots,
+  PermissionDotsHint,
+} from "@/components/pages/permission-dots";
+import { PERMISSIONS, type Permission } from "@/lib/permissions";
+
+const PERMISSION_VALUES = new Set<string>(Object.values(PERMISSIONS));
+
+function isPermissionList(value: unknown): value is Permission[] {
+  return (
+    Array.isArray(value) &&
+    value.every((v) => typeof v === "string" && PERMISSION_VALUES.has(v))
+  );
+}
 
 export type AuditAction = "INSERT" | "UPDATE" | "DELETE" | "REPLACE_PERMISSIONS";
 
@@ -50,8 +64,17 @@ function AuditObjectView({
     <div className="space-y-2">
       {Object.entries(value).map(([key, fieldValue]) => (
         <div key={key} className="min-w-0">
-          <div className="font-mono text-xs text-muted-foreground">{key}</div>
-          <div className="break-all">{formatAuditValue(fieldValue)}</div>
+          <div className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
+            {key}
+            {key === "permissions" && isPermissionList(fieldValue) && (
+              <PermissionDotsHint />
+            )}
+          </div>
+          {key === "permissions" && isPermissionList(fieldValue) ? (
+            <PermissionDots permissions={fieldValue} />
+          ) : (
+            <div className="break-all">{formatAuditValue(fieldValue)}</div>
+          )}
         </div>
       ))}
     </div>
@@ -76,18 +99,34 @@ function AuditNewValues({
       <div className="space-y-2">
         {entries.map(([field, change]) => {
           const typedChange = change as { old?: unknown; new?: unknown };
+          const isPermissionsField =
+            field === "permissions" &&
+            isPermissionList(typedChange.old) &&
+            isPermissionList(typedChange.new);
+
           return (
             <div key={field} className="min-w-0">
-              <div className="font-medium">{field}</div>
-              <div className="mt-1 grid grid-cols-[80px_minmax(0,1fr)] gap-x-2 gap-y-1">
+              <div className="flex items-center gap-1.5 font-medium">
+                {field}
+                {isPermissionsField && <PermissionDotsHint />}
+              </div>
+              <div className="mt-1 grid grid-cols-[80px_minmax(0,1fr)] items-center gap-x-2 gap-y-1.5">
                 <span className="text-muted-foreground">Old</span>
-                <code className="break-all">
-                  {JSON.stringify(typedChange.old)}
-                </code>
+                {isPermissionsField ? (
+                  <PermissionDots permissions={typedChange.old as Permission[]} />
+                ) : (
+                  <code className="break-all">
+                    {JSON.stringify(typedChange.old)}
+                  </code>
+                )}
                 <span className="text-muted-foreground">New</span>
-                <code className="break-all">
-                  {JSON.stringify(typedChange.new)}
-                </code>
+                {isPermissionsField ? (
+                  <PermissionDots permissions={typedChange.new as Permission[]} />
+                ) : (
+                  <code className="break-all">
+                    {JSON.stringify(typedChange.new)}
+                  </code>
+                )}
               </div>
             </div>
           );
