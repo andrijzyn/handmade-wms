@@ -3,6 +3,7 @@ import { z } from "zod";
 import { storage } from "@/lib/storage";
 import { insertUserSchema } from "@/lib/schema";
 import { getSession } from "@/lib/auth";
+import { getClientIp } from "@/lib/request";
 import {
   withErrorHandling,
   badRequest,
@@ -25,18 +26,30 @@ export const POST = withErrorHandling(
     }
 
     const { username, password } = parsed.data;
+    const ip = getClientIp(req);
+
+    const rateLimit = await storage.checkLoginRateLimit(ip, username);
+    if (!rateLimit.allowed) {
+      raiseApiError(
+        `Too many login attempts. Try again in about ${rateLimit.retryAfterSeconds}s.`,
+        429,
+      );
+    }
 
     const user = await storage.getUserByUsername(username);
     if (!user) {
+      await storage.recordFailedLoginAttempt(ip, username);
       raiseApiError("Invalid username or password", 401);
     }
 
     if (!user.is_active) {
+      await storage.recordFailedLoginAttempt(ip, username);
       raiseApiError("Account is deactivated", 401);
     }
 
     const valid = await storage.validatePassword(user, password);
     if (!valid) {
+      await storage.recordFailedLoginAttempt(ip, username);
       raiseApiError("Invalid username or password", 401);
     }
 
