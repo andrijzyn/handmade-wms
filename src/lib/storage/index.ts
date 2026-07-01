@@ -7,6 +7,7 @@ import { createUsersStorage } from "./users";
 import { createLocationsStorage } from "./locations";
 import { createProductLocationsStorage } from "./product-locations";
 import { createAuditStorage } from "./logs";
+import { createRateLimitStorage } from "./rate-limit";
 
 const PASSWORD_ROUNDS = 10;
 
@@ -35,6 +36,7 @@ export const storage = {
   ...createLocationsStorage(ctx),
   ...createProductLocationsStorage(ctx),
   ...createAuditStorage(ctx),
+  ...createRateLimitStorage(ctx),
 };
 
 export type {
