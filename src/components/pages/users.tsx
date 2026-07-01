@@ -39,6 +39,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { UserPlus, Pencil, Trash2 } from "lucide-react";
 import UserForm from "@/components/pages/user-form";
+import {
+  PermissionDots,
+  PermissionDotsHint,
+} from "@/components/pages/permission-dots";
 
 function clearanceBadgeVariant(level: string) {
   switch (level) {
@@ -180,7 +184,12 @@ export default function UsersPage() {
                   <TableHead>Unit</TableHead>
                   <TableHead>Callsign</TableHead>
                   <TableHead>Clearance</TableHead>
-                  <TableHead>Permissions</TableHead>
+                  <TableHead>
+                    <span className="inline-flex items-center gap-1.5">
+                      Permissions
+                      <PermissionDotsHint />
+                    </span>
+                  </TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="w-[80px]" />
                 </TableRow>
@@ -205,10 +214,7 @@ export default function UsersPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <span className="text-xs tabular-nums text-muted-foreground">
-                        {u.permissions.length} perm
-                        {u.permissions.length !== 1 ? "s" : ""}
-                      </span>
+                      <PermissionDots permissions={u.permissions} />
                     </TableCell>
                     <TableCell>
                       <Badge variant={u.is_active ? "default" : "secondary"}>

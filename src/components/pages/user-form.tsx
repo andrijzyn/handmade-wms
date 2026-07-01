@@ -40,6 +40,7 @@ const PERMISSION_GROUPS: { label: string; perms: Permission[] }[] = [
       PERMISSIONS.READ_LOCATIONS,
       PERMISSIONS.READ_USERS,
       PERMISSIONS.READ_DEBUG,
+      PERMISSIONS.READ_LOGS,
     ],
   },
   {
